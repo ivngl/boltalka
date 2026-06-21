@@ -23,7 +23,10 @@ app.use(express.json());
 let pubClient, subClient;
 try {
   if (process.env.REDIS_URL) {
-    pubClient = new Redis(process.env.REDIS_URL);
+    pubClient = new Redis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: null,
+      retryStrategy: () => null,
+    });
     subClient = pubClient.duplicate();
     pubClient.on("error", () => {});
     subClient.on("error", () => {});
