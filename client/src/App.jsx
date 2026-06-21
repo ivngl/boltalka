@@ -189,12 +189,15 @@ function App() {
     <div className="app">
       <aside className="sidebar">
         <div className="sidebar-header">
+          <div className="sidebar-header-left">
+            <div onClick={openProfile} className="header-avatar">
+              <Avatar username={user.username} size={28} />
+            </div>
+          </div>
           <h2>Boltalka</h2>
-          <button onClick={logout} className="logout-btn">Logout</button>
-        </div>
-        <div className="sidebar-user" onClick={openProfile}>
-          <Avatar username={user.username} size={32} />
-          <span>{user.username}</span>
+          <div className="sidebar-header-right">
+            <button onClick={logout} className="logout-btn">Logout</button>
+          </div>
         </div>
         <div className="conv-list">
           {conversations.map((c) => (

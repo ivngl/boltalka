@@ -14,14 +14,25 @@ const prisma = new PrismaClient();
 const app = express();
 const httpServer = createServer(app);
 
-app.use(cors({ origin: process.env.CLIENT_URL }));
+const allowedOrigins = process.env.CLIENT_URL?.split(",") || [];
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+      cb(null, true);
+    } else {
+      cb(null, true);
+    }
+  },
+}));
 app.use(express.json());
+
+app.get("/health", (req, res) => res.json({ ok: true }));
 
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma));
 
 const io = new Server(httpServer, {
-  cors: { origin: process.env.CLIENT_URL },
+  cors: { origin: allowedOrigins.includes("*") ? "*" : allowedOrigins },
 });
 
 const pubClient = new Redis(process.env.REDIS_URL);
