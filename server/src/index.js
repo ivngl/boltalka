@@ -29,7 +29,9 @@ try {
     });
     subClient = pubClient.duplicate();
     pubClient.on("error", () => {});
+    pubClient.on("close", () => {});
     subClient.on("error", () => {});
+    subClient.on("close", () => {});
   }
 } catch {
   console.log("Redis unavailable — running without adapter");
