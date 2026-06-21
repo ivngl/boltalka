@@ -44,7 +44,7 @@ process.on("unhandledRejection", () => {});
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma));
 
-const clientDist = path.resolve("client/dist");
+const clientDist = path.resolve("../client/dist");
 app.use(express.static(clientDist));
 app.get("/{*path}", (req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));
