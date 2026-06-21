@@ -1,7 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createServer } from "node:http";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { Redis } from "ioredis";
@@ -44,7 +47,7 @@ process.on("unhandledRejection", () => {});
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma));
 
-const clientDist = path.resolve("../client/dist");
+const clientDist = path.resolve(__dirname, "../../client/dist");
 app.use(express.static(clientDist));
 app.get("/{*path}", (req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));
