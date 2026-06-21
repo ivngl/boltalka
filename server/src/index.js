@@ -15,19 +15,22 @@ const prisma = new PrismaClient();
 const app = express();
 const httpServer = createServer(app);
 
-const allowedOrigins = process.env.CLIENT_URL?.split(",") || [];
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
-      cb(null, true);
-    } else {
-      cb(null, true);
-    }
-  },
-}));
+app.get("/health", (req, res) => res.json({ ok: true }));
+
+app.use(cors());
 app.use(express.json());
 
-app.get("/health", (req, res) => res.json({ ok: true }));
+let pubClient, subClient;
+try {
+  if (process.env.REDIS_URL) {
+    pubClient = new Redis(process.env.REDIS_URL);
+    subClient = pubClient.duplicate();
+    pubClient.on("error", () => {});
+    subClient.on("error", () => {});
+  }
+} catch {
+  console.log("Redis unavailable — running without adapter");
+}
 
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma));
@@ -40,13 +43,13 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-const io = new Server(httpServer, {
-  cors: { origin: allowedOrigins.includes("*") ? "*" : allowedOrigins },
-});
+const io = new Server(httpServer, { cors: { origin: "*" } });
 
-const pubClient = new Redis(process.env.REDIS_URL);
-const subClient = pubClient.duplicate();
-io.adapter(createAdapter(pubClient, subClient));
+if (pubClient && subClient) {
+  try {
+    io.adapter(createAdapter(pubClient, subClient));
+  } catch {}
+}
 
 const userSockets = new Map();
 
