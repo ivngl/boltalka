@@ -16,6 +16,11 @@ function App() {
   const [typingUsers, setTypingUsers] = useState({});
   const [view, setView] = useState("auth");
   const msgEndRef = useRef(null);
+  const activeConvRef = useRef(null);
+  const conversationsRef = useRef([]);
+
+  useEffect(() => { activeConvRef.current = activeConv; }, [activeConv]);
+  useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -45,6 +50,19 @@ function App() {
         }
         return copy;
       });
+      if (msg.senderId !== user?.id && "Notification" in window && Notification.permission === "granted") {
+        const conv = conversationsRef.current.find((c) => c.id === msg.conversationId);
+        const inActive = activeConvRef.current?.id === msg.conversationId;
+        if (!inActive || document.hidden) {
+          const title = msg.sender?.username || "New message";
+          const n = new Notification(title, { body: msg.content, icon: "/favicon.svg" });
+          n.onclick = () => {
+            window.focus();
+            const found = conversationsRef.current.find((c) => c.id === msg.conversationId);
+            if (found) selectConversation(found);
+          };
+        }
+      }
     });
     s.on("presence", ({ userId, online }) => {
       setOnlineUsers((prev) => {
@@ -81,6 +99,7 @@ function App() {
     setUser(data.user);
     initSocket(data.token);
     loadData();
+    requestNotif();
   }
 
   async function handleLogin(e) {
@@ -92,6 +111,13 @@ function App() {
     setUser(data.user);
     initSocket(data.token);
     loadData();
+    requestNotif();
+  }
+
+  function requestNotif() {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   }
 
   function logout() {
