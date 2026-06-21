@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import path from "node:path";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
@@ -30,6 +31,14 @@ app.get("/health", (req, res) => res.json({ ok: true }));
 
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma));
+
+if (process.env.NODE_ENV === "production") {
+  const clientDist = path.resolve("../client/dist");
+  app.use(express.static(clientDist));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 
 const io = new Server(httpServer, {
   cors: { origin: allowedOrigins.includes("*") ? "*" : allowedOrigins },

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const SERVER = import.meta.env.VITE_SERVER_URL || "http://localhost:4000";
+const SERVER = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? "http://localhost:4000" : "");
 const api = axios.create({ baseURL: SERVER });
 
 export function setToken(token) {

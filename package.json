@@ -1,0 +1,9 @@
+{
+  "name": "boltalka",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm ci && npm run build && cd ../server && npm ci && npx prisma generate",
+    "start": "cd server && npm start",
+    "dev": "cd server && npm run dev"
+  }
+}
