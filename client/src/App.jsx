@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
 import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers } from "./api.js";
+import Avatar from "./Avatar.jsx";
 import "./App.css";
 
 function App() {
@@ -188,9 +189,7 @@ function App() {
               className={`conv-item ${activeConv?.id === c.id ? "active" : ""}`}
               onClick={() => selectConversation(c)}
             >
-              <div className="conv-avatar">
-                {conversationName(c).charAt(0).toUpperCase()}
-              </div>
+              <Avatar username={conversationName(c)} />
               <div className="conv-info">
                 <div className="conv-name">{conversationName(c)}</div>
                 <div className="conv-preview">
@@ -206,7 +205,7 @@ function App() {
           <div className="user-list">
             {users.filter((u) => !conversations.some((c) => otherParticipant(c)?.id === u.id)).map((u) => (
               <div key={u.id} className="user-item" onClick={() => startDM(u.id)}>
-                <span className="user-avatar">{u.username.charAt(0).toUpperCase()}</span>
+                <Avatar username={u.username} size={28} />
                 <span>{u.username}</span>
                 <span className={`online-dot ${onlineUsers.has(u.id) ? "online" : ""}`} />
               </div>
