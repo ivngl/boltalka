@@ -24,6 +24,8 @@ let pubClient, subClient;
 try {
   if (process.env.REDIS_URL) {
     pubClient = new Redis(process.env.REDIS_URL, {
+      lazyConnect: true,
+      enableOfflineQueue: false,
       maxRetriesPerRequest: null,
       retryStrategy: () => null,
     });
@@ -36,6 +38,8 @@ try {
 } catch {
   console.log("Redis unavailable — running without adapter");
 }
+
+process.on("unhandledRejection", () => {});
 
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma));
