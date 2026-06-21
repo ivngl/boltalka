@@ -1,0 +1,250 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
+import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers } from "./api.js";
+import "./App.css";
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [conversations, setConversations] = useState([]);
+  const [activeConv, setActiveConv] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState(new Set());
+  const [typingUsers, setTypingUsers] = useState({});
+  const [view, setView] = useState("auth");
+  const msgEndRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) { setLoading(false); return; }
+    setToken(token);
+    getMe().then((u) => {
+      setUser(u);
+      initSocket(token);
+      loadData();
+    }).catch(() => {
+      localStorage.removeItem("token");
+      setLoading(false);
+    });
+  }, []);
+
+  function initSocket(token) {
+    const s = connectSocket(token);
+    s.on("new_message", (msg) => {
+      setMessages((prev) => [...prev, msg]);
+      setConversations((prev) => {
+        const copy = [...prev];
+        const idx = copy.findIndex((c) => c.id === msg.conversationId);
+        if (idx !== -1) {
+          const c = { ...copy[idx], messages: [{ ...msg, sender: msg.sender }] };
+          copy.splice(idx, 1);
+          copy.unshift(c);
+        }
+        return copy;
+      });
+    });
+    s.on("presence", ({ userId, online }) => {
+      setOnlineUsers((prev) => {
+        const next = new Set(prev);
+        online ? next.add(userId) : next.delete(userId);
+        return next;
+      });
+    });
+    s.on("typing", ({ userId, conversationId }) => {
+      if (conversationId !== activeConv?.id) return;
+      setTypingUsers((prev) => ({ ...prev, [userId]: true }));
+    });
+    s.on("stop_typing", ({ userId, conversationId }) => {
+      if (conversationId !== activeConv?.id) return;
+      setTypingUsers((prev) => ({ ...prev, [userId]: false }));
+    });
+  }
+
+  async function loadData() {
+    const [convs, usrs] = await Promise.all([getConversations(), getUsers()]);
+    setConversations(convs);
+    setUsers(usrs);
+    const s = getSocket();
+    convs.forEach((c) => s?.emit("join_conversation", c.id));
+    setLoading(false);
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = await register(fd.get("username"), fd.get("email"), fd.get("password"));
+    localStorage.setItem("token", data.token);
+    setToken(data.token);
+    setUser(data.user);
+    initSocket(data.token);
+    loadData();
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = await login(fd.get("email"), fd.get("password"));
+    localStorage.setItem("token", data.token);
+    setToken(data.token);
+    setUser(data.user);
+    initSocket(data.token);
+    loadData();
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    disconnectSocket();
+    setUser(null);
+    setConversations([]);
+    setActiveConv(null);
+    setMessages([]);
+    setView("auth");
+  }
+
+  async function selectConversation(conv) {
+    setActiveConv(conv);
+    if (conv) {
+      const msgs = await getMessages(conv.id);
+      setMessages(msgs);
+    }
+  }
+
+  async function startDM(otherUserId) {
+    const conv = await createConversation("dm", [otherUserId]);
+    setConversations((prev) => {
+      const exists = prev.find((c) => c.id === conv.id);
+      return exists ? prev : [conv, ...prev];
+    });
+    getSocket()?.emit("join_conversation", conv.id);
+    selectConversation(conv);
+    setView("chat");
+  }
+
+  async function handleSend(e) {
+    e.preventDefault();
+    const input = e.target.querySelector("input");
+    const content = input.value.trim();
+    if (!content || !activeConv) return;
+    input.value = "";
+    getSocket()?.emit("send_message", { conversationId: activeConv.id, content });
+  }
+
+  function conversationName(conv) {
+    if (conv.type === "group" && conv.name) return conv.name;
+    const other = conv.participants?.find((p) => p.user.id !== user?.id);
+    return other?.user?.username || "Unknown";
+  }
+
+  function otherParticipant(conv) {
+    return conv.participants?.find((p) => p.user.id !== user?.id)?.user;
+  }
+
+  if (loading) return <div className="loading">Loading...</div>;
+  if (!user) {
+    return (
+      <div className="auth-screen">
+        <div className="auth-card">
+          <h1>Boltalka</h1>
+          {view === "auth" && (
+            <div className="auth-tabs">
+              <form onSubmit={handleLogin}>
+                <h2>Login</h2>
+                <input name="email" type="email" placeholder="Email" required />
+                <input name="password" type="password" placeholder="Password" required />
+                <button type="submit">Login</button>
+              </form>
+              <p className="switch" onClick={() => setView("register")}>No account? Register</p>
+            </div>
+          )}
+          {view === "register" && (
+            <div className="auth-tabs">
+              <form onSubmit={handleRegister}>
+                <h2>Register</h2>
+                <input name="username" placeholder="Username" required />
+                <input name="email" type="email" placeholder="Email" required />
+                <input name="password" type="password" placeholder="Password" required />
+                <button type="submit">Register</button>
+              </form>
+              <p className="switch" onClick={() => setView("auth")}>Already have an account? Login</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <h2>Boltalka</h2>
+          <button onClick={logout} className="logout-btn">Logout</button>
+        </div>
+        <div className="conv-list">
+          {conversations.map((c) => (
+            <div
+              key={c.id}
+              className={`conv-item ${activeConv?.id === c.id ? "active" : ""}`}
+              onClick={() => selectConversation(c)}
+            >
+              <div className="conv-avatar">
+                {conversationName(c).charAt(0).toUpperCase()}
+              </div>
+              <div className="conv-info">
+                <div className="conv-name">{conversationName(c)}</div>
+                <div className="conv-preview">
+                  {c.messages?.[0]?.content?.slice(0, 30) || ""}
+                </div>
+              </div>
+              <div className={`online-dot ${onlineUsers.has(otherParticipant(c)?.id) ? "online" : ""}`} />
+            </div>
+          ))}
+        </div>
+        <div className="new-chat-section">
+          <h3>New chat</h3>
+          <div className="user-list">
+            {users.filter((u) => !conversations.some((c) => otherParticipant(c)?.id === u.id)).map((u) => (
+              <div key={u.id} className="user-item" onClick={() => startDM(u.id)}>
+                <span className="user-avatar">{u.username.charAt(0).toUpperCase()}</span>
+                <span>{u.username}</span>
+                <span className={`online-dot ${onlineUsers.has(u.id) ? "online" : ""}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+      <main className="chat-area">
+        {!activeConv ? (
+          <div className="empty-state">Select a conversation</div>
+        ) : (
+          <>
+            <div className="chat-header">
+              <h3>{conversationName(activeConv)}</h3>
+            </div>
+            <div className="messages" ref={msgEndRef}>
+              {messages.map((m) => (
+                <div key={m.id} className={`msg ${m.senderId === user.id ? "mine" : ""}`}>
+                  <div className="msg-sender">{m.sender?.username}</div>
+                  <div className="msg-content">{m.content}</div>
+                  <div className="msg-time">
+                    {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                </div>
+              ))}
+              {Object.entries(typingUsers).filter(([, v]) => v).length > 0 && (
+                <div className="typing-indicator">Someone is typing...</div>
+              )}
+            </div>
+            <form className="msg-form" onSubmit={handleSend}>
+              <input placeholder="Type a message..." autoFocus />
+              <button type="submit">Send</button>
+            </form>
+          </>
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default App;
