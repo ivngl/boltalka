@@ -7,7 +7,7 @@ RUN cd client && npm ci && cd ../server && npm ci
 
 COPY . .
 RUN cd client && npm run build
-RUN cd server && npx prisma generate
+RUN cd server && npx prisma generate --schema=prisma/schema.prisma
 
 EXPOSE 8080
 CMD ["node", "server/src/index.js"]
