@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY client/package*.json ./client/
 COPY server/package*.json ./server/
-RUN cd client && npm ci --omit=dev && cd ../server && npm ci --omit=dev
+RUN cd client && npm ci && cd ../server && npm ci
 
 COPY . .
 RUN cd client && npm run build
