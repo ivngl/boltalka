@@ -2,6 +2,17 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ error: "No token" });
+  try {
+    req.userId = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET).userId;
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
+}
+
 export function authRoutes(prisma) {
   const router = Router();
 
@@ -44,20 +55,52 @@ export function authRoutes(prisma) {
     });
   });
 
-  router.get("/me", async (req, res) => {
-    const auth = req.headers.authorization;
-    if (!auth) return res.status(401).json({ error: "No token" });
-    try {
-      const decoded = jwt.verify(auth.split(" ")[1], process.env.JWT_SECRET);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
-        select: { id: true, username: true, email: true, avatar: true, createdAt: true },
+  router.get("/me", auth, async (req, res) => {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { id: true, username: true, email: true, avatar: true, createdAt: true },
+    });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  });
+
+  router.put("/profile", auth, async (req, res) => {
+    const { username, email, currentPassword, newPassword } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const update = {};
+    if (username !== undefined) {
+      const taken = await prisma.user.findFirst({
+        where: { username, id: { not: req.userId } },
       });
-      if (!user) return res.status(404).json({ error: "User not found" });
-      res.json(user);
-    } catch {
-      res.status(401).json({ error: "Invalid token" });
+      if (taken) return res.status(409).json({ error: "Username taken" });
+      update.username = username;
     }
+    if (email !== undefined) {
+      const taken = await prisma.user.findFirst({
+        where: { email, id: { not: req.userId } },
+      });
+      if (taken) return res.status(409).json({ error: "Email taken" });
+      update.email = email;
+    }
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: "Current password required" });
+      }
+      const valid = await bcrypt.compare(currentPassword, user.password);
+      if (!valid) return res.status(401).json({ error: "Wrong password" });
+      update.password = await bcrypt.hash(newPassword, 10);
+    }
+    if (!Object.keys(update).length) {
+      return res.status(400).json({ error: "Nothing to update" });
+    }
+    const updated = await prisma.user.update({
+      where: { id: req.userId },
+      data: update,
+      select: { id: true, username: true, email: true, avatar: true },
+    });
+    res.json(updated);
   });
 
   return router;

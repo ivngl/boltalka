@@ -41,3 +41,8 @@ export async function getUsers() {
   const { data } = await api.get("/conversations/users");
   return data;
 }
+
+export async function updateProfile(body) {
+  const { data } = await api.put("/auth/profile", body);
+  return data;
+}

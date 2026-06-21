@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
 import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers } from "./api.js";
 import Avatar from "./Avatar.jsx";
+import Profile from "./Profile.jsx";
 import "./App.css";
 
 function App() {
@@ -103,11 +104,20 @@ function App() {
     setView("auth");
   }
 
-  async function selectConversation(conv) {
+  async   function openProfile() {
+    setView("profile");
+    setActiveConv(null);
+  }
+
+  function handleUpdateUser(updated) {
+    setUser((prev) => ({ ...prev, ...updated }));
+  }
+
+  function selectConversation(conv) {
+    setView("chat");
     setActiveConv(conv);
     if (conv) {
-      const msgs = await getMessages(conv.id);
-      setMessages(msgs);
+      getMessages(conv.id).then(setMessages);
     }
   }
 
@@ -182,6 +192,10 @@ function App() {
           <h2>Boltalka</h2>
           <button onClick={logout} className="logout-btn">Logout</button>
         </div>
+        <div className="sidebar-user" onClick={openProfile}>
+          <Avatar username={user.username} size={32} />
+          <span>{user.username}</span>
+        </div>
         <div className="conv-list">
           {conversations.map((c) => (
             <div
@@ -214,7 +228,9 @@ function App() {
         </div>
       </aside>
       <main className="chat-area">
-        {!activeConv ? (
+        {view === "profile" ? (
+          <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
+        ) : !activeConv ? (
           <div className="empty-state">Select a conversation</div>
         ) : (
           <>
