@@ -38,7 +38,7 @@ app.use("/conversations", conversationRoutes(prisma));
 if (process.env.NODE_ENV === "production") {
   const clientDist = path.resolve("../client/dist");
   app.use(express.static(clientDist));
-  app.get("*", (req, res) => {
+  app.get("/{*path}", (req, res) => {
     res.sendFile(path.join(clientDist, "index.html"));
   });
 }
