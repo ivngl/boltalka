@@ -47,3 +47,12 @@ export async function updateProfile(body) {
   const { data } = await api.put("/auth/profile", body);
   return data;
 }
+
+export async function uploadFile(file) {
+  const fd = new FormData();
+  fd.append("file", file);
+  const { data } = await api.post("/upload", fd, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}

@@ -1,8 +1,10 @@
 import "dotenv/config";
 import express from "express";
 import path from "node:path";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createServer } from "node:http";
+import multer from "multer";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { Server } from "socket.io";
@@ -22,6 +24,43 @@ app.get("/health", (req, res) => res.json({ ok: true }));
 
 app.use(cors());
 app.use(express.json());
+
+const uploadsDir = path.resolve(__dirname, "../uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: uploadsDir,
+  filename: (req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, unique + ext);
+  },
+});
+const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ error: "No token" });
+  try {
+    req.userId = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET).userId;
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
+}
+
+app.use("/uploads", express.static(uploadsDir));
+
+app.post("/upload", auth, upload.single("file"), (req, res) => {
+  const file = req.file;
+  if (!file) return res.status(400).json({ error: "No file provided" });
+  res.json({
+    url: `/uploads/${file.filename}`,
+    name: file.originalname,
+    type: file.mimetype,
+    size: file.size,
+  });
+});
 
 let pubClient, subClient;
 try {
@@ -93,9 +132,13 @@ io.on("connection", (socket) => {
     try {
       const message = await prisma.message.create({
         data: {
-          content: data.content,
+          content: data.content || "",
           senderId: userId,
           conversationId: data.conversationId,
+          fileUrl: data.fileUrl || null,
+          fileName: data.fileName || null,
+          fileType: data.fileType || null,
+          fileSize: data.fileSize ? Number(data.fileSize) : null,
         },
         include: { sender: { select: { id: true, username: true, avatar: true } } },
       });

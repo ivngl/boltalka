@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
-import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers } from "./api.js";
+import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile } from "./api.js";
 import Avatar from "./Avatar.jsx";
 import Profile from "./Profile.jsx";
 import "./App.css";
@@ -17,6 +17,8 @@ function App() {
   const [chatSearch, setChatSearch] = useState("");
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [newChatSearch, setNewChatSearch] = useState("");
+  const [sending, setSending] = useState(false);
+  const fileInputRef = useRef(null);
   const [view, setView] = useState("auth");
   const msgEndRef = useRef(null);
   const activeConvRef = useRef(null);
@@ -163,11 +165,33 @@ function App() {
 
   async function handleSend(e) {
     e.preventDefault();
-    const input = e.target.querySelector("input");
-    const content = input.value.trim();
-    if (!content || !activeConv) return;
-    input.value = "";
-    getSocket()?.emit("send_message", { conversationId: activeConv.id, content });
+    const fileInput = fileInputRef.current;
+    const file = fileInput?.files?.[0];
+    const textInput = e.target.querySelector("input[type=text]");
+    const content = textInput?.value.trim() || "";
+    if (!content && !file) return;
+    if (sending) return;
+    setSending(true);
+    if (textInput) textInput.value = "";
+    let messageData = { conversationId: activeConv.id, content };
+    if (file) {
+      try {
+        const uploaded = await uploadFile(file);
+        messageData = {
+          ...messageData,
+          fileUrl: uploaded.url,
+          fileName: uploaded.name,
+          fileType: uploaded.type,
+          fileSize: uploaded.size,
+        };
+      } catch (err) {
+        setSending(false);
+        return;
+      }
+      fileInput.value = "";
+    }
+    getSocket()?.emit("send_message", messageData);
+    setSending(false);
   }
 
   function conversationName(conv) {
@@ -300,7 +324,20 @@ function App() {
               {messages.map((m) => (
                 <div key={m.id} className={`msg ${m.senderId === user.id ? "mine" : ""}`}>
                   <div className="msg-sender">{m.sender?.username}</div>
-                  <div className="msg-content">{m.content}</div>
+                  {m.fileUrl && (
+                    <div className="msg-file">
+                      {m.fileType?.startsWith("image/") ? (
+                        <img src={m.fileUrl} alt={m.fileName} className="msg-image" />
+                      ) : m.fileType?.startsWith("video/") ? (
+                        <video src={m.fileUrl} controls className="msg-video" />
+                      ) : (
+                        <a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="msg-file-link" download={m.fileName}>
+                          📄 {m.fileName}
+                        </a>
+                      )}
+                    </div>
+                  )}
+                  {m.content && <div className="msg-content">{m.content}</div>}
                   <div className="msg-time">
                     {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
@@ -311,8 +348,10 @@ function App() {
               )}
             </div>
             <form className="msg-form" onSubmit={handleSend}>
-              <input placeholder="Type a message..." autoFocus />
-              <button type="submit">Send</button>
+              <input type="text" placeholder="Type a message..." autoFocus />
+              <input type="file" ref={fileInputRef} className="file-input" />
+              <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title="Attach file">📎</button>
+              <button type="submit" disabled={sending}>{sending ? "..." : "Send"}</button>
             </form>
           </>
         )}
