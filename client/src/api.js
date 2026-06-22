@@ -48,6 +48,11 @@ export async function updateProfile(body) {
   return data;
 }
 
+export async function deleteConversation(id) {
+  const { data } = await api.delete(`/conversations/${id}`);
+  return data;
+}
+
 export async function uploadFile(file) {
   const fd = new FormData();
   fd.append("file", file);

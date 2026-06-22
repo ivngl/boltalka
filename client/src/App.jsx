@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
-import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile } from "./api.js";
+import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.js";
 import Avatar from "./Avatar.jsx";
 import Profile from "./Profile.jsx";
 import "./App.css";
@@ -163,6 +163,19 @@ function App() {
     setView("chat");
   }
 
+  async function handleDeleteConversation(convId) {
+    try {
+      await deleteConversation(convId);
+      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      if (activeConv?.id === convId) {
+        setActiveConv(null);
+        setMessages([]);
+        setView("chat");
+      }
+      getSocket()?.emit("leave_conversation", convId);
+    } catch {}
+  }
+
   async function handleSend(e) {
     e.preventDefault();
     const fileInput = fileInputRef.current;
@@ -276,6 +289,11 @@ function App() {
                 </div>
               </div>
               <div className={`online-dot ${onlineUsers.has(otherParticipant(c)?.id) ? "online" : ""}`} />
+              <button
+                className="conv-delete"
+                onClick={(e) => { e.stopPropagation(); handleDeleteConversation(c.id); }}
+                title="Delete chat"
+              >×</button>
             </div>
           ))}
         </div>

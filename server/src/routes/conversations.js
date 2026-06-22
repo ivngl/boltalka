@@ -98,6 +98,29 @@ export function conversationRoutes(prisma) {
     res.status(201).json(conversation);
   });
 
+  router.delete("/:id", auth, async (req, res) => {
+    const { id } = req.params;
+    const participant = await prisma.conversationParticipant.findUnique({
+      where: { userId_conversationId: { userId: req.userId, conversationId: id } },
+    });
+    if (!participant) return res.status(404).json({ error: "Conversation not found" });
+
+    await prisma.conversationParticipant.delete({
+      where: { userId_conversationId: { userId: req.userId, conversationId: id } },
+    });
+
+    const remaining = await prisma.conversationParticipant.count({
+      where: { conversationId: id },
+    });
+
+    if (remaining === 0) {
+      await prisma.message.deleteMany({ where: { conversationId: id } });
+      await prisma.conversation.delete({ where: { id } });
+    }
+
+    res.json({ success: true });
+  });
+
   router.get("/users", auth, async (req, res) => {
     const users = await prisma.user.findMany({
       where: { id: { not: req.userId } },
