@@ -124,6 +124,27 @@
   font-size: 0.8rem;
 }
 
+.sidebar-search {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #30363d;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background: #0d1117;
+  color: #c9d1d9;
+  outline: none;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
+.sidebar-search input:focus {
+  border-color: #58a6ff;
+}
+
 .conv-list {
   flex: 1;
   overflow-y: auto;

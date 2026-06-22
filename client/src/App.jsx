@@ -14,6 +14,7 @@ function App() {
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [typingUsers, setTypingUsers] = useState({});
+  const [chatSearch, setChatSearch] = useState("");
   const [view, setView] = useState("auth");
   const msgEndRef = useRef(null);
   const activeConvRef = useRef(null);
@@ -225,8 +226,16 @@ function App() {
             <button onClick={logout} className="logout-btn">Logout</button>
           </div>
         </div>
+        <div className="sidebar-search">
+          <input
+            type="text"
+            placeholder="Search chats..."
+            value={chatSearch}
+            onChange={(e) => setChatSearch(e.target.value)}
+          />
+        </div>
         <div className="conv-list">
-          {conversations.map((c) => (
+          {conversations.filter((c) => conversationName(c).toLowerCase().includes(chatSearch.toLowerCase())).map((c) => (
             <div
               key={c.id}
               className={`conv-item ${activeConv?.id === c.id ? "active" : ""}`}
