@@ -456,6 +456,10 @@
   color: #c9d1d9;
 }
 
+.clear-file:hover {
+  color: #f85149;
+}
+
 .msg-time {
   font-size: 0.7rem;
   color: #8b949e;

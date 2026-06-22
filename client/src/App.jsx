@@ -18,6 +18,7 @@ function App() {
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [newChatSearch, setNewChatSearch] = useState("");
   const [sending, setSending] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   const [view, setView] = useState("auth");
   const msgEndRef = useRef(null);
@@ -204,6 +205,7 @@ function App() {
       fileInput.value = "";
     }
     getSocket()?.emit("send_message", messageData);
+    setSelectedFile(null);
     setSending(false);
   }
 
@@ -365,9 +367,12 @@ function App() {
               )}
             </div>
             <form className="msg-form" onSubmit={handleSend}>
-              <input type="text" placeholder="Type a message..." autoFocus />
-              <input type="file" ref={fileInputRef} className="file-input" />
+              <input type="text" placeholder={selectedFile ? `📎 ${selectedFile.name}` : "Type a message..."} autoFocus />
+              <input type="file" ref={fileInputRef} className="file-input" onChange={(e) => setSelectedFile(e.target.files[0] || null)} />
               <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title="Attach file">📎</button>
+              {selectedFile && (
+                <button type="button" className="attach-btn clear-file" onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} title="Remove file">×</button>
+              )}
               <button type="submit" disabled={sending}>{sending ? "..." : "Send"}</button>
             </form>
           </>
