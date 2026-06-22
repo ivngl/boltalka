@@ -80,7 +80,6 @@
 .sidebar {
   width: 320px;
   background: #161b22;
-  border-right: 1px solid #30363d;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -239,8 +238,12 @@
   border-bottom: 1px solid #21262d;
 }
 
-.conv-item:hover, .conv-item.active {
+.conv-item:hover {
   background: #1c2128;
+}
+
+.conv-item.active {
+  background: #0d1117;
 }
 
 .conv-avatar, .user-avatar {
