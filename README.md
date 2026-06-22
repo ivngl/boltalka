@@ -1,4 +1,4 @@
-# boltalka
+# Boltalka
 
 Real-time WhatsApp-like chat application. Built with React 19 + Vite 6 on the frontend and Express 5 + Socket.IO on the backend. Data is persisted in PostgreSQL via Prisma ORM, with Redis used for the Socket.IO adapter and presence tracking. Authentication uses JWT tokens with bcryptjs password hashing.
 
