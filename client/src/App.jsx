@@ -260,7 +260,6 @@ function App() {
               <Avatar username={user.username} size={28} />
             </div>
           </div>
-          <h2>Boltalka</h2>
           <div className="sidebar-header-right">
             <button onClick={logout} className="logout-btn">Logout</button>
           </div>
@@ -336,7 +335,7 @@ function App() {
         ) : (
           <>
             <div className="chat-header">
-              <h3>{conversationName(activeConv)}</h3>
+              <span className="chat-brand">Boltalka</span>
             </div>
             <div className="messages" ref={msgEndRef}>
               {messages.map((m) => (
