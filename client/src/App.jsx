@@ -15,6 +15,8 @@ function App() {
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [typingUsers, setTypingUsers] = useState({});
   const [chatSearch, setChatSearch] = useState("");
+  const [newChatOpen, setNewChatOpen] = useState(false);
+  const [newChatSearch, setNewChatSearch] = useState("");
   const [view, setView] = useState("auth");
   const msgEndRef = useRef(null);
   const activeConvRef = useRef(null);
@@ -234,6 +236,7 @@ function App() {
             onChange={(e) => setChatSearch(e.target.value)}
           />
         </div>
+        <button className="new-chat-btn" onClick={() => setNewChatOpen(true)}>+ New chat</button>
         <div className="conv-list">
           {conversations.filter((c) => conversationName(c).toLowerCase().includes(chatSearch.toLowerCase())).map((c) => (
             <div
@@ -252,18 +255,36 @@ function App() {
             </div>
           ))}
         </div>
-        <div className="new-chat-section">
-          <h3>New chat</h3>
-          <div className="user-list">
-            {users.filter((u) => !conversations.some((c) => otherParticipant(c)?.id === u.id)).map((u) => (
-              <div key={u.id} className="user-item" onClick={() => startDM(u.id)}>
-                <Avatar username={u.username} size={28} />
-                <span>{u.username}</span>
-                <span className={`online-dot ${onlineUsers.has(u.id) ? "online" : ""}`} />
+        {newChatOpen && (
+          <div className="new-chat-overlay" onClick={() => { setNewChatOpen(false); setNewChatSearch(""); }}>
+            <div className="new-chat-popup" onClick={(e) => e.stopPropagation()}>
+              <div className="new-chat-popup-header">
+                <h3>New chat</h3>
+                <button className="close-btn" onClick={() => { setNewChatOpen(false); setNewChatSearch(""); }}>×</button>
               </div>
-            ))}
+              <input
+                className="new-chat-popup-search"
+                type="text"
+                placeholder="Search by username..."
+                value={newChatSearch}
+                onChange={(e) => setNewChatSearch(e.target.value)}
+                autoFocus
+              />
+              <div className="new-chat-popup-list">
+                {users
+                  .filter((u) => u.id !== user.id)
+                  .filter((u) => u.username.toLowerCase().includes(newChatSearch.toLowerCase()))
+                  .map((u) => (
+                    <div key={u.id} className="user-item" onClick={() => { startDM(u.id); setNewChatOpen(false); setNewChatSearch(""); }}>
+                      <Avatar username={u.username} size={28} />
+                      <span>{u.username}</span>
+                      <span className={`online-dot ${onlineUsers.has(u.id) ? "online" : ""}`} />
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </aside>
       <main className="chat-area">
         {view === "profile" ? (
