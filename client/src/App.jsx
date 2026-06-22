@@ -272,8 +272,8 @@ function App() {
             value={chatSearch}
             onChange={(e) => setChatSearch(e.target.value)}
           />
+          <button className="new-chat-btn" onClick={() => setNewChatOpen(true)}>+</button>
         </div>
-        <button className="new-chat-btn" onClick={() => setNewChatOpen(true)}>+ New chat</button>
         <div className="conv-list">
           {conversations.filter((c) => conversationName(c).toLowerCase().includes(chatSearch.toLowerCase())).map((c) => (
             <div

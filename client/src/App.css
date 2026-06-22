@@ -124,12 +124,15 @@
 }
 
 .sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-bottom: 1px solid #30363d;
 }
 
 .sidebar-search input {
-  width: 100%;
+  flex: 1;
   padding: 0.5rem 0.75rem;
   border: 1px solid #30363d;
   border-radius: 6px;
@@ -137,26 +140,32 @@
   color: #c9d1d9;
   outline: none;
   font-size: 0.85rem;
-  box-sizing: border-box;
+  min-width: 0;
 }
 
 .sidebar-search input:focus {
   border-color: #58a6ff;
 }
 
-.new-chat-btn {
-  width: calc(100% - 2rem);
-  margin: 0.5rem 1rem;
-  padding: 0.5rem;
+.sidebar-search .new-chat-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   background: #238636;
   color: #fff;
   border: none;
   border-radius: 6px;
   font-weight: 600;
+  font-size: 1.2rem;
+  line-height: 1;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.new-chat-btn:hover {
+.sidebar-search .new-chat-btn:hover {
   background: #2ea043;
 }
 
