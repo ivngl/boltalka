@@ -40,15 +40,14 @@
 
 .auth-tabs input {
   padding: 0.6rem 0.8rem;
-  border: 1px solid #30363d;
   border-radius: 6px;
   background: #0d1117;
   color: #c9d1d9;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
   outline: none;
 }
 
 .auth-tabs input:focus {
-  border-color: #58a6ff;
 }
 
 .auth-tabs button {
@@ -89,7 +88,6 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #30363d;
 }
 
 .sidebar-header-left {
@@ -107,7 +105,6 @@
 
 .logout-btn {
   background: none;
-  border: 1px solid #30363d;
   color: #c9d1d9;
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
@@ -119,23 +116,21 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid #30363d;
 }
 
 .sidebar-search input {
   flex: 1;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #30363d;
   border-radius: 6px;
   background: #0d1117;
   color: #c9d1d9;
   outline: none;
   font-size: 0.85rem;
   min-width: 0;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .sidebar-search input:focus {
-  border-color: #58a6ff;
 }
 
 .sidebar-search .new-chat-btn {
@@ -172,7 +167,6 @@
 
 .new-chat-popup {
   background: #161b22;
-  border: 1px solid #30363d;
   border-radius: 12px;
   width: 360px;
   max-height: 400px;
@@ -185,7 +179,6 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid #30363d;
 }
 
 .new-chat-popup-header h3 {
@@ -207,15 +200,14 @@
 .new-chat-popup-search {
   margin: 0.75rem 1rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #30363d;
   border-radius: 6px;
   background: #0d1117;
   color: #c9d1d9;
   outline: none;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .new-chat-popup-search:focus {
-  border-color: #58a6ff;
 }
 
 .new-chat-popup-list {
@@ -235,7 +227,6 @@
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid #21262d;
 }
 
 .conv-item:hover {
@@ -311,7 +302,6 @@
 
 .new-chat-section {
   padding: 0.75rem 1rem;
-  border-top: 1px solid #30363d;
 }
 
 .new-chat-section h3 {
@@ -360,7 +350,6 @@
 
 .chat-header {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #30363d;
   background: #161b22;
   text-align: center;
 }
@@ -485,22 +474,20 @@
   display: flex;
   gap: 0.5rem;
   padding: 1rem;
-  border-top: 1px solid #30363d;
   background: #161b22;
 }
 
 .msg-form input {
   flex: 1;
   padding: 0.6rem 0.8rem;
-  border: 1px solid #30363d;
   border-radius: 8px;
   background: #0d1117;
   color: #c9d1d9;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
   outline: none;
 }
 
 .msg-form input:focus {
-  border-color: #58a6ff;
 }
 
 .msg-form button {
@@ -521,7 +508,6 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #30363d;
   cursor: pointer;
   font-size: 0.9rem;
 }
@@ -555,7 +541,6 @@
 
 .back-btn {
   background: none;
-  border: 1px solid #30363d;
   color: #c9d1d9;
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
@@ -584,16 +569,15 @@
 
 .profile-form input {
   padding: 0.6rem 0.8rem;
-  border: 1px solid #30363d;
   border-radius: 6px;
   background: #161b22;
   color: #c9d1d9;
   outline: none;
   font-size: 0.95rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .profile-form input:focus {
-  border-color: #58a6ff;
 }
 
 .profile-form input:disabled {
@@ -602,7 +586,6 @@
 
 .profile-form hr {
   border: none;
-  border-top: 1px solid #30363d;
   margin: 0.5rem 0;
 }
 
