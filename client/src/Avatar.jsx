@@ -11,8 +11,11 @@ function hashColor(name) {
   return colors[Math.abs(hash) % colors.length];
 }
 
+import { useTranslation } from "react-i18next";
+
 export default function Avatar({ username, size = 36 }) {
-  const letter = username?.charAt(0).toUpperCase() || "?";
+  const { t } = useTranslation();
+  const letter = username?.charAt(0).toUpperCase() || t("avatar.fallback");
   const bg = hashColor(username || "");
 
   return (

@@ -111,6 +111,20 @@
   font-size: 0.8rem;
 }
 
+.lang-btn {
+  background: #21262d;
+  color: #c9d1d9;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-right: 0.4rem;
+}
+
+.lang-btn:hover {
+  background: #30363d;
+}
+
 .sidebar-search {
   display: flex;
   align-items: center;

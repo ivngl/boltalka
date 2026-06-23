@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "./i18n.js";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
 import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.js";
 import Avatar from "./Avatar.jsx";
@@ -6,6 +8,7 @@ import Profile from "./Profile.jsx";
 import "./App.css";
 
 function App() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState([]);
@@ -60,7 +63,7 @@ function App() {
         const conv = conversationsRef.current.find((c) => c.id === msg.conversationId);
         const inActive = activeConvRef.current?.id === msg.conversationId;
         if (!inActive || document.hidden) {
-          const title = msg.sender?.username || "New message";
+          const title = msg.sender?.username || t("chat.new_message");
           const n = new Notification(title, { body: msg.content, icon: "/favicon.svg" });
           n.onclick = () => {
             window.focus();
@@ -212,40 +215,40 @@ function App() {
   function conversationName(conv) {
     if (conv.type === "group" && conv.name) return conv.name;
     const other = conv.participants?.find((p) => p.user.id !== user?.id);
-    return other?.user?.username || "Unknown";
+    return other?.user?.username || t("chat.unknown");
   }
 
   function otherParticipant(conv) {
     return conv.participants?.find((p) => p.user.id !== user?.id)?.user;
   }
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return <div className="loading">{t("app.loading")}</div>;
   if (!user) {
     return (
       <div className="auth-screen">
         <div className="auth-card">
-          <h1>Boltalka</h1>
+          <h1>{t("app.title")}</h1>
           {view === "auth" && (
             <div className="auth-tabs">
               <form onSubmit={handleLogin}>
-                <h2>Login</h2>
-                <input name="email" type="email" placeholder="Email" required />
-                <input name="password" type="password" placeholder="Password" required />
-                <button type="submit">Login</button>
+                <h2>{t("auth.login.title")}</h2>
+                <input name="email" type="email" placeholder={t("auth.login.email")} required />
+                <input name="password" type="password" placeholder={t("auth.login.password")} required />
+                <button type="submit">{t("auth.login.submit")}</button>
               </form>
-              <p className="switch" onClick={() => setView("register")}>No account? Register</p>
+              <p className="switch" onClick={() => setView("register")}>{t("auth.login.switch")}</p>
             </div>
           )}
           {view === "register" && (
             <div className="auth-tabs">
               <form onSubmit={handleRegister}>
-                <h2>Register</h2>
-                <input name="username" placeholder="Username" required />
-                <input name="email" type="email" placeholder="Email" required />
-                <input name="password" type="password" placeholder="Password" required />
-                <button type="submit">Register</button>
+                <h2>{t("auth.register.title")}</h2>
+                <input name="username" placeholder={t("auth.register.username")} required />
+                <input name="email" type="email" placeholder={t("auth.register.email")} required />
+                <input name="password" type="password" placeholder={t("auth.register.password")} required />
+                <button type="submit">{t("auth.register.submit")}</button>
               </form>
-              <p className="switch" onClick={() => setView("auth")}>Already have an account? Login</p>
+              <p className="switch" onClick={() => setView("auth")}>{t("auth.register.switch")}</p>
             </div>
           )}
         </div>
@@ -263,13 +266,14 @@ function App() {
             </div>
           </div>
           <div className="sidebar-header-right">
-            <button onClick={logout} className="logout-btn">Logout</button>
+            <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="lang-btn">{i18n.language === "ru" ? "EN" : "RU"}</button>
+            <button onClick={logout} className="logout-btn">{t("chat.logout")}</button>
           </div>
         </div>
         <div className="sidebar-search">
           <input
             type="text"
-            placeholder="Search chats..."
+            placeholder={t("chat.search")}
             value={chatSearch}
             onChange={(e) => setChatSearch(e.target.value)}
           />
@@ -293,7 +297,7 @@ function App() {
               <button
                 className="conv-delete"
                 onClick={(e) => { e.stopPropagation(); handleDeleteConversation(c.id); }}
-                title="Delete chat"
+                title={t("chat.delete_chat")}
               >×</button>
             </div>
           ))}
@@ -302,13 +306,13 @@ function App() {
           <div className="new-chat-overlay" onClick={() => { setNewChatOpen(false); setNewChatSearch(""); }}>
             <div className="new-chat-popup" onClick={(e) => e.stopPropagation()}>
               <div className="new-chat-popup-header">
-                <h3>New chat</h3>
+                <h3>{t("chat.new_chat")}</h3>
                 <button className="close-btn" onClick={() => { setNewChatOpen(false); setNewChatSearch(""); }}>×</button>
               </div>
               <input
                 className="new-chat-popup-search"
                 type="text"
-                placeholder="Search by username..."
+                placeholder={t("chat.search_users")}
                 value={newChatSearch}
                 onChange={(e) => setNewChatSearch(e.target.value)}
                 autoFocus
@@ -333,11 +337,11 @@ function App() {
         {view === "profile" ? (
           <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
         ) : !activeConv ? (
-          <div className="empty-state">Select a conversation</div>
+          <div className="empty-state">{t("chat.empty")}</div>
         ) : (
           <>
             <div className="chat-header">
-              <span className="chat-brand">Boltalka</span>
+              <span className="chat-brand">{t("app.title")}</span>
             </div>
             <div className="messages" ref={msgEndRef}>
               {messages.map((m) => (
@@ -363,17 +367,17 @@ function App() {
                 </div>
               ))}
               {Object.entries(typingUsers).filter(([, v]) => v).length > 0 && (
-                <div className="typing-indicator">Someone is typing...</div>
+                <div className="typing-indicator">{t("chat.typing")}</div>
               )}
             </div>
             <form className="msg-form" onSubmit={handleSend}>
-              <input type="text" placeholder={selectedFile ? `📎 ${selectedFile.name}` : "Type a message..."} autoFocus />
+              <input type="text" placeholder={selectedFile ? `📎 ${selectedFile.name}` : t("chat.message_placeholder")} autoFocus />
               <input type="file" ref={fileInputRef} className="file-input" onChange={(e) => setSelectedFile(e.target.files[0] || null)} />
-              <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title="Attach file">📎</button>
+              <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title={t("chat.attach_file")}>📎</button>
               {selectedFile && (
-                <button type="button" className="attach-btn clear-file" onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} title="Remove file">×</button>
+                <button type="button" className="attach-btn clear-file" onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} title={t("chat.remove_file")}>×</button>
               )}
-              <button type="submit" disabled={sending}>{sending ? "..." : "Send"}</button>
+              <button type="submit" disabled={sending}>{sending ? t("chat.sending") : t("chat.send")}</button>
             </form>
           </>
         )}
