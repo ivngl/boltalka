@@ -480,19 +480,20 @@
   letter-spacing: 0.05em;
 }
 
-.back-btn-mobile {
+.burger-btn {
   display: none;
   background: none;
   border: none;
-  color: var(--accent-blue);
-  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-size: 1.5rem;
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
   cursor: pointer;
+  line-height: 1;
 }
 
-.back-btn-mobile:hover {
-  text-decoration: underline;
+.burger-btn:hover {
+  background: var(--bg-tertiary);
 }
 
 .messages {
@@ -758,8 +759,10 @@
     display: none;
   }
 
-  .back-btn-mobile {
+  .burger-btn {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .new-chat-popup {
