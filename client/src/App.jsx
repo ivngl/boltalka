@@ -359,7 +359,7 @@ function App() {
                   {m.fileUrl && (
                     <div className="msg-file">
                       {m.fileType?.startsWith("image/") ? (
-                        <img src={m.fileUrl} alt={m.fileName} className="msg-image" />
+                        <img src={m.fileUrl} alt={m.fileName} className="msg-image" onError={(e) => { e.target.style.display = "none"; }} />
                       ) : m.fileType?.startsWith("video/") ? (
                         <video src={m.fileUrl} controls className="msg-video" />
                       ) : (

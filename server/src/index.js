@@ -54,9 +54,8 @@ app.use("/uploads", express.static(uploadsDir));
 app.post("/upload", auth, upload.single("file"), (req, res) => {
   const file = req.file;
   if (!file) return res.status(400).json({ error: "No file provided" });
-  const port = process.env.PORT || 4000;
   res.json({
-    url: `http://localhost:${port}/uploads/${file.filename}`,
+    url: `${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
     name: file.originalname,
     type: file.mimetype,
     size: file.size,
