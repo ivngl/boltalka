@@ -260,7 +260,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${activeConv || view === "profile" ? "show-chat" : "show-sidebar"}`}>
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-header-left">
@@ -337,6 +337,11 @@ function App() {
       </aside>
       <main className="chat-area">
         <div className="chat-header">
+          <div className="chat-header-left">
+            {activeConv && (
+              <button className="back-btn-mobile" onClick={() => setActiveConv(null)}>{t("chat.back")}</button>
+            )}
+          </div>
           <div className="chat-header-center">
             <span className="chat-brand">{t("app.title")}</span>
           </div>
