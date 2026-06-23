@@ -29,7 +29,7 @@ lint:
 migrate:
 	cd server && npx prisma migrate dev
 
-db:deploy:
+db-deploy:
 	cd server && npx prisma migrate deploy
 
-.PHONY: install client server db db-stop seed dev lint migrate db:deploy
+.PHONY: install client server db db-stop seed dev lint migrate db-deploy
