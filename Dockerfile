@@ -10,4 +10,4 @@ RUN cd client && npm run build
 RUN cd server && npx prisma generate --schema=prisma/schema.prisma
 
 EXPOSE 8080
-CMD cd server && npx prisma migrate deploy && node src/index.js
+CMD cd server && npm start
