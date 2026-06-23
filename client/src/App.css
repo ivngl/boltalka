@@ -803,6 +803,11 @@
     width: calc(100% - 2rem);
     max-width: 320px;
   }
+
+  .msg-form {
+    padding: 1rem;
+  }
+
 }
 
 @media (max-width: 480px) {
