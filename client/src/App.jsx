@@ -5,9 +5,11 @@ import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
 import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.js";
 import Avatar from "./Avatar.jsx";
 import Profile from "./Profile.jsx";
+import { useTheme } from "./ThemeContext.jsx";
 import "./App.css";
 
 function App() {
+  const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -266,6 +268,9 @@ function App() {
             </div>
           </div>
           <div className="sidebar-header-right">
+            <button onClick={toggleTheme} className="theme-btn" title="Toggle theme">
+              {theme === "light" ? "🌙" : "☀️"}
+            </button>
             <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="lang-btn">{i18n.language === "ru" ? "EN" : "RU"}</button>
             <button onClick={logout} className="logout-btn">{t("chat.logout")}</button>
           </div>

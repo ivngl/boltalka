@@ -11,11 +11,11 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: #0d1117;
+  background: var(--bg-primary);
 }
 
 .auth-card {
-  background: #161b22;
+  background: var(--bg-secondary);
   padding: 2rem;
   border-radius: 12px;
   width: 360px;
@@ -24,7 +24,7 @@
 .auth-card h1 {
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #58a6ff;
+  color: var(--accent-blue);
 }
 
 .auth-tabs form {
@@ -35,38 +35,35 @@
 
 .auth-tabs h2 {
   font-size: 1.1rem;
-  color: #c9d1d9;
+  color: var(--text-primary);
 }
 
 .auth-tabs input {
   padding: 0.6rem 0.8rem;
   border-radius: 6px;
-  background: #0d1117;
-  color: #c9d1d9;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-input);
   outline: none;
-}
-
-.auth-tabs input:focus {
 }
 
 .auth-tabs button {
   padding: 0.6rem;
-  background: #238636;
-  color: #fff;
+  background: var(--bg-green);
+  color: var(--text-white);
   border: none;
   border-radius: 6px;
   font-weight: 600;
 }
 
 .auth-tabs button:hover {
-  background: #2ea043;
+  background: var(--bg-green-hover);
 }
 
 .switch {
   text-align: center;
   margin-top: 1rem;
-  color: #58a6ff;
+  color: var(--accent-blue);
   cursor: pointer;
   font-size: 0.9rem;
 }
@@ -78,7 +75,7 @@
 
 .sidebar {
   width: 320px;
-  background: #161b22;
+  background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -105,10 +102,24 @@
 
 .logout-btn {
   background: none;
-  color: #c9d1d9;
+  color: var(--text-primary);
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
   font-size: 0.8rem;
+}
+
+.theme-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.theme-btn:hover {
+  color: var(--text-primary);
 }
 
 .lang-btn {
@@ -136,12 +147,12 @@
   flex: 1;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
-  background: #0d1117;
-  color: #c9d1d9;
+  background: var(--bg-input);
+  color: var(--text-primary);
   outline: none;
   font-size: 0.85rem;
   min-width: 0;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-input);
 }
 
 .sidebar-search input:focus {
@@ -152,8 +163,8 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  background: #238636;
-  color: #fff;
+  background: var(--bg-green);
+  color: var(--text-white);
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -166,13 +177,13 @@
 }
 
 .sidebar-search .new-chat-btn:hover {
-  background: #2ea043;
+  background: var(--bg-green-hover);
 }
 
 .new-chat-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,7 +191,7 @@
 }
 
 .new-chat-popup {
-  background: #161b22;
+  background: var(--bg-secondary);
   border-radius: 12px;
   width: 360px;
   max-height: 400px;
@@ -202,23 +213,23 @@
 .close-btn {
   background: none;
   border: none;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-size: 1.4rem;
   cursor: pointer;
 }
 
 .close-btn:hover {
-  color: #c9d1d9;
+  color: var(--text-primary);
 }
 
 .new-chat-popup-search {
   margin: 0.75rem 1rem;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
-  background: #0d1117;
-  color: #c9d1d9;
+  background: var(--bg-input);
+  color: var(--text-primary);
   outline: none;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-input);
 }
 
 .new-chat-popup-search:focus {
@@ -244,18 +255,18 @@
 }
 
 .conv-item:hover {
-  background: #1c2128;
+  background: var(--bg-tertiary);
 }
 
 .conv-item.active {
-  background: #0d1117;
+  background: var(--bg-primary);
 }
 
 .conv-avatar, .user-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #30363d;
+  background: var(--bg-avatar);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,7 +287,7 @@
 
 .conv-preview {
   font-size: 0.8rem;
-  color: #8b949e;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -286,18 +297,18 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #30363d;
+  background: var(--bg-avatar);
   flex-shrink: 0;
 }
 
 .online-dot.online {
-  background: #3fb950;
+  background: var(--accent-green);
 }
 
 .conv-delete {
   background: none;
   border: none;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0 0.2rem;
@@ -311,7 +322,7 @@
 }
 
 .conv-delete:hover {
-  color: #f85149;
+  color: var(--accent-red);
 }
 
 .new-chat-section {
@@ -320,7 +331,7 @@
 
 .new-chat-section h3 {
   font-size: 0.85rem;
-  color: #8b949e;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
@@ -343,14 +354,14 @@
 }
 
 .user-item:hover {
-  background: #1c2128;
+  background: var(--bg-tertiary);
 }
 
 .chat-area {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #0d1117;
+  background: var(--bg-primary);
 }
 
 .empty-state {
@@ -358,20 +369,20 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-size: 1.1rem;
 }
 
 .chat-header {
   padding: 0.75rem 1rem;
-  background: #161b22;
+  background: var(--bg-secondary);
   text-align: center;
 }
 
 .chat-brand {
   display: block;
   font-size: 0.75rem;
-  color: #58a6ff;
+  color: var(--accent-blue);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -395,23 +406,23 @@
   max-width: 70%;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
-  background: #21262d;
+  background: var(--bg-msg-received);
   align-self: flex-start;
 }
 
 .msg.mine {
-  background: #1f6feb;
+  background: var(--bg-msg-mine);
   align-self: flex-end;
 }
 
 .msg-sender {
   font-size: 0.75rem;
-  color: #8b949e;
+  color: var(--text-secondary);
   margin-bottom: 0.2rem;
 }
 
 .msg.mine .msg-sender {
-  color: rgba(255,255,255,0.7);
+  color: var(--text-mine-meta);
 }
 
 .msg-content {
@@ -441,7 +452,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  color: #58a6ff;
+  color: var(--accent-blue);
   font-size: 0.9rem;
   text-decoration: none;
   word-break: break-all;
@@ -458,7 +469,7 @@
 .attach-btn {
   background: none;
   border: none;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0 0.3rem;
@@ -467,23 +478,23 @@
 }
 
 .attach-btn:hover {
-  color: #c9d1d9;
+  color: var(--text-primary);
 }
 
 .clear-file:hover {
-  color: #f85149;
+  color: var(--accent-red);
 }
 
 .msg-time {
   font-size: 0.7rem;
-  color: #8b949e;
+  color: var(--text-secondary);
   text-align: right;
   margin-top: 0.2rem;
 }
 
 .typing-indicator {
   font-size: 0.85rem;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-style: italic;
   padding: 0.3rem 0;
 }
@@ -492,16 +503,16 @@
   display: flex;
   gap: 0.5rem;
   padding: 1rem;
-  background: #161b22;
+  background: var(--bg-secondary);
 }
 
 .msg-form input {
   flex: 1;
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
-  background: #0d1117;
-  color: #c9d1d9;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-input);
   outline: none;
 }
 
@@ -510,15 +521,15 @@
 
 .msg-form button {
   padding: 0.6rem 1.2rem;
-  background: #238636;
-  color: #fff;
+  background: var(--bg-green);
+  color: var(--text-white);
   border: none;
   border-radius: 8px;
   font-weight: 600;
 }
 
 .msg-form button:hover {
-  background: #2ea043;
+  background: var(--bg-green-hover);
 }
 
 .sidebar-user {
@@ -531,7 +542,7 @@
 }
 
 .sidebar-user:hover {
-  background: #1c2128;
+  background: var(--bg-tertiary);
 }
 
 .profile-page {
@@ -541,7 +552,7 @@
   align-items: center;
   padding: 2rem;
   overflow-y: auto;
-  background: #0d1117;
+  background: var(--bg-primary);
 }
 
 .profile-header {
@@ -559,7 +570,7 @@
 
 .back-btn {
   background: none;
-  color: #c9d1d9;
+  color: var(--text-primary);
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -582,17 +593,17 @@
   flex-direction: column;
   gap: 0.3rem;
   font-size: 0.85rem;
-  color: #8b949e;
+  color: var(--text-secondary);
 }
 
 .profile-form input {
   padding: 0.6rem 0.8rem;
   border-radius: 6px;
-  background: #161b22;
-  color: #c9d1d9;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   outline: none;
   font-size: 0.95rem;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-input);
 }
 
 .profile-form input:focus {
@@ -608,14 +619,14 @@
 }
 
 .profile-error {
-  color: #f85149;
+  color: var(--accent-red);
   font-size: 0.85rem;
 }
 
 .save-btn {
   padding: 0.6rem;
-  background: #238636;
-  color: #fff;
+  background: var(--bg-green);
+  color: var(--text-white);
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -627,5 +638,5 @@
 }
 
 .save-btn:hover:not(:disabled) {
-  background: #2ea043;
+  background: var(--bg-green-hover);
 }
