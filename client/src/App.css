@@ -383,14 +383,10 @@
   position: relative;
 }
 
-.chat-header-left,
 .chat-header-right {
   flex: 1 1 0;
   display: flex;
   align-items: center;
-}
-
-.chat-header-right {
   justify-content: flex-end;
   gap: 0.25rem;
 }
@@ -399,31 +395,6 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.chat-header-conv {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.chat-header-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-title {
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.chat-status {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.chat-status.online {
-  color: var(--accent-green);
 }
 
 .chat-brand {
