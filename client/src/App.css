@@ -613,7 +613,7 @@
 .msg-form {
   display: flex;
   gap: 0.5rem;
-  padding: 1rem 1rem 1rem 1rem;
+  padding: 1rem 1rem 1rem 0;
   background: var(--bg-secondary);
 }
 
