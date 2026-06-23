@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Avatar from "./Avatar.jsx";
 import { updateProfile } from "./api.js";
 
 export default function Profile({ user, onUpdate, onBack }) {
+  const { t } = useTranslation();
   const [username, setUsername] = useState(user.username);
   const [email, setEmail] = useState(user.email);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -31,7 +33,7 @@ export default function Profile({ user, onUpdate, onBack }) {
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
-      setError(err.response?.data?.error || "Update failed");
+      setError(err.response?.data?.error || t("profile.update_failed"));
     }
     setSaving(false);
   }
@@ -39,47 +41,47 @@ export default function Profile({ user, onUpdate, onBack }) {
   return (
     <div className="profile-page">
       <div className="profile-header">
-        <button className="back-btn" onClick={onBack}>← Back</button>
-        <h2>Profile</h2>
+        <button className="back-btn" onClick={onBack}>{t("profile.back")}</button>
+        <h2>{t("profile.title")}</h2>
       </div>
       <div className="profile-avatar">
         <Avatar username={user.username} size={80} />
       </div>
       <form className="profile-form" onSubmit={handleSave}>
         <label>
-          Username
+          {t("profile.username")}
           <input value={username} onChange={(e) => setUsername(e.target.value)} />
         </label>
         <label>
-          Email
+          {t("profile.email")}
           <input value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
         <label>
-          Member since
+          {t("profile.member_since")}
           <input value={new Date(user.createdAt).toLocaleDateString()} disabled />
         </label>
         <hr />
         <label>
-          Current password
+          {t("profile.current_password")}
           <input
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            placeholder="Leave blank to keep"
+            placeholder={t("profile.password_placeholder")}
           />
         </label>
         <label>
-          New password
+          {t("profile.new_password")}
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Leave blank to keep"
+            placeholder={t("profile.password_placeholder")}
           />
         </label>
         {error && <div className="profile-error">{error}</div>}
         <button type="submit" className="save-btn" disabled={saving}>
-          {saving ? "Saving..." : "Save"}
+          {saving ? t("profile.saving") : t("profile.save")}
         </button>
       </form>
     </div>
