@@ -112,7 +112,8 @@
   font-size: 0.8rem;
 }
 
-.theme-btn {
+.theme-btn,
+.lang-btn {
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -120,19 +121,12 @@
   padding: 0.3rem 0.5rem;
   border-radius: 6px;
   line-height: 1;
+  cursor: pointer;
 }
 
-.theme-btn:hover {
+.theme-btn:hover,
+.lang-btn:hover {
   color: var(--text-primary);
-}
-
-.lang-btn {
-  background: none;
-  color: var(--text-primary);
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  margin-right: 0.4rem;
 }
 
 .sidebar-search {
