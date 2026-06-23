@@ -537,6 +537,10 @@
   word-wrap: break-word;
 }
 
+.msg.mine .msg-content {
+  color: var(--text-white);
+}
+
 .msg-file {
   margin-bottom: 0.3rem;
 }
@@ -812,7 +816,7 @@
   }
 
   .msg-form {
-    padding: 0.75rem 0.75rem 0.75rem 0;
+    padding: 0.75rem;
   }
 
   .profile-page {

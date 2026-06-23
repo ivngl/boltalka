@@ -362,7 +362,7 @@ function App() {
             <div className="messages" ref={msgEndRef}>
               {messages.map((m) => (
                 <div key={m.id} className={`msg ${m.senderId === user.id ? "mine" : ""}`}>
-                  <div className="msg-sender">{m.sender?.username}</div>
+                  {m.senderId !== user.id && <div className="msg-sender">{m.sender?.username}</div>}
                   {m.fileUrl && (
                     <div className="msg-file">
                       {m.fileType?.startsWith("image/") ? (
