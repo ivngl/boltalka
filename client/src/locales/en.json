@@ -28,6 +28,7 @@
   "chat.remove_file": "Remove file",
   "chat.send": "Send",
   "chat.sending": "...",
+  "chat.back": "← Back",
   "chat.unknown": "Unknown",
   "chat.online": "online",
   "chat.new_message": "New message",
