@@ -47,6 +47,10 @@
   outline: none;
 }
 
+.auth-tabs input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
 .auth-tabs button {
   padding: 0.6rem;
   background: var(--bg-green);
@@ -151,6 +155,7 @@
 }
 
 .sidebar-search input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .sidebar-search .new-chat-btn {
@@ -228,6 +233,7 @@
 }
 
 .new-chat-popup-search:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .new-chat-popup-list {
@@ -510,7 +516,7 @@
 .msg-form {
   display: flex;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 1rem 1rem 1rem 0;
   background: var(--bg-secondary);
 }
 
@@ -525,6 +531,7 @@
 }
 
 .msg-form input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .msg-form button {
@@ -615,6 +622,7 @@
 }
 
 .profile-form input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .profile-form input:disabled {
