@@ -339,15 +339,27 @@ function App() {
         )}
       </aside>
       <main className="chat-area">
+        <div className="chat-header">
+          {activeConv ? (
+            <div className="chat-header-conv">
+              <Avatar username={conversationName(activeConv)} size={32} />
+              <div className="chat-header-info">
+                <div className="chat-title">{conversationName(activeConv)}</div>
+                <div className={`chat-status ${onlineUsers.has(otherParticipant(activeConv)?.id) ? "online" : ""}`}>
+                  {onlineUsers.has(otherParticipant(activeConv)?.id) ? t("chat.online") : ""}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <span className="chat-brand">{t("app.title")}</span>
+          )}
+        </div>
         {view === "profile" ? (
           <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
         ) : !activeConv ? (
           <div className="empty-state">{t("chat.empty")}</div>
         ) : (
           <>
-            <div className="chat-header">
-              <span className="chat-brand">{t("app.title")}</span>
-            </div>
             <div className="messages" ref={msgEndRef}>
               {messages.map((m) => (
                 <div key={m.id} className={`msg ${m.senderId === user.id ? "mine" : ""}`}>
