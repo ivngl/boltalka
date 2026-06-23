@@ -338,9 +338,7 @@ function App() {
       <main className="chat-area">
         <div className="chat-header">
           <div className="chat-header-left">
-            {activeConv && (
-              <button className="back-btn-mobile" onClick={() => setActiveConv(null)}>{t("chat.back")}</button>
-            )}
+            <button className="burger-btn" onClick={() => setActiveConv(null)}>☰</button>
           </div>
           <div className="chat-header-center">
             <span className="chat-brand">{t("app.title")}</span>
