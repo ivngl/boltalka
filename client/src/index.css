@@ -22,6 +22,7 @@
   --text-white: #ffffff;
   --text-mine-meta: rgba(255,255,255,0.7);
   --accent-blue: #0969da;
+  --accent-blue-hover: #1a7ae8;
   --accent-green: #3fb950;
   --accent-red: #cf222e;
 }
@@ -44,6 +45,7 @@
   --text-white: #ffffff;
   --text-mine-meta: rgba(255,255,255,0.9);
   --accent-blue: #79c0ff;
+  --accent-blue-hover: #58a6ff;
   --accent-green: #56d364;
   --accent-red: #ff6b6b;
 }

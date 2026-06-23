@@ -53,7 +53,7 @@
 
 .auth-tabs button {
   padding: 0.6rem;
-  background: var(--bg-green);
+  background: var(--accent-blue);
   color: var(--text-white);
   border: none;
   border-radius: 6px;
@@ -61,7 +61,7 @@
 }
 
 .auth-tabs button:hover {
-  background: var(--bg-green-hover);
+  background: var(--accent-blue-hover);
 }
 
 .switch {
@@ -157,7 +157,7 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  background: var(--bg-green);
+  background: var(--accent-blue);
   color: var(--text-white);
   border: none;
   border-radius: 6px;
@@ -171,7 +171,7 @@
 }
 
 .sidebar-search .new-chat-btn:hover {
-  background: var(--bg-green-hover);
+  background: var(--accent-blue-hover);
 }
 
 .new-chat-overlay {
@@ -605,7 +605,7 @@
 
 .msg-form button {
   padding: 0.6rem 1.2rem;
-  background: var(--bg-green);
+  background: var(--accent-blue);
   color: var(--text-white);
   border: none;
   border-radius: 8px;
@@ -613,7 +613,7 @@
 }
 
 .msg-form button:hover {
-  background: var(--bg-green-hover);
+  background: var(--accent-blue-hover);
 }
 
 .sidebar-user {
@@ -710,7 +710,7 @@
 
 .save-btn {
   padding: 0.6rem;
-  background: var(--bg-green);
+  background: var(--accent-blue);
   color: var(--text-white);
   border: none;
   border-radius: 6px;
@@ -723,5 +723,5 @@
 }
 
 .save-btn:hover:not(:disabled) {
-  background: var(--bg-green-hover);
+  background: var(--accent-blue-hover);
 }
