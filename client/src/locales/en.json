@@ -25,6 +25,7 @@
   "chat.send": "Send",
   "chat.sending": "...",
   "chat.unknown": "Unknown",
+  "chat.online": "online",
   "chat.new_message": "New message",
   "profile.title": "Profile",
   "profile.back": "← Back",
