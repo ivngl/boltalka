@@ -23,6 +23,7 @@ function App() {
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [newChatSearch, setNewChatSearch] = useState("");
   const [sending, setSending] = useState(false);
+  const [confirmDeleteConvId, setConfirmDeleteConvId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   const [view, setView] = useState("auth");
@@ -297,7 +298,7 @@ function App() {
               <div className={`online-dot ${onlineUsers.has(otherParticipant(c)?.id) ? "online" : ""}`} />
               <button
                 className="conv-delete"
-                onClick={(e) => { e.stopPropagation(); handleDeleteConversation(c.id); }}
+                onClick={(e) => { e.stopPropagation(); setConfirmDeleteConvId(c.id); }}
                 title={t("chat.delete_chat")}
               >×</button>
             </div>
@@ -366,7 +367,24 @@ function App() {
                         <a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="msg-file-link" download={m.fileName}>
                           📄 {m.fileName}
                         </a>
-                      )}
+        )}
+        {confirmDeleteConvId && (
+          <div className="confirm-overlay" onClick={() => setConfirmDeleteConvId(null)}>
+            <div className="confirm-popup" onClick={(e) => e.stopPropagation()}>
+              <div className="confirm-popup-header">
+                <h3>{t("chat.confirm_delete_title")}</h3>
+                <button className="close-btn" onClick={() => setConfirmDeleteConvId(null)}>×</button>
+              </div>
+              <div className="confirm-popup-body">
+                <p>{t("chat.confirm_delete_body")}</p>
+              </div>
+              <div className="confirm-popup-buttons">
+                <button className="confirm-cancel" onClick={() => setConfirmDeleteConvId(null)}>{t("chat.cancel")}</button>
+                <button className="confirm-delete" onClick={() => { handleDeleteConversation(confirmDeleteConvId); setConfirmDeleteConvId(null); }}>{t("chat.delete")}</button>
+              </div>
+            </div>
+          </div>
+        )}
                     </div>
                   )}
                   {m.content && <div className="msg-content">{m.content}</div>}
