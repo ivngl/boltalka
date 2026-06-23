@@ -268,10 +268,6 @@ function App() {
             </div>
           </div>
           <div className="sidebar-header-right">
-            <button onClick={toggleTheme} className="theme-btn" title="Toggle theme">
-              {theme === "light" ? "🌙" : "☀️"}
-            </button>
-            <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="lang-btn">{i18n.language === "ru" ? "EN" : "RU"}</button>
             <button onClick={logout} className="logout-btn">{t("chat.logout")}</button>
           </div>
         </div>
@@ -340,19 +336,27 @@ function App() {
       </aside>
       <main className="chat-area">
         <div className="chat-header">
-          {activeConv ? (
-            <div className="chat-header-conv">
-              <Avatar username={conversationName(activeConv)} size={32} />
-              <div className="chat-header-info">
-                <div className="chat-title">{conversationName(activeConv)}</div>
-                <div className={`chat-status ${onlineUsers.has(otherParticipant(activeConv)?.id) ? "online" : ""}`}>
-                  {onlineUsers.has(otherParticipant(activeConv)?.id) ? t("chat.online") : ""}
+          <div className="chat-header-left">
+            {activeConv ? (
+              <div className="chat-header-conv">
+                <Avatar username={conversationName(activeConv)} size={32} />
+                <div className="chat-header-info">
+                  <div className="chat-title">{conversationName(activeConv)}</div>
+                  <div className={`chat-status ${onlineUsers.has(otherParticipant(activeConv)?.id) ? "online" : ""}`}>
+                    {onlineUsers.has(otherParticipant(activeConv)?.id) ? t("chat.online") : ""}
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <span className="chat-brand">{t("app.title")}</span>
-          )}
+            ) : (
+              <span className="chat-brand">{t("app.title")}</span>
+            )}
+          </div>
+          <div className="chat-header-right">
+            <button onClick={toggleTheme} className="theme-btn" title="Toggle theme">
+              {theme === "light" ? "🌙" : "☀️"}
+            </button>
+            <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="lang-btn">{i18n.language === "ru" ? "EN" : "RU"}</button>
+          </div>
         </div>
         {view === "profile" ? (
           <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
