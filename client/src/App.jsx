@@ -336,18 +336,6 @@ function App() {
       </aside>
       <main className="chat-area">
         <div className="chat-header">
-          <div className="chat-header-left">
-            {activeConv && (
-              <div className="chat-header-conv">
-                <div className="chat-header-info">
-                  <div className="chat-title">{conversationName(activeConv)}</div>
-                  <div className={`chat-status ${onlineUsers.has(otherParticipant(activeConv)?.id) ? "online" : ""}`}>
-                    {onlineUsers.has(otherParticipant(activeConv)?.id) ? t("chat.online") : ""}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
           <div className="chat-header-center">
             <span className="chat-brand">{t("app.title")}</span>
           </div>
