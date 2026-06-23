@@ -337,9 +337,8 @@ function App() {
       <main className="chat-area">
         <div className="chat-header">
           <div className="chat-header-left">
-            {activeConv ? (
+            {activeConv && (
               <div className="chat-header-conv">
-                <Avatar username={conversationName(activeConv)} size={32} />
                 <div className="chat-header-info">
                   <div className="chat-title">{conversationName(activeConv)}</div>
                   <div className={`chat-status ${onlineUsers.has(otherParticipant(activeConv)?.id) ? "online" : ""}`}>
@@ -347,9 +346,10 @@ function App() {
                   </div>
                 </div>
               </div>
-            ) : (
-              <span className="chat-brand">{t("app.title")}</span>
             )}
+          </div>
+          <div className="chat-header-center">
+            <span className="chat-brand">{t("app.title")}</span>
           </div>
           <div className="chat-header-right">
             <button onClick={toggleTheme} className="theme-btn" title="Toggle theme">
