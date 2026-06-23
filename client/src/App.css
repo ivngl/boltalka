@@ -47,6 +47,10 @@
   outline: none;
 }
 
+.auth-tabs input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
 .auth-tabs button {
   padding: 0.6rem;
   background: var(--bg-green);
@@ -108,7 +112,8 @@
   font-size: 0.8rem;
 }
 
-.theme-btn {
+.theme-btn,
+.lang-btn {
   background: none;
   border: none;
   color: var(--text-secondary);
@@ -116,19 +121,12 @@
   padding: 0.3rem 0.5rem;
   border-radius: 6px;
   line-height: 1;
+  cursor: pointer;
 }
 
-.theme-btn:hover {
+.theme-btn:hover,
+.lang-btn:hover {
   color: var(--text-primary);
-}
-
-.lang-btn {
-  background: none;
-  color: var(--text-primary);
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  margin-right: 0.4rem;
 }
 
 .sidebar-search {
@@ -151,6 +149,7 @@
 }
 
 .sidebar-search input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .sidebar-search .new-chat-btn {
@@ -228,6 +227,7 @@
 }
 
 .new-chat-popup-search:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .new-chat-popup-list {
@@ -585,7 +585,7 @@
 .msg-form {
   display: flex;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 1rem 1rem 1rem 0;
   background: var(--bg-secondary);
 }
 
@@ -600,6 +600,7 @@
 }
 
 .msg-form input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .msg-form button {
@@ -690,6 +691,7 @@
 }
 
 .profile-form input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
 .profile-form input:disabled {

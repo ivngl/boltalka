@@ -28,24 +28,24 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg-primary: #080c12;
+  --bg-primary: #06090e;
   --bg-secondary: #11151c;
-  --bg-tertiary: #181d26;
-  --bg-input: #080c12;
+  --bg-tertiary: #1c212b;
+  --bg-input: #1a1f28;
   --bg-msg-received: #1a1f28;
   --bg-msg-mine: #1f6feb;
   --bg-green: #238636;
   --bg-green-hover: #2ea043;
-  --bg-avatar: #30363d;
-  --overlay: rgba(0,0,0,0.6);
-  --text-primary: #e6edf3;
-  --text-secondary: #a5afbb;
-  --text-body: #f0f0f0;
+  --bg-avatar: #3b434d;
+  --overlay: rgba(0,0,0,0.7);
+  --text-primary: #f0f6fc;
+  --text-secondary: #d0d7de;
+  --text-body: #ffffff;
   --text-white: #ffffff;
-  --text-mine-meta: rgba(255,255,255,0.7);
-  --accent-blue: #58a6ff;
-  --accent-green: #3fb950;
-  --accent-red: #f85149;
+  --text-mine-meta: rgba(255,255,255,0.9);
+  --accent-blue: #79c0ff;
+  --accent-green: #56d364;
+  --accent-red: #ff6b6b;
 }
 
 body {
