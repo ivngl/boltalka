@@ -460,7 +460,16 @@
   flex: 1;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   min-width: 0;
+}
+
+.chat-conv-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-header-center {

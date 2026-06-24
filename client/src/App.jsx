@@ -340,7 +340,11 @@ function App() {
         <div className="chat-header">
           <div className="chat-header-left">
             {activeConv && (
-              <button className="back-btn-mobile" onClick={() => { setActiveConv(null); setMessages([]); }}>←</button>
+              <>
+                <button className="back-btn-mobile" onClick={() => { setActiveConv(null); setMessages([]); }}>←</button>
+                <Avatar username={conversationName(activeConv)} size={32} />
+                <span className="chat-conv-name">{conversationName(activeConv)}</span>
+              </>
             )}
           </div>
           <div className="chat-header-center">
