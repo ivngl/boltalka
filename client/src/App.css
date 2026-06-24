@@ -622,10 +622,12 @@
   padding: 0.75rem 1rem;
   border-top: 1px solid var(--border-color);
   background: var(--bg-secondary);
+  overflow: hidden;
 }
 
 .msg-form input {
   flex: 1;
+  min-width: 0;
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
   background: var(--bg-input);
@@ -812,6 +814,12 @@
 
   .msg-form {
     padding: 0.75rem 0.75rem 0.75rem 1rem;
+    gap: 0.3rem;
+  }
+
+  .msg-form button {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
   }
 
   .profile-page {
