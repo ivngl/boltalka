@@ -25,6 +25,7 @@
   --accent-blue-hover: #1a7ae8;
   --accent-green: #3fb950;
   --accent-red: #cf222e;
+  --border-color: #d0d7de;
 }
 
 [data-theme="dark"] {
@@ -48,6 +49,7 @@
   --accent-blue-hover: #58a6ff;
   --accent-green: #56d364;
   --accent-red: #ff6b6b;
+  --border-color: #3e4042;
 }
 
 body {
