@@ -18,6 +18,7 @@ import { conversationRoutes } from "./routes/conversations.js";
 
 const prisma = new PrismaClient();
 const app = express();
+app.set("trust proxy", 1);
 const httpServer = createServer(app);
 
 app.get("/health", (req, res) => res.json({ ok: true }));
