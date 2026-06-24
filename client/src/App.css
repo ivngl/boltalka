@@ -484,7 +484,8 @@
   letter-spacing: 0.05em;
 }
 
-.burger-btn {
+.burger-btn,
+.back-btn-mobile {
   display: none;
   background: none;
   border: none;
@@ -496,7 +497,8 @@
   line-height: 1;
 }
 
-.burger-btn:hover {
+.burger-btn:hover,
+.back-btn-mobile:hover {
   background: var(--bg-tertiary);
 }
 
@@ -756,39 +758,22 @@
 
 @media (max-width: 768px) {
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 70%;
-    max-width: 320px;
-    height: 100vh;
-    z-index: 90;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    display: flex;
-  }
-
-  .app.sidebar-open .sidebar {
-    transform: translateX(0);
+    width: 100%;
   }
 
   .app.show-chat .sidebar {
-    display: flex;
+    display: none;
   }
 
   .app.show-sidebar .chat-area {
-    display: flex;
+    display: none;
   }
 
   .sidebar-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 80;
+    display: none !important;
   }
 
-  .burger-btn {
+  .back-btn-mobile {
     display: inline-flex;
     align-items: center;
     justify-content: center;

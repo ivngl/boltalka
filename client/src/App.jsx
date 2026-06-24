@@ -25,7 +25,7 @@ function App() {
   const [sending, setSending] = useState(false);
   const [confirmDeleteConvId, setConfirmDeleteConvId] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const fileInputRef = useRef(null);
   const [view, setView] = useState("auth");
   const msgEndRef = useRef(null);
@@ -155,7 +155,6 @@ function App() {
   function selectConversation(conv) {
     setView("chat");
     setActiveConv(conv);
-    setSidebarOpen(false);
     if (conv) {
       getMessages(conv.id).then(setMessages);
     }
@@ -262,7 +261,7 @@ function App() {
   }
 
   return (
-    <div className={`app ${activeConv || view === "profile" ? "show-chat" : "show-sidebar"}${sidebarOpen ? " sidebar-open" : ""}`}>
+    <div className={`app ${activeConv || view === "profile" ? "show-chat" : "show-sidebar"}`}>
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-header-left">
@@ -337,11 +336,12 @@ function App() {
           </div>
         )}
       </aside>
-      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
       <main className="chat-area">
         <div className="chat-header">
           <div className="chat-header-left">
-            <button className="burger-btn" onClick={() => setSidebarOpen(prev => !prev)}>☰</button>
+            {activeConv && (
+              <button className="back-btn-mobile" onClick={() => { setActiveConv(null); setMessages([]); }}>←</button>
+            )}
           </div>
           <div className="chat-header-center">
             <span className="chat-brand">{t("app.title")}</span>
