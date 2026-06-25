@@ -57,10 +57,12 @@ body {
   background: var(--bg-primary);
   color: var(--text-body);
   height: 100vh;
+  height: 100dvh;
 }
 
 #root {
   height: 100vh;
+  height: 100dvh;
 }
 
 input, button {
