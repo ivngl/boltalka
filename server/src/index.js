@@ -119,7 +119,12 @@ io.on("connection", (socket) => {
   const userId = socket.userId;
   userSockets.set(userId, socket.id);
   socket.join(`user:${userId}`);
-  io.emit("presence", { userId, online: true });
+  for (const [onlineUserId] of userSockets) {
+    if (onlineUserId !== userId) {
+      socket.emit("presence", { userId: onlineUserId, online: true });
+    }
+  }
+  socket.broadcast.emit("presence", { userId, online: true });
 
   socket.on("join_conversation", (conversationId) => {
     socket.join(conversationId);
