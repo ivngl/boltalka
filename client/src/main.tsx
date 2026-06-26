@@ -1,11 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.jsx";
-import { ThemeProvider } from "./ThemeContext.jsx";
+import App from "./App.tsx";
+import { ThemeProvider } from "./ThemeContext.tsx";
 import "./index.css";
-import "./i18n.js";
+import "./i18n.ts";
 
-createRoot(document.getElementById("root")).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
       <App />

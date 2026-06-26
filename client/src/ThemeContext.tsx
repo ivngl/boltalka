@@ -1,15 +1,20 @@
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 
-const ThemeContext = createContext();
+interface ThemeContextType {
+  theme: "light" | "dark";
+  toggleTheme: () => void;
+}
 
-function getInitialTheme() {
+const ThemeContext = createContext<ThemeContextType | null>(null);
+
+function getInitialTheme(): "light" | "dark" {
   const stored = localStorage.getItem("theme");
   if (stored === "dark" || stored === "light") return stored;
   return "light";
 }
 
-export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(getInitialTheme);
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<"light" | "dark">(getInitialTheme);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -27,7 +32,7 @@ export function ThemeProvider({ children }) {
   );
 }
 
-export function useTheme() {
+export function useTheme(): ThemeContextType {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
   return ctx;

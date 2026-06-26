@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Avatar from "./Avatar.jsx";
-import { updateProfile } from "./api.js";
+import Avatar from "./Avatar.tsx";
+import { updateProfile } from "./api.ts";
+import type { User } from "./types.ts";
+import type { AxiosError } from "axios";
 
-export default function Profile({ user, onUpdate, onBack }) {
+interface ProfileProps {
+  user: User;
+  onUpdate: (user: User) => void;
+  onBack: () => void;
+}
+
+export default function Profile({ user, onUpdate, onBack }: ProfileProps) {
   const { t } = useTranslation();
   const [username, setUsername] = useState(user.username);
   const [email, setEmail] = useState(user.email);
@@ -12,12 +20,12 @@ export default function Profile({ user, onUpdate, onBack }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSave(e) {
+  async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setSaving(true);
     try {
-      const body = {};
+      const body: Record<string, string> = {};
       if (username !== user.username) body.username = username;
       if (email !== user.email) body.email = email;
       if (newPassword) {
@@ -33,7 +41,8 @@ export default function Profile({ user, onUpdate, onBack }) {
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
-      setError(err.response?.data?.error || t("profile.update_failed"));
+      const axiosErr = err as AxiosError<{ error: string }>;
+      setError(axiosErr.response?.data?.error || t("profile.update_failed"));
     }
     setSaving(false);
   }

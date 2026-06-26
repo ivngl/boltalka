@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
+
 const colors = [
   "#1f6feb", "#3fb950", "#d29922", "#f78166", "#db6d28",
   "#a371f7", "#6e7681", "#79c0ff", "#56d364", "#e3b341",
 ];
 
-function hashColor(name) {
+function hashColor(name: string): string {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -11,9 +13,12 @@ function hashColor(name) {
   return colors[Math.abs(hash) % colors.length];
 }
 
-import { useTranslation } from "react-i18next";
+interface AvatarProps {
+  username: string;
+  size?: number;
+}
 
-export default function Avatar({ username, size = 36 }) {
+export default function Avatar({ username, size = 36 }: AvatarProps) {
   const { t } = useTranslation();
   const letter = username?.charAt(0).toUpperCase() || t("avatar.fallback");
   const bg = hashColor(username || "");

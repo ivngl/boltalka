@@ -1,36 +1,37 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import i18n from "./i18n.js";
-import { connectSocket, disconnectSocket, getSocket } from "./socket.js";
-import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.js";
-import Avatar from "./Avatar.jsx";
-import Profile from "./Profile.jsx";
-import { useTheme } from "./ThemeContext.jsx";
+import i18n from "./i18n.ts";
+import { connectSocket, disconnectSocket, getSocket } from "./socket.ts";
+import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.ts";
+import Avatar from "./Avatar.tsx";
+import Profile from "./Profile.tsx";
+import { useTheme } from "./ThemeContext.tsx";
+import type { User, Message, Conversation, ViewState } from "./types.ts";
 import "./App.css";
 
 function App() {
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [conversations, setConversations] = useState([]);
-  const [activeConv, setActiveConv] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState(new Set());
-  const [typingUsers, setTypingUsers] = useState({});
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConv, setActiveConv] = useState<Conversation | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
+  const [typingUsers, setTypingUsers] = useState<Record<number, boolean>>({});
   const [chatSearch, setChatSearch] = useState("");
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [newChatSearch, setNewChatSearch] = useState("");
   const [sending, setSending] = useState(false);
-  const [confirmDeleteConvId, setConfirmDeleteConvId] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [confirmDeleteConvId, setConfirmDeleteConvId] = useState<number | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const fileInputRef = useRef(null);
-  const [view, setView] = useState("auth");
-  const msgEndRef = useRef(null);
-  const activeConvRef = useRef(null);
-  const conversationsRef = useRef([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [view, setView] = useState<ViewState>("auth");
+  const msgEndRef = useRef<HTMLDivElement | null>(null);
+  const activeConvRef = useRef<Conversation | null>(null);
+  const conversationsRef = useRef<Conversation[]>([]);
 
   useEffect(() => { activeConvRef.current = activeConv; }, [activeConv]);
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
@@ -47,11 +48,12 @@ function App() {
       localStorage.removeItem("token");
       setLoading(false);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function initSocket(token) {
+  function initSocket(token: string) {
     const s = connectSocket(token);
-    s.on("new_message", (msg) => {
+    s.on("new_message", (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
       setConversations((prev) => {
         const copy = [...prev];
@@ -64,7 +66,6 @@ function App() {
         return copy;
       });
       if (msg.senderId !== user?.id && "Notification" in window && Notification.permission === "granted") {
-        const conv = conversationsRef.current.find((c) => c.id === msg.conversationId);
         const inActive = activeConvRef.current?.id === msg.conversationId;
         if (!inActive || document.hidden) {
           const title = msg.sender?.username || t("chat.new_message");
@@ -77,18 +78,18 @@ function App() {
         }
       }
     });
-    s.on("presence", ({ userId, online }) => {
+    s.on("presence", ({ userId, online }: { userId: number; online: boolean }) => {
       setOnlineUsers((prev) => {
         const next = new Set(prev);
-        online ? next.add(userId) : next.delete(userId);
+        if (online) { next.add(userId); } else { next.delete(userId); }
         return next;
       });
     });
-    s.on("typing", ({ userId, conversationId }) => {
+    s.on("typing", ({ userId, conversationId }: { userId: number; conversationId: number }) => {
       if (conversationId !== activeConv?.id) return;
       setTypingUsers((prev) => ({ ...prev, [userId]: true }));
     });
-    s.on("stop_typing", ({ userId, conversationId }) => {
+    s.on("stop_typing", ({ userId, conversationId }: { userId: number; conversationId: number }) => {
       if (conversationId !== activeConv?.id) return;
       setTypingUsers((prev) => ({ ...prev, [userId]: false }));
     });
@@ -99,14 +100,14 @@ function App() {
     setConversations(convs);
     setUsers(usrs);
     const s = getSocket();
-    convs.forEach((c) => s?.emit("join_conversation", c.id));
+    convs.forEach((c: Conversation) => s?.emit("join_conversation", c.id));
     setLoading(false);
   }
 
-  async function handleRegister(e) {
+  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    const data = await register(fd.get("username"), fd.get("email"), fd.get("password"));
+    const fd = new FormData(e.currentTarget);
+    const data = await register(fd.get("username") as string, fd.get("email") as string, fd.get("password") as string);
     localStorage.setItem("token", data.token);
     setToken(data.token);
     setUser(data.user);
@@ -115,10 +116,10 @@ function App() {
     requestNotif();
   }
 
-  async function handleLogin(e) {
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    const data = await login(fd.get("email"), fd.get("password"));
+    const fd = new FormData(e.currentTarget);
+    const data = await login(fd.get("email") as string, fd.get("password") as string);
     localStorage.setItem("token", data.token);
     setToken(data.token);
     setUser(data.user);
@@ -143,16 +144,16 @@ function App() {
     setView("auth");
   }
 
-  async   function openProfile() {
+  function openProfile() {
     setView("profile");
     setActiveConv(null);
   }
 
-  function handleUpdateUser(updated) {
+  function handleUpdateUser(updated: User) {
     setUser((prev) => ({ ...prev, ...updated }));
   }
 
-  function selectConversation(conv) {
+  function selectConversation(conv: Conversation) {
     setView("chat");
     setActiveConv(conv);
     if (conv) {
@@ -160,7 +161,7 @@ function App() {
     }
   }
 
-  async function startDM(otherUserId) {
+  async function startDM(otherUserId: number) {
     const conv = await createConversation("dm", [otherUserId]);
     setConversations((prev) => {
       const exists = prev.find((c) => c.id === conv.id);
@@ -171,7 +172,7 @@ function App() {
     setView("chat");
   }
 
-  async function handleDeleteConversation(convId) {
+  async function handleDeleteConversation(convId: number) {
     try {
       await deleteConversation(convId);
       setConversations((prev) => prev.filter((c) => c.id !== convId));
@@ -181,20 +182,28 @@ function App() {
         setView("chat");
       }
       getSocket()?.emit("leave_conversation", convId);
-    } catch {}
+    } catch { /* ignore */ }
   }
 
-  async function handleSend(e) {
+  async function handleSend(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!activeConv) return;
     const fileInput = fileInputRef.current;
     const file = fileInput?.files?.[0];
-    const textInput = e.target.querySelector("input[type=text]");
+    const textInput = e.currentTarget.querySelector<HTMLInputElement>("input[type=text]");
     const content = textInput?.value.trim() || "";
     if (!content && !file) return;
     if (sending) return;
     setSending(true);
     if (textInput) textInput.value = "";
-    let messageData = { conversationId: activeConv.id, content };
+    let messageData: {
+      conversationId: number;
+      content: string;
+      fileUrl?: string;
+      fileName?: string;
+      fileType?: string;
+      fileSize?: number;
+    } = { conversationId: activeConv.id, content };
     if (file) {
       try {
         const uploaded = await uploadFile(file);
@@ -205,24 +214,24 @@ function App() {
           fileType: uploaded.type,
           fileSize: uploaded.size,
         };
-      } catch (err) {
+      } catch {
         setSending(false);
         return;
       }
-      fileInput.value = "";
+      fileInput!.value = "";
     }
     getSocket()?.emit("send_message", messageData);
     setSelectedFile(null);
     setSending(false);
   }
 
-  function conversationName(conv) {
+  function conversationName(conv: Conversation): string {
     if (conv.type === "group" && conv.name) return conv.name;
     const other = conv.participants?.find((p) => p.user.id !== user?.id);
     return other?.user?.username || t("chat.unknown");
   }
 
-  function otherParticipant(conv) {
+  function otherParticipant(conv: Conversation) {
     return conv.participants?.find((p) => p.user.id !== user?.id)?.user;
   }
 
@@ -296,7 +305,7 @@ function App() {
                   {c.messages?.[0]?.content?.slice(0, 30) || ""}
                 </div>
               </div>
-              <div className={`online-dot ${onlineUsers.has(otherParticipant(c)?.id) ? "online" : ""}`} />
+              <div className={`online-dot ${onlineUsers.has(otherParticipant(c)?.id ?? 0) ? "online" : ""}`} />
               <button
                 className="conv-delete"
                 onClick={(e) => { e.stopPropagation(); setConfirmDeleteConvId(c.id); }}
@@ -370,31 +379,14 @@ function App() {
                   {m.fileUrl && (
                     <div className="msg-file">
                       {m.fileType?.startsWith("image/") ? (
-                        <img src={m.fileUrl} alt={m.fileName} className="msg-image" onError={(e) => { e.target.style.display = "none"; }} />
+                        <img src={m.fileUrl} alt={m.fileName ?? ""} className="msg-image" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                       ) : m.fileType?.startsWith("video/") ? (
                         <video src={m.fileUrl} controls className="msg-video" />
                       ) : (
                         <a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="msg-file-link" download={m.fileName}>
                           📄 {m.fileName}
                         </a>
-        )}
-        {confirmDeleteConvId && (
-          <div className="confirm-overlay" onClick={() => setConfirmDeleteConvId(null)}>
-            <div className="confirm-popup" onClick={(e) => e.stopPropagation()}>
-              <div className="confirm-popup-header">
-                <h3>{t("chat.confirm_delete_title")}</h3>
-                <button className="close-btn" onClick={() => setConfirmDeleteConvId(null)}>×</button>
-              </div>
-              <div className="confirm-popup-body">
-                <p>{t("chat.confirm_delete_body")}</p>
-              </div>
-              <div className="confirm-popup-buttons">
-                <button className="confirm-cancel" onClick={() => setConfirmDeleteConvId(null)}>{t("chat.cancel")}</button>
-                <button className="confirm-delete" onClick={() => { handleDeleteConversation(confirmDeleteConvId); setConfirmDeleteConvId(null); }}>{t("chat.delete")}</button>
-              </div>
-            </div>
-          </div>
-        )}
+                      )}
                     </div>
                   )}
                   {m.content && <div className="msg-content">{m.content}</div>}
@@ -409,7 +401,7 @@ function App() {
             </div>
             <form className="msg-form" onSubmit={handleSend}>
               <input type="text" placeholder={selectedFile ? `📎 ${selectedFile.name}` : t("chat.message_placeholder")} autoFocus />
-              <input type="file" ref={fileInputRef} className="file-input" onChange={(e) => setSelectedFile(e.target.files[0] || null)} />
+              <input type="file" ref={fileInputRef} className="file-input" onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)} />
               <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title={t("chat.attach_file")}>📎</button>
               {selectedFile && (
                 <button type="button" className="attach-btn clear-file" onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} title={t("chat.remove_file")}>×</button>
@@ -419,6 +411,23 @@ function App() {
           </>
         )}
       </main>
+      {confirmDeleteConvId && (
+        <div className="confirm-overlay" onClick={() => setConfirmDeleteConvId(null)}>
+          <div className="confirm-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-popup-header">
+              <h3>{t("chat.confirm_delete_title")}</h3>
+              <button className="close-btn" onClick={() => setConfirmDeleteConvId(null)}>×</button>
+            </div>
+            <div className="confirm-popup-body">
+              <p>{t("chat.confirm_delete_body")}</p>
+            </div>
+            <div className="confirm-popup-buttons">
+              <button className="confirm-cancel" onClick={() => setConfirmDeleteConvId(null)}>{t("chat.cancel")}</button>
+              <button className="confirm-delete" onClick={() => { handleDeleteConversation(confirmDeleteConvId); setConfirmDeleteConvId(null); }}>{t("chat.delete")}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
