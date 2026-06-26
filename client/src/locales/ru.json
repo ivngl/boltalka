@@ -31,6 +31,8 @@
   "chat.unknown": "Неизвестный",
   "chat.online": "в сети",
   "chat.new_message": "Новое сообщение",
+  "chat.delete_message": "Удалить",
+  "chat.message_deleted": "Сообщение удалено",
   "profile.title": "Профиль",
   "profile.back": "← Назад",
   "profile.username": "Имя пользователя",

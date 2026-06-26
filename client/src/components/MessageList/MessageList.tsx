@@ -8,9 +8,10 @@ interface MessageListProps {
   messages: Message[];
   currentUserId: number;
   typingUsers: Record<number, boolean>;
+  onDeleteMessage: (messageId: number) => void;
 }
 
-export default function MessageList({ messages, currentUserId, typingUsers }: MessageListProps) {
+export default function MessageList({ messages, currentUserId, typingUsers, onDeleteMessage }: MessageListProps) {
   const { t } = useTranslation();
   const msgEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -21,7 +22,7 @@ export default function MessageList({ messages, currentUserId, typingUsers }: Me
   return (
     <div className="messages">
       {messages.map((m) => (
-        <MessageBubble key={m.id} message={m} isMine={m.senderId === currentUserId} />
+        <MessageBubble key={m.id} message={m} isMine={m.senderId === currentUserId} onDelete={onDeleteMessage} />
       ))}
       {Object.entries(typingUsers).filter(([, v]) => v).length > 0 && (
         <div className="typing-indicator">{t("chat.typing")}</div>

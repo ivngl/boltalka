@@ -12,6 +12,7 @@ export interface Message {
   senderId: number;
   sender?: { id: number; username: string };
   createdAt: string;
+  deletedAt?: string;
   fileUrl?: string;
   fileName?: string;
   fileType?: string;

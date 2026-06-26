@@ -25,6 +25,7 @@ function App() {
   const [typingUsers, setTypingUsers] = useState<Record<number, boolean>>({});
   const [sending, setSending] = useState(false);
   const [confirmDeleteConvId, setConfirmDeleteConvId] = useState<number | null>(null);
+  const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<number | null>(null);
 
   const [view, setView] = useState<ViewState>("auth");
   const activeConvRef = useRef<Conversation | null>(null);
@@ -89,6 +90,9 @@ function App() {
     s.on("stop_typing", ({ userId, conversationId }: { userId: number; conversationId: number }) => {
       if (conversationId !== activeConv?.id) return;
       setTypingUsers((prev) => ({ ...prev, [userId]: false }));
+    });
+    s.on("message_deleted", ({ messageId }: { messageId: number }) => {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
     });
   }
 
@@ -209,6 +213,16 @@ function App() {
     setSending(false);
   }
 
+  function handleDeleteMessage(messageId: number) {
+    setConfirmDeleteMsgId(messageId);
+  }
+
+  function handleConfirmDeleteMessage(messageId: number) {
+    if (!activeConv) return;
+    getSocket()?.emit("delete_message", { messageId, conversationId: activeConv.id });
+    setConfirmDeleteMsgId(null);
+  }
+
   function chatBack() {
     setActiveConv(null);
     setMessages([]);
@@ -263,6 +277,7 @@ function App() {
               messages={messages}
               currentUserId={user.id}
               typingUsers={typingUsers}
+              onDeleteMessage={handleDeleteMessage}
             />
             <MessageForm
               sending={sending}
@@ -277,6 +292,23 @@ function App() {
           onConfirm={(convId) => { handleDeleteConversation(convId); setConfirmDeleteConvId(null); }}
           onCancel={() => setConfirmDeleteConvId(null)}
         />
+      )}
+      {confirmDeleteMsgId && (
+        <div className="confirm-overlay" onClick={() => setConfirmDeleteMsgId(null)}>
+          <div className="confirm-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-popup-header">
+              <h3>{t("chat.delete_message")}</h3>
+              <button className="close-btn" onClick={() => setConfirmDeleteMsgId(null)}>×</button>
+            </div>
+            <div className="confirm-popup-body">
+              <p>{t("chat.confirm_delete_body")}</p>
+            </div>
+            <div className="confirm-popup-buttons">
+              <button className="confirm-cancel" onClick={() => setConfirmDeleteMsgId(null)}>{t("chat.cancel")}</button>
+              <button className="confirm-delete" onClick={() => handleConfirmDeleteMessage(confirmDeleteMsgId)}>{t("chat.delete")}</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

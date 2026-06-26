@@ -1,14 +1,29 @@
+import { useTranslation } from "react-i18next";
 import type { Message } from "../../types.ts";
 import "./MessageBubble.css";
 
 interface MessageBubbleProps {
   message: Message;
   isMine: boolean;
+  onDelete: (messageId: number) => void;
 }
 
-export default function MessageBubble({ message, isMine }: MessageBubbleProps) {
+export default function MessageBubble({ message, isMine, onDelete }: MessageBubbleProps) {
+  const { t } = useTranslation();
+
+  if (message.deletedAt) {
+    return (
+      <div className={`msg deleted ${isMine ? "mine" : ""}`}>
+        <div className="msg-deleted-label">{t("chat.message_deleted")}</div>
+        <div className="msg-time">
+          {new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div key={message.id} className={`msg ${isMine ? "mine" : ""}`}>
+    <div className={`msg ${isMine ? "mine" : ""}`}>
       {!isMine && <div className="msg-sender">{message.sender?.username}</div>}
       {message.fileUrl && (
         <div className="msg-file">
@@ -27,6 +42,11 @@ export default function MessageBubble({ message, isMine }: MessageBubbleProps) {
       <div className="msg-time">
         {new Date(message.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
       </div>
+      {isMine && (
+        <button className="msg-delete-btn" onClick={() => onDelete(message.id)} title={t("chat.delete_message")}>
+          ×
+        </button>
+      )}
     </div>
   );
 }

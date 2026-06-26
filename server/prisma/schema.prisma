@@ -55,6 +55,7 @@ model Message {
   conversationId String
   status         String   @default("sent")
   createdAt      DateTime @default(now())
+  deletedAt      DateTime?
 
   sender       User         @relation(fields: [senderId], references: [id])
   conversation Conversation @relation(fields: [conversationId], references: [id])

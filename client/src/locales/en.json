@@ -31,6 +31,8 @@
   "chat.unknown": "Unknown",
   "chat.online": "online",
   "chat.new_message": "New message",
+  "chat.delete_message": "Delete",
+  "chat.message_deleted": "Message deleted",
   "profile.title": "Profile",
   "profile.back": "← Back",
   "profile.username": "Username",

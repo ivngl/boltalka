@@ -179,6 +179,25 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("delete_message", async ({ messageId, conversationId }, ack) => {
+    try {
+      const message = await prisma.message.findUnique({ where: { id: messageId } });
+      if (!message) return ack?.({ success: false, error: "Message not found" });
+      if (message.senderId !== userId) return ack?.({ success: false, error: "Not your message" });
+      if (message.conversationId !== conversationId) return ack?.({ success: false, error: "Conversation mismatch" });
+
+      await prisma.message.update({
+        where: { id: messageId },
+        data: { deletedAt: new Date() },
+      });
+
+      io.to(conversationId).emit("message_deleted", { messageId, conversationId });
+      if (ack) ack({ success: true });
+    } catch (err) {
+      if (ack) ack({ success: false, error: err.message });
+    }
+  });
+
   socket.on("disconnect", () => {
     userSockets.delete(userId);
     io.emit("presence", { userId, online: false });
