@@ -1,5 +1,5 @@
 install:
-	cd client && npm install && cd ../server && npm install
+	npm install && cd client && npm install && cd ../server && npm install
 
 client:
 	cd client && npm run dev
@@ -18,10 +18,11 @@ seed:
 
 dev:
 	@echo "Starting server and client..."
-	@trap 'kill 0' EXIT; \
-		make -s server & \
-		make -s client & \
-		wait
+	@npm run dev
+
+dev-sqlite:
+	@echo "Starting server (SQLite) and client..."
+	@npm run dev:sqlite
 
 lint:
 	cd client && npm run lint
