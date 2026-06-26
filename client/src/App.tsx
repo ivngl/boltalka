@@ -1,16 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import i18n from "./i18n.ts";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.ts";
 import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.ts";
-import Avatar from "./Avatar.tsx";
-import Profile from "./Profile.tsx";
-import { useTheme } from "./ThemeContext.tsx";
+import Profile from "./components/Profile/Profile.tsx";
+import AuthScreen from "./components/AuthScreen/AuthScreen.tsx";
+import Sidebar from "./components/Sidebar/Sidebar.tsx";
+import ChatHeader from "./components/ChatHeader/ChatHeader.tsx";
+import MessageList from "./components/MessageList/MessageList.tsx";
+import MessageForm from "./components/MessageForm/MessageForm.tsx";
+import ConfirmDeleteModal from "./components/ConfirmDeleteModal/ConfirmDeleteModal.tsx";
+import { conversationName } from "./components/helpers.ts";
 import type { User, Message, Conversation, ViewState } from "./types.ts";
 import "./App.css";
 
 function App() {
-  const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,16 +23,10 @@ function App() {
   const [users, setUsers] = useState<User[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
   const [typingUsers, setTypingUsers] = useState<Record<number, boolean>>({});
-  const [chatSearch, setChatSearch] = useState("");
-  const [newChatOpen, setNewChatOpen] = useState(false);
-  const [newChatSearch, setNewChatSearch] = useState("");
   const [sending, setSending] = useState(false);
   const [confirmDeleteConvId, setConfirmDeleteConvId] = useState<number | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [view, setView] = useState<ViewState>("auth");
-  const msgEndRef = useRef<HTMLDivElement | null>(null);
   const activeConvRef = useRef<Conversation | null>(null);
   const conversationsRef = useRef<Conversation[]>([]);
 
@@ -144,11 +141,6 @@ function App() {
     setView("auth");
   }
 
-  function openProfile() {
-    setView("profile");
-    setActiveConv(null);
-  }
-
   function handleUpdateUser(updated: User) {
     setUser((prev) => ({ ...prev, ...updated }));
   }
@@ -185,17 +177,11 @@ function App() {
     } catch { /* ignore */ }
   }
 
-  async function handleSend(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSend(text: string, file: File | null) {
     if (!activeConv) return;
-    const fileInput = fileInputRef.current;
-    const file = fileInput?.files?.[0];
-    const textInput = e.currentTarget.querySelector<HTMLInputElement>("input[type=text]");
-    const content = textInput?.value.trim() || "";
-    if (!content && !file) return;
+    if (!text && !file) return;
     if (sending) return;
     setSending(true);
-    if (textInput) textInput.value = "";
     let messageData: {
       conversationId: number;
       content: string;
@@ -203,7 +189,7 @@ function App() {
       fileName?: string;
       fileType?: string;
       fileSize?: number;
-    } = { conversationId: activeConv.id, content };
+    } = { conversationId: activeConv.id, content: text };
     if (file) {
       try {
         const uploaded = await uploadFile(file);
@@ -218,215 +204,79 @@ function App() {
         setSending(false);
         return;
       }
-      fileInput!.value = "";
     }
     getSocket()?.emit("send_message", messageData);
-    setSelectedFile(null);
     setSending(false);
   }
 
-  function conversationName(conv: Conversation): string {
-    if (conv.type === "group" && conv.name) return conv.name;
-    const other = conv.participants?.find((p) => p.user.id !== user?.id);
-    return other?.user?.username || t("chat.unknown");
+  function chatBack() {
+    setActiveConv(null);
+    setMessages([]);
   }
 
-  function otherParticipant(conv: Conversation) {
-    return conv.participants?.find((p) => p.user.id !== user?.id)?.user;
+  function openProfileFromSidebar() {
+    setView("profile");
+    setActiveConv(null);
   }
 
   if (loading) return <div className="loading">{t("app.loading")}</div>;
+
   if (!user) {
     return (
-      <div className="auth-screen">
-        <div className="auth-card">
-          <h1>{t("app.title")}</h1>
-          {view === "auth" && (
-            <div className="auth-tabs">
-              <form onSubmit={handleLogin}>
-                <h2>{t("auth.login.title")}</h2>
-                <input name="email" type="email" placeholder={t("auth.login.email")} required />
-                <input name="password" type="password" placeholder={t("auth.login.password")} required />
-                <button type="submit">{t("auth.login.submit")}</button>
-              </form>
-              <p className="switch" onClick={() => setView("register")}>{t("auth.login.switch")}</p>
-            </div>
-          )}
-          {view === "register" && (
-            <div className="auth-tabs">
-              <form onSubmit={handleRegister}>
-                <h2>{t("auth.register.title")}</h2>
-                <input name="username" placeholder={t("auth.register.username")} required />
-                <input name="email" type="email" placeholder={t("auth.register.email")} required />
-                <input name="password" type="password" placeholder={t("auth.register.password")} required />
-                <button type="submit">{t("auth.register.submit")}</button>
-              </form>
-              <p className="switch" onClick={() => setView("auth")}>{t("auth.register.switch")}</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <AuthScreen
+        view={view as "auth" | "register"}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        setView={setView}
+      />
     );
   }
 
+  const activeConvName = activeConv ? conversationName(activeConv, user.id) : "";
+
   return (
     <div className={`app ${activeConv || view === "profile" ? "show-chat" : "show-sidebar"}`}>
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-header-left">
-            <div onClick={openProfile} className="header-avatar">
-              <Avatar username={user.username} size={28} />
-            </div>
-          </div>
-          <div className="sidebar-header-right">
-            <button onClick={logout} className="logout-btn">{t("chat.logout")}</button>
-          </div>
-        </div>
-        <div className="sidebar-search">
-          <input
-            type="text"
-            placeholder={t("chat.search")}
-            value={chatSearch}
-            onChange={(e) => setChatSearch(e.target.value)}
-          />
-          <button className="new-chat-btn" onClick={() => setNewChatOpen(true)}>+</button>
-        </div>
-        <div className="conv-list">
-          {conversations.filter((c) => conversationName(c).toLowerCase().includes(chatSearch.toLowerCase())).map((c) => (
-            <div
-              key={c.id}
-              className={`conv-item ${activeConv?.id === c.id ? "active" : ""}`}
-              onClick={() => selectConversation(c)}
-            >
-              <Avatar username={conversationName(c)} />
-              <div className="conv-info">
-                <div className="conv-name">{conversationName(c)}</div>
-                <div className="conv-preview">
-                  {c.messages?.[0]?.content?.slice(0, 30) || ""}
-                </div>
-              </div>
-              <div className={`online-dot ${onlineUsers.has(otherParticipant(c)?.id ?? 0) ? "online" : ""}`} />
-              <button
-                className="conv-delete"
-                onClick={(e) => { e.stopPropagation(); setConfirmDeleteConvId(c.id); }}
-                title={t("chat.delete_chat")}
-              >×</button>
-            </div>
-          ))}
-        </div>
-        {newChatOpen && (
-          <div className="new-chat-overlay" onClick={() => { setNewChatOpen(false); setNewChatSearch(""); }}>
-            <div className="new-chat-popup" onClick={(e) => e.stopPropagation()}>
-              <div className="new-chat-popup-header">
-                <h3>{t("chat.new_chat")}</h3>
-                <button className="close-btn" onClick={() => { setNewChatOpen(false); setNewChatSearch(""); }}>×</button>
-              </div>
-              <input
-                className="new-chat-popup-search"
-                type="text"
-                placeholder={t("chat.search_users")}
-                value={newChatSearch}
-                onChange={(e) => setNewChatSearch(e.target.value)}
-                autoFocus
-              />
-              <div className="new-chat-popup-list">
-                {users
-                  .filter((u) => u.id !== user.id)
-                  .filter((u) => u.username.toLowerCase().includes(newChatSearch.toLowerCase()))
-                  .map((u) => (
-                    <div key={u.id} className="user-item" onClick={() => { startDM(u.id); setNewChatOpen(false); setNewChatSearch(""); }}>
-                      <Avatar username={u.username} size={28} />
-                      <span>{u.username}</span>
-                      <span className={`online-dot ${onlineUsers.has(u.id) ? "online" : ""}`} />
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </aside>
+      <Sidebar
+        user={user}
+        conversations={conversations}
+        activeConv={activeConv}
+        onlineUsers={onlineUsers}
+        users={users}
+        onLogout={logout}
+        onOpenProfile={openProfileFromSidebar}
+        onSelectConversation={selectConversation}
+        onStartDM={startDM}
+        onDeleteRequest={(convId) => setConfirmDeleteConvId(convId)}
+      />
       <main className="chat-area">
-        <div className="chat-header">
-          <div className="chat-header-left">
-            {activeConv && (
-              <>
-                <button className="back-btn-mobile" onClick={() => { setActiveConv(null); setMessages([]); }}>←</button>
-                <Avatar username={conversationName(activeConv)} size={32} />
-                <span className="chat-conv-name">{conversationName(activeConv)}</span>
-              </>
-            )}
-          </div>
-          <div className="chat-header-center">
-            <span className="chat-brand">{t("app.title")}</span>
-          </div>
-          <div className="chat-header-right">
-            <button onClick={toggleTheme} className="theme-btn" title="Toggle theme">
-              {theme === "light" ? "🌙" : "☀️"}
-            </button>
-            <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="lang-btn">{i18n.language === "ru" ? "EN" : "RU"}</button>
-          </div>
-        </div>
+        <ChatHeader
+          activeConvName={activeConvName}
+          onBack={chatBack}
+        />
         {view === "profile" ? (
           <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
         ) : !activeConv ? (
           <div className="empty-state">{t("chat.empty")}</div>
         ) : (
           <>
-            <div className="messages" ref={msgEndRef}>
-              {messages.map((m) => (
-                <div key={m.id} className={`msg ${m.senderId === user.id ? "mine" : ""}`}>
-                  {m.senderId !== user.id && <div className="msg-sender">{m.sender?.username}</div>}
-                  {m.fileUrl && (
-                    <div className="msg-file">
-                      {m.fileType?.startsWith("image/") ? (
-                        <img src={m.fileUrl} alt={m.fileName ?? ""} className="msg-image" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                      ) : m.fileType?.startsWith("video/") ? (
-                        <video src={m.fileUrl} controls className="msg-video" />
-                      ) : (
-                        <a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="msg-file-link" download={m.fileName}>
-                          📄 {m.fileName}
-                        </a>
-                      )}
-                    </div>
-                  )}
-                  {m.content && <div className="msg-content">{m.content}</div>}
-                  <div className="msg-time">
-                    {new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                </div>
-              ))}
-              {Object.entries(typingUsers).filter(([, v]) => v).length > 0 && (
-                <div className="typing-indicator">{t("chat.typing")}</div>
-              )}
-            </div>
-            <form className="msg-form" onSubmit={handleSend}>
-              <input type="text" placeholder={selectedFile ? `📎 ${selectedFile.name}` : t("chat.message_placeholder")} autoFocus />
-              <input type="file" ref={fileInputRef} className="file-input" onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)} />
-              <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title={t("chat.attach_file")}>📎</button>
-              {selectedFile && (
-                <button type="button" className="attach-btn clear-file" onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} title={t("chat.remove_file")}>×</button>
-              )}
-              <button type="submit" disabled={sending}>{sending ? t("chat.sending") : t("chat.send")}</button>
-            </form>
+            <MessageList
+              messages={messages}
+              currentUserId={user.id}
+              typingUsers={typingUsers}
+            />
+            <MessageForm
+              sending={sending}
+              onSend={handleSend}
+            />
           </>
         )}
       </main>
       {confirmDeleteConvId && (
-        <div className="confirm-overlay" onClick={() => setConfirmDeleteConvId(null)}>
-          <div className="confirm-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="confirm-popup-header">
-              <h3>{t("chat.confirm_delete_title")}</h3>
-              <button className="close-btn" onClick={() => setConfirmDeleteConvId(null)}>×</button>
-            </div>
-            <div className="confirm-popup-body">
-              <p>{t("chat.confirm_delete_body")}</p>
-            </div>
-            <div className="confirm-popup-buttons">
-              <button className="confirm-cancel" onClick={() => setConfirmDeleteConvId(null)}>{t("chat.cancel")}</button>
-              <button className="confirm-delete" onClick={() => { handleDeleteConversation(confirmDeleteConvId); setConfirmDeleteConvId(null); }}>{t("chat.delete")}</button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDeleteModal
+          convId={confirmDeleteConvId}
+          onConfirm={(convId) => { handleDeleteConversation(convId); setConfirmDeleteConvId(null); }}
+          onCancel={() => setConfirmDeleteConvId(null)}
+        />
       )}
     </div>
   );

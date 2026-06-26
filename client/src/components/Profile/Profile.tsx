@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Avatar from "./Avatar.tsx";
-import { updateProfile } from "./api.ts";
-import type { User } from "./types.ts";
+import Avatar from "../Avatar/Avatar.tsx";
+import { updateProfile } from "../../api.ts";
+import type { User } from "../../types.ts";
 import type { AxiosError } from "axios";
+import "./Profile.css";
 
 interface ProfileProps {
   user: User;

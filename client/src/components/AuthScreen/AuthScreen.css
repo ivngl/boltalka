@@ -1,0 +1,74 @@
+.auth-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-primary);
+}
+
+.auth-card {
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 360px;
+}
+
+.auth-card h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--accent-blue);
+  font-style: italic;
+}
+
+.auth-tabs form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-tabs h2 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.auth-tabs input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  border: none;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.auth-tabs input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
+.auth-tabs button {
+  padding: 0.6rem;
+  background: var(--accent-blue);
+  color: var(--text-white);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.auth-tabs button:hover {
+  background: var(--accent-blue-hover);
+}
+
+.switch {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--accent-blue);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    width: calc(100% - 2rem);
+    padding: 1.5rem 1rem;
+  }
+}

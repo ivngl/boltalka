@@ -1,0 +1,23 @@
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: var(--text-primary);
+}
+
+.online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-avatar);
+  flex-shrink: 0;
+}
+
+.online-dot.online {
+  background: var(--accent-green);
+}

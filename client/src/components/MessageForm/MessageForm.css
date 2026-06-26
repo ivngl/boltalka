@@ -1,0 +1,83 @@
+.msg-form {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.msg-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: none;
+  outline: none;
+}
+
+.msg-form input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
+.msg-form button {
+  padding: 0.6rem 1.2rem;
+  background: var(--accent-blue);
+  color: var(--text-white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.msg-form button:hover {
+  background: var(--accent-blue-hover);
+}
+
+.file-input {
+  display: none;
+}
+
+.attach-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  display: flex;
+  align-items: center;
+}
+
+.attach-btn:hover {
+  color: var(--text-primary);
+}
+
+.clear-file:hover {
+  color: var(--accent-red);
+}
+
+@media (max-width: 768px) {
+  .msg-form {
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 480px) {
+  .msg-form {
+    padding: 0.75rem 0.75rem 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.3rem;
+  }
+
+  .msg-form button {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}

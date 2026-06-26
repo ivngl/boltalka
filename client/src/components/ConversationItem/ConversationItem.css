@@ -1,0 +1,53 @@
+.conv-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.conv-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.conv-item.active {
+  background: var(--bg-primary);
+}
+
+.conv-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.conv-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.conv-preview {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-delete {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.conv-item:hover .conv-delete {
+  opacity: 1;
+}
+
+.conv-delete:hover {
+  color: var(--accent-red);
+}
