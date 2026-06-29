@@ -27,6 +27,7 @@ export function conversationRoutes(prisma) {
           },
         },
         messages: {
+          where: { deletedAt: null },
           orderBy: { createdAt: "desc" },
           take: 1,
           include: {
@@ -42,7 +43,7 @@ export function conversationRoutes(prisma) {
   router.get("/:id/messages", auth, async (req, res) => {
     const { id } = req.params;
     const { before, limit = 50 } = req.query;
-    const where = { conversationId: id };
+    const where = { conversationId: id, deletedAt: null };
     if (before) {
       where.createdAt = { lt: new Date(before) };
     }

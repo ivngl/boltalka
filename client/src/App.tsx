@@ -219,7 +219,9 @@ function App() {
 
   function handleConfirmDeleteMessage(messageId: number) {
     if (!activeConv) return;
-    getSocket()?.emit("delete_message", { messageId, conversationId: activeConv.id });
+    getSocket()?.emit("delete_message", { messageId, conversationId: activeConv.id }, (res) => {
+      if (!res.success) console.error("Delete failed:", res.error);
+    });
     setConfirmDeleteMsgId(null);
   }
 

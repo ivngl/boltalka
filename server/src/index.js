@@ -174,7 +174,7 @@ io.on("connection", (socket) => {
       where: { conversationId, senderId: { not: userId }, status: "sent" },
       data: { status: "read" },
     });
-    io.to(`conversation:${conversationId}`).emit("messages_read", {
+    io.to(conversationId).emit("messages_read", {
       conversationId, userId,
     });
   });
