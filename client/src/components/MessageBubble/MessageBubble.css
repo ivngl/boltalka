@@ -97,8 +97,8 @@
 }
 
 .msg.mine .msg-delete-btn {
-  right: auto;
-  left: 0.2rem;
+  right: 0.2rem;
+  left: auto;
 }
 
 .msg:hover .msg-delete-btn {
