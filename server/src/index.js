@@ -23,7 +23,7 @@ const httpServer = createServer(app);
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 
-app.use(cors());
+app.use(cors({ origin: process.env.CLIENT_URL || true }));
 app.use(express.json());
 
 const uploadsDir = path.resolve(__dirname, "../uploads");
@@ -93,7 +93,7 @@ app.get("/{*path}", (req, res) => {
   res.sendFile(path.join(clientDist, "index.html"));
 });
 
-const io = new Server(httpServer, { cors: { origin: "*" } });
+const io = new Server(httpServer, { cors: { origin: process.env.CLIENT_URL || "*" } });
 
 if (pubClient && subClient) {
   try {
