@@ -5,6 +5,8 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { createServer } from "node:http";
 import multer from "multer";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { Server } from "socket.io";
@@ -21,7 +23,40 @@ const app = express();
 app.set("trust proxy", 1);
 const httpServer = createServer(app);
 
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     tags: [Health]
+ *     summary: Health check
+ *     responses:
+ *       200:
+ *         description: Server is healthy
+ */
 app.get("/health", (req, res) => res.json({ ok: true }));
+
+const specs = swaggerJsdoc({
+  definition: {
+    openapi: "3.0.0",
+    info: { title: "Boltalka API", version: "1.0.0" },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+  },
+  apis: [
+    path.join(__dirname, "routes/*.js"),
+    path.join(__dirname, "index.js"),
+  ],
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+app.get("/api/openapi.json", (req, res) => res.json(specs));
 
 app.use(cors({ origin: process.env.CLIENT_URL || true }));
 app.use(express.json());
@@ -52,6 +87,32 @@ function auth(req, res, next) {
 
 app.use("/uploads", express.static(uploadsDir));
 
+/**
+ * @openapi
+ * /upload:
+ *   post:
+ *     tags: [Upload]
+ *     summary: Upload a file
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: File uploaded
+ *       400:
+ *         description: No file provided
+ *       401:
+ *         description: Unauthorized
+ */
 app.post("/upload", auth, upload.single("file"), (req, res) => {
   const file = req.file;
   if (!file) return res.status(400).json({ error: "No file provided" });
@@ -84,15 +145,6 @@ try {
 
 process.on("unhandledRejection", () => {});
 
-app.use("/auth", authRoutes(prisma));
-app.use("/conversations", conversationRoutes(prisma));
-
-const clientDist = path.resolve(__dirname, "../../client/dist");
-app.use(express.static(clientDist));
-app.get("/{*path}", (req, res) => {
-  res.sendFile(path.join(clientDist, "index.html"));
-});
-
 const io = new Server(httpServer, { cors: { origin: process.env.CLIENT_URL || "*" } });
 
 if (pubClient && subClient) {
@@ -102,6 +154,15 @@ if (pubClient && subClient) {
 }
 
 const userSockets = new Map();
+
+app.use("/auth", authRoutes(prisma));
+app.use("/conversations", conversationRoutes(prisma, io));
+
+const clientDist = path.resolve(__dirname, "../../client/dist");
+app.use(express.static(clientDist));
+app.get("/{*path}", (req, res) => {
+  res.sendFile(path.join(clientDist, "index.html"));
+});
 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;

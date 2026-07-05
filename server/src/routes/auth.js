@@ -16,6 +16,34 @@ function auth(req, res, next) {
 export function authRoutes(prisma) {
   const router = Router();
 
+  /**
+   * @openapi
+   * /auth/register:
+   *   post:
+   *     tags: [Auth]
+   *     summary: Register a new user
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required: [username, email, password]
+   *             properties:
+   *               username:
+   *                 type: string
+   *               email:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *     responses:
+   *       201:
+   *         description: User created
+   *       400:
+   *         description: Missing fields
+   *       409:
+   *         description: Username or email taken
+   */
   router.post("/register", async (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -38,6 +66,30 @@ export function authRoutes(prisma) {
     res.status(201).json({ user, token });
   });
 
+  /**
+   * @openapi
+   * /auth/login:
+   *   post:
+   *     tags: [Auth]
+   *     summary: Log in with email and password
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required: [email, password]
+   *             properties:
+   *               email:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Logged in successfully
+   *       401:
+   *         description: Invalid credentials
+   */
   router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
@@ -55,6 +107,22 @@ export function authRoutes(prisma) {
     });
   });
 
+  /**
+   * @openapi
+   * /auth/me:
+   *   get:
+   *     tags: [Auth]
+   *     summary: Get the currently authenticated user
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Current user data
+   *       401:
+   *         description: Unauthorized
+   *       404:
+   *         description: User not found
+   */
   router.get("/me", auth, async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
@@ -64,6 +132,41 @@ export function authRoutes(prisma) {
     res.json(user);
   });
 
+  /**
+   * @openapi
+   * /auth/profile:
+   *   put:
+   *     tags: [Auth]
+   *     summary: Update user profile
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               username:
+   *                 type: string
+   *               email:
+   *                 type: string
+   *               currentPassword:
+   *                 type: string
+   *               newPassword:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Profile updated
+   *       400:
+   *         description: Bad request
+   *       401:
+   *         description: Unauthorized
+   *       404:
+   *         description: User not found
+   *       409:
+   *         description: Username or email taken
+   */
   router.put("/profile", auth, async (req, res) => {
     const { username, email, currentPassword, newPassword } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
