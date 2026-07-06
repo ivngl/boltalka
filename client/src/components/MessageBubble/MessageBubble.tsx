@@ -10,6 +10,7 @@ interface MessageBubbleProps {
 
 export default function MessageBubble({ message, isMine, onDelete }: MessageBubbleProps) {
   const { t } = useTranslation();
+  const secureUrl = message.fileUrl?.replace(/^http:\/\//i, "https://");
 
   if (message.deletedAt) {
     return (
@@ -28,11 +29,11 @@ export default function MessageBubble({ message, isMine, onDelete }: MessageBubb
       {message.fileUrl && (
         <div className="msg-file">
           {message.fileType?.startsWith("image/") ? (
-            <img src={message.fileUrl} alt={message.fileName ?? ""} className="msg-image" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            <img src={secureUrl} alt={message.fileName ?? ""} className="msg-image" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
           ) : message.fileType?.startsWith("video/") ? (
-            <video src={message.fileUrl} controls className="msg-video" />
+            <video src={secureUrl} controls className="msg-video" />
           ) : (
-            <a href={message.fileUrl} target="_blank" rel="noopener noreferrer" className="msg-file-link" download={message.fileName}>
+            <a href={secureUrl} target="_blank" rel="noopener noreferrer" className="msg-file-link" download={message.fileName}>
               📄 {message.fileName}
             </a>
           )}
