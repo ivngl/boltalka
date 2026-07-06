@@ -61,10 +61,17 @@
   color: var(--text-primary);
 }
 
+.call-btn-audio {
+  color: var(--bg-green);
+}
+
+.call-btn-video {
+  color: var(--accent-blue);
+}
+
 .call-btn {
   background: none;
   border: none;
-  color: var(--accent-blue);
   font-size: 1rem;
   padding: 0.3rem 0.5rem;
   border-radius: 6px;

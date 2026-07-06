@@ -1,10 +1,11 @@
 import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import type { CallState } from "../../useCall.ts";
+import type { CallState, CallType } from "../../useCall.ts";
 import "./CallOverlay.css";
 
 interface CallOverlayProps {
   callState: CallState;
+  callType: CallType;
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
   peerName: string;
@@ -18,6 +19,7 @@ interface CallOverlayProps {
 
 export default function CallOverlay({
   callState,
+  callType,
   localStream,
   remoteStream,
   peerName,
@@ -28,6 +30,7 @@ export default function CallOverlay({
   onToggleAudio,
   onToggleVideo,
 }: CallOverlayProps) {
+  const isAudio = callType === "audio";
   const { t } = useTranslation();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -61,7 +64,7 @@ export default function CallOverlay({
       <div className="call-overlay-backdrop" />
 
       <div className="call-video-container">
-        {remoteStream && (
+        {remoteStream && !isAudio && (
           <video
             ref={remoteVideoRef}
             className="call-remote-video"
@@ -69,7 +72,7 @@ export default function CallOverlay({
             playsInline
           />
         )}
-        {!remoteStream && (
+        {(!remoteStream || isAudio) && (
           <div className="call-remote-placeholder">
             <div className="call-peer-avatar">
               {peerName.charAt(0).toUpperCase()}
@@ -85,30 +88,32 @@ export default function CallOverlay({
             )}
           </div>
         )}
-        {remoteStream && isConnected && (
+        {remoteStream && isConnected && !isAudio && (
           <div className="call-duration call-duration-overlay">
             {formatDuration(callDuration)}
           </div>
         )}
       </div>
 
-      <div className="call-local-video-wrapper">
-        {localStream ? (
-          <video
-            ref={localVideoRef}
-            className="call-local-video"
-            autoPlay
-            playsInline
-            muted
-          />
-        ) : (
-          <div className="call-local-placeholder">
-            <div className="call-peer-avatar small">
-              {peerName.charAt(0).toUpperCase()}
+      {!isAudio && (
+        <div className="call-local-video-wrapper">
+          {localStream ? (
+            <video
+              ref={localVideoRef}
+              className="call-local-video"
+              autoPlay
+              playsInline
+              muted
+            />
+          ) : (
+            <div className="call-local-placeholder">
+              <div className="call-peer-avatar small">
+                {peerName.charAt(0).toUpperCase()}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {showControls && (
         <div className="call-controls">
@@ -141,22 +146,24 @@ export default function CallOverlay({
             </svg>
           </button>
 
-          <button
-            className={`call-control-btn ${!isVideoEnabled ? "active" : ""}`}
-            onClick={onToggleVideo}
-            title={isVideoEnabled ? t("call.turn_off_video") : t("call.turn_on_video")}
-          >
-            {!isVideoEnabled ? (
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-                <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-              </svg>
-            )}
-          </button>
+          {!isAudio && (
+            <button
+              className={`call-control-btn ${!isVideoEnabled ? "active" : ""}`}
+              onClick={onToggleVideo}
+              title={isVideoEnabled ? t("call.turn_off_video") : t("call.turn_on_video")}
+            >
+              {!isVideoEnabled ? (
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                  <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
       )}
 

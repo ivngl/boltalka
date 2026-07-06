@@ -1,18 +1,22 @@
 import { useTranslation } from "react-i18next";
+import type { CallType } from "../../useCall.ts";
 import "./IncomingCallModal.css";
 
 interface IncomingCallModalProps {
   callerName: string;
+  callType: CallType;
   onAccept: () => void;
   onReject: () => void;
 }
 
 export default function IncomingCallModal({
   callerName,
+  callType,
   onAccept,
   onReject,
 }: IncomingCallModalProps) {
   const { t } = useTranslation();
+  const isAudio = callType === "audio";
 
   return (
     <div className="incoming-call-overlay" onClick={onReject}>
@@ -24,7 +28,9 @@ export default function IncomingCallModal({
           {callerName.charAt(0).toUpperCase()}
         </div>
         <div className="incoming-call-name">{callerName}</div>
-        <div className="incoming-call-label">{t("call.incoming_call")}</div>
+        <div className="incoming-call-label">
+          {isAudio ? t("call.incoming_audio") : t("call.incoming_call")}
+        </div>
         <div className="incoming-call-actions">
           <button
             className="incoming-call-btn incoming-call-decline"

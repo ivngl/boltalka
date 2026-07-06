@@ -38,7 +38,7 @@ function App() {
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
 
   const {
-    callState, localStream, remoteStream, callDuration,
+    callState, callType, localStream, remoteStream, callDuration,
     isAudioMuted, isVideoEnabled, incomingCall,
     startCall, acceptCall, rejectCall, endCall,
     toggleAudio, toggleVideo, setIncomingCall,
@@ -104,8 +104,8 @@ function App() {
     s.on("message_deleted", ({ messageId }: { messageId: number }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     });
-    s.on("incoming_call", ({ callerId, conversationId }: { callerId: number; conversationId: number }) => {
-      setIncomingCall({ callerId: String(callerId), conversationId: String(conversationId) });
+    s.on("incoming_call", ({ callerId, conversationId, callType: incomingCallType }: { callerId: number; conversationId: number; callType: string }) => {
+      setIncomingCall({ callerId: String(callerId), conversationId: String(conversationId), callType: incomingCallType === "audio" ? "audio" : "video" });
     });
   }
 
@@ -251,9 +251,15 @@ function App() {
   const activeConvName = user && activeConv ? conversationName(activeConv, user.id) : "";
   const otherUser = user && activeConv ? otherParticipant(activeConv, user.id) : null;
   const otherUserOnline = otherUser ? onlineUsers.has(otherUser.id) : false;
-  const onStartCall = useCallback(() => {
+  const onStartAudioCall = useCallback(() => {
     if (otherUser && activeConv) {
-      startCall(String(otherUser.id), String(activeConv.id));
+      startCall(String(otherUser.id), String(activeConv.id), "audio");
+    }
+  }, [otherUser, activeConv, startCall]);
+
+  const onStartVideoCall = useCallback(() => {
+    if (otherUser && activeConv) {
+      startCall(String(otherUser.id), String(activeConv.id), "video");
     }
   }, [otherUser, activeConv, startCall]);
 
@@ -288,7 +294,8 @@ function App() {
         <ChatHeader
           activeConvName={activeConvName}
           onBack={chatBack}
-          onStartCall={onStartCall}
+          onStartAudioCall={onStartAudioCall}
+          onStartVideoCall={onStartVideoCall}
           otherUserOnline={otherUserOnline}
           callState={callState}
         />
@@ -338,12 +345,14 @@ function App() {
       {incomingCall && (
         <IncomingCallModal
           callerName={users.find((u) => String(u.id) === incomingCall.callerId)?.username || "Unknown"}
+          callType={incomingCall.callType}
           onAccept={acceptCall}
           onReject={rejectCall}
         />
       )}
       <CallOverlay
         callState={callState}
+        callType={callType}
         localStream={localStream}
         remoteStream={remoteStream}
         peerName={activeConvName}

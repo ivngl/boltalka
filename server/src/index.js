@@ -259,7 +259,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("call_user", ({ calleeId, conversationId }) => {
+  socket.on("call_user", ({ calleeId, conversationId, callType }) => {
     const calleeSocketId = userSockets.get(calleeId);
     if (!calleeSocketId) {
       socket.emit("call_failed", { reason: "User offline" });
@@ -268,6 +268,7 @@ io.on("connection", (socket) => {
     io.to(`user:${calleeId}`).emit("incoming_call", {
       callerId: userId,
       conversationId,
+      callType: callType || "video",
     });
   });
 

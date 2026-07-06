@@ -9,14 +9,17 @@ const PC_CONFIG: RTCConfiguration = {
 };
 
 export type CallState = "idle" | "calling" | "ringing" | "connecting" | "connected" | "ended";
+export type CallType = "audio" | "video";
 
 export interface IncomingCallInfo {
   callerId: string;
   conversationId: string;
+  callType: CallType;
 }
 
 export interface UseCallReturn {
   callState: CallState;
+  callType: CallType;
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
   callDuration: number;
@@ -24,7 +27,7 @@ export interface UseCallReturn {
   isVideoEnabled: boolean;
   incomingCall: IncomingCallInfo | null;
   peerId: string | null;
-  startCall: (calleeId: string, conversationId: string) => Promise<void>;
+  startCall: (calleeId: string, conversationId: string, type?: CallType) => Promise<void>;
   acceptCall: () => Promise<void>;
   rejectCall: () => void;
   endCall: () => void;
@@ -35,6 +38,7 @@ export interface UseCallReturn {
 
 export function useCall(): UseCallReturn {
   const [callState, setCallState] = useState<CallState>("idle");
+  const [callType, setCallType] = useState<CallType>("video");
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [callDuration, setCallDuration] = useState(0);
@@ -48,6 +52,7 @@ export function useCall(): UseCallReturn {
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const peerIdRef = useRef<string | null>(null);
   const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
+  const callTypeRef = useRef<CallType>("video");
 
   function stopTimer() {
     if (callTimerRef.current) {
@@ -78,11 +83,13 @@ export function useCall(): UseCallReturn {
     setRemoteStream(null);
     setCallDuration(0);
     setCallState("idle");
+    setCallType("video");
     setIsAudioMuted(false);
     setIsVideoEnabled(true);
     setPeerId(null);
     peerIdRef.current = null;
     pendingOfferRef.current = null;
+    callTypeRef.current = "video";
   }, []);
 
   const endCall = useCallback(() => {
@@ -97,8 +104,9 @@ export function useCall(): UseCallReturn {
   async function ensurePC() {
     if (pcRef.current) return pcRef.current;
 
+    const video = callTypeRef.current === "video";
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+      video,
       audio: true,
     });
     localStreamRef.current = stream;
@@ -217,7 +225,7 @@ export function useCall(): UseCallReturn {
       if (pc && candidate) {
         try {
           await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch {}
+        } catch { /* ignore */ }
       }
     };
 
@@ -269,14 +277,16 @@ export function useCall(): UseCallReturn {
   }, [callState, cleanup]);
 
   const startCall = useCallback(
-    async (calleeId: string, conversationId: string) => {
+    async (calleeId: string, conversationId: string, type: CallType = "video") => {
       if (callState !== "idle") return;
       peerIdRef.current = calleeId;
       setPeerId(calleeId);
       setCallState("calling");
+      setCallType(type);
+      callTypeRef.current = type;
       setIsAudioMuted(false);
-      setIsVideoEnabled(true);
-      getSocket()?.emit("call_user", { calleeId, conversationId });
+      setIsVideoEnabled(type === "video");
+      getSocket()?.emit("call_user", { calleeId, conversationId, callType: type });
     },
     [callState],
   );
@@ -288,8 +298,10 @@ export function useCall(): UseCallReturn {
     setPeerId(callerId);
     setIncomingCall(null);
     setCallState("connecting");
+    setCallType(incomingCall.callType);
+    callTypeRef.current = incomingCall.callType;
     setIsAudioMuted(false);
-    setIsVideoEnabled(true);
+    setIsVideoEnabled(incomingCall.callType === "video");
 
     getSocket()?.emit("accept_call", { callerId });
 
@@ -341,6 +353,7 @@ export function useCall(): UseCallReturn {
 
   return {
     callState,
+    callType,
     localStream,
     remoteStream,
     callDuration,
