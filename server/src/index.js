@@ -118,7 +118,7 @@ app.post("/upload", auth, upload.single("file"), (req, res) => {
   const file = req.file;
   if (!file) return res.status(400).json({ error: "No file provided" });
   res.json({
-    url: `https://${req.get("host")}/uploads/${file.filename}`,
+    url: `${process.env.URL_PROTOCOL || "https"}://${req.get("host")}/uploads/${file.filename}`,
     name: file.originalname,
     type: file.mimetype,
     size: file.size,
@@ -311,10 +311,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("offer", ({ targetId, sdp }) => {
+    console.log("[offer] from:", userId, "to:", targetId);
     io.to(`user:${targetId}`).emit("offer", { sdp, from: userId });
   });
 
   socket.on("answer", ({ targetId, sdp }) => {
+    console.log("[answer] from:", userId, "to:", targetId);
     io.to(`user:${targetId}`).emit("answer", { sdp, from: userId });
   });
 
