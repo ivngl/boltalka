@@ -12,4 +12,4 @@ RUN npx --prefix server prisma generate --schema=server/prisma/schema.prisma
 
 EXPOSE ${PORT:-8080}
 
-CMD npx --prefix server prisma migrate deploy --schema=server/prisma/schema.prisma && node server/src/index.js
+CMD npm run build --prefix client && npx --prefix server prisma migrate deploy --schema=server/prisma/schema.prisma && node server/src/index.js
