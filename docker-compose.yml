@@ -21,6 +21,24 @@ services:
     networks:
       - boltalka-net
 
+  coturn:
+    image: instrumentisto/coturn:latest
+    command:
+      - -n
+      - --listening-port=3478
+      - --min-port=40000
+      - --max-port=40999
+      - --realm=boltalka
+      - --static-auth-secret=${TURN_SECRET?Required}
+      - --fingerprint
+    ports:
+      - "3478:3478"
+      - "3478:3478/udp"
+      - "40000-40999:40000-40999/udp"
+    restart: unless-stopped
+    networks:
+      - boltalka-net
+
   app:
     build: .
     depends_on:
@@ -33,9 +51,8 @@ services:
       JWT_SECRET: ${JWT_SECRET?Required}
       REDIS_URL: redis://redis:6379
       PORT: 4000
-      VITE_TURN_URL: ${VITE_TURN_URL:-}
-      VITE_TURN_USERNAME: ${VITE_TURN_USERNAME:-}
-      VITE_TURN_CREDENTIAL: ${VITE_TURN_CREDENTIAL:-}
+      TURN_SECRET: ${TURN_SECRET}
+      TURN_URL: ${TURN_URL:-turn:coturn:3478}
     volumes:
       - ./client:/app/client
       - /app/client/node_modules

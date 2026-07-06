@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { createServer } from "node:http";
 import multer from "multer";
@@ -157,6 +158,31 @@ const userSockets = new Map();
 
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma, io));
+
+/**
+ * @openapi
+ * /api/turn-config:
+ *   get:
+ *     tags: [Calls]
+ *     summary: Get TURN server credentials for WebRTC
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: TURN config object (null if not configured)
+ */
+app.get("/api/turn-config", auth, (req, res) => {
+  const secret = process.env.TURN_SECRET;
+  if (!secret) return res.json(null);
+  const expiry = Math.floor(Date.now() / 1000) + 86400;
+  const username = `${expiry}:${req.userId}`;
+  const credential = crypto.createHmac("sha1", secret).update(username).digest("base64");
+  res.json({
+    url: process.env.TURN_URL || `turn:${req.hostname}:3478`,
+    username,
+    credential,
+  });
+});
 
 const clientDist = path.resolve(__dirname, "../../client/dist");
 app.use(express.static(clientDist));

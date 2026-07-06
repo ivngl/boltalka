@@ -1,19 +1,36 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getSocket } from "./socket.ts";
 
-const TURN_URL = import.meta.env.VITE_TURN_URL;
-const TURN_USERNAME = import.meta.env.VITE_TURN_USERNAME;
-const TURN_CREDENTIAL = import.meta.env.VITE_TURN_CREDENTIAL;
+let cachedTurn: { url: string; username: string; credential: string } | null | undefined;
 
-const PC_CONFIG: RTCConfiguration = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-    TURN_URL
-      ? { urls: TURN_URL, username: TURN_USERNAME, credential: TURN_CREDENTIAL }
-      : { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
-  ],
-};
+async function turnConfig(): Promise<{ url: string; username: string; credential: string } | null> {
+  if (cachedTurn !== undefined) return cachedTurn;
+  const token = localStorage.getItem("token");
+  if (!token) return (cachedTurn = null);
+  try {
+    const res = await fetch("/api/turn-config", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return (cachedTurn = null);
+    const data = await res.json();
+    if (!data) return (cachedTurn = null);
+    cachedTurn = data;
+    return data;
+  } catch {
+    return (cachedTurn = null);
+  }
+}
+
+async function pcConfig(): Promise<RTCConfiguration> {
+  const turn = await turnConfig();
+  return {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      ...(turn ? [{ urls: turn.url, username: turn.username, credential: turn.credential }] : []),
+    ],
+  };
+}
 
 export type CallState = "idle" | "calling" | "ringing" | "connecting" | "connected" | "ended";
 export type CallType = "audio" | "video";
@@ -117,7 +134,7 @@ export function useCall(): UseCallReturn {
     localStreamRef.current = stream;
     setLocalStream(stream);
 
-    const pc = new RTCPeerConnection(PC_CONFIG);
+    const pc = new RTCPeerConnection(await pcConfig());
     pcRef.current = pc;
 
     stream.getTracks().forEach((track) => {
