@@ -33,4 +33,10 @@ migrate:
 db-deploy:
 	cd server && npx prisma migrate deploy
 
-.PHONY: install client server db db-stop seed dev lint migrate db-deploy
+build:
+	cd client && npm run build
+
+prod: build
+	cd server && npm run start
+
+.PHONY: install client server db db-stop seed dev lint migrate db-deploy build prod
