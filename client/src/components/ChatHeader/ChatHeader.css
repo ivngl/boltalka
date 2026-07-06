@@ -56,8 +56,22 @@
 }
 
 .theme-btn:hover,
-.lang-btn:hover {
+.lang-btn:hover,
+.call-btn:hover {
   color: var(--text-primary);
+}
+
+.call-btn {
+  background: none;
+  border: none;
+  color: var(--accent-blue);
+  font-size: 1rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .back-btn-mobile {

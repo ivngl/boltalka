@@ -259,6 +259,54 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("call_user", ({ calleeId, conversationId }) => {
+    const calleeSocketId = userSockets.get(calleeId);
+    if (!calleeSocketId) {
+      socket.emit("call_failed", { reason: "User offline" });
+      return;
+    }
+    io.to(`user:${calleeId}`).emit("incoming_call", {
+      callerId: userId,
+      conversationId,
+    });
+  });
+
+  socket.on("accept_call", ({ callerId }) => {
+    io.to(`user:${callerId}`).emit("call_accepted", {
+      calleeId: userId,
+    });
+  });
+
+  socket.on("reject_call", ({ callerId }) => {
+    io.to(`user:${callerId}`).emit("call_rejected", {
+      calleeId: userId,
+    });
+  });
+
+  socket.on("offer", ({ targetId, sdp }) => {
+    io.to(`user:${targetId}`).emit("offer", { sdp, from: userId });
+  });
+
+  socket.on("answer", ({ targetId, sdp }) => {
+    io.to(`user:${targetId}`).emit("answer", { sdp, from: userId });
+  });
+
+  socket.on("ice_candidate", ({ targetId, candidate }) => {
+    io.to(`user:${targetId}`).emit("ice_candidate", { candidate, from: userId });
+  });
+
+  socket.on("end_call", ({ targetId }) => {
+    io.to(`user:${targetId}`).emit("call_ended", { userId });
+  });
+
+  socket.on("toggle_audio", ({ targetId, muted }) => {
+    io.to(`user:${targetId}`).emit("user_audio_toggled", { userId, muted });
+  });
+
+  socket.on("toggle_video", ({ targetId, enabled }) => {
+    io.to(`user:${targetId}`).emit("user_video_toggled", { userId, enabled });
+  });
+
   socket.on("disconnect", () => {
     userSockets.delete(userId);
     io.emit("presence", { userId, online: false });

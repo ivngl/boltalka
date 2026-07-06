@@ -44,5 +44,18 @@
   "profile.save": "Сохранить",
   "profile.saving": "Сохранение...",
   "profile.update_failed": "Ошибка обновления",
-  "avatar.fallback": "?"
+  "avatar.fallback": "?",
+  "call.start_video": "Видеозвонок",
+  "call.calling": "Звоним...",
+  "call.incoming": "Входящий...",
+  "call.connecting": "Подключение...",
+  "call.incoming_call": "Входящий видеозвонок",
+  "call.accept": "Ответить",
+  "call.decline": "Отклонить",
+  "call.end": "Завершить",
+  "call.mute": "Выключить микрофон",
+  "call.unmute": "Включить микрофон",
+  "call.turn_off_video": "Выключить камеру",
+  "call.turn_on_video": "Включить камеру",
+  "call.cancel": "Отмена"
 }

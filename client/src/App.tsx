@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.ts";
 import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.ts";
@@ -9,7 +9,10 @@ import ChatHeader from "./components/ChatHeader/ChatHeader.tsx";
 import MessageList from "./components/MessageList/MessageList.tsx";
 import MessageForm from "./components/MessageForm/MessageForm.tsx";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal/ConfirmDeleteModal.tsx";
-import { conversationName } from "./components/helpers.ts";
+import CallOverlay from "./components/CallOverlay/CallOverlay.tsx";
+import IncomingCallModal from "./components/IncomingCallModal/IncomingCallModal.tsx";
+import { conversationName, otherParticipant } from "./components/helpers.ts";
+import { useCall } from "./useCall.ts";
 import type { User, Message, Conversation, ViewState } from "./types.ts";
 import "./App.css";
 
@@ -33,6 +36,13 @@ function App() {
 
   useEffect(() => { activeConvRef.current = activeConv; }, [activeConv]);
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
+
+  const {
+    callState, localStream, remoteStream, callDuration,
+    isAudioMuted, isVideoEnabled, incomingCall,
+    startCall, acceptCall, rejectCall, endCall,
+    toggleAudio, toggleVideo, setIncomingCall,
+  } = useCall();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -93,6 +103,9 @@ function App() {
     });
     s.on("message_deleted", ({ messageId }: { messageId: number }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    });
+    s.on("incoming_call", ({ callerId, conversationId }: { callerId: number; conversationId: number }) => {
+      setIncomingCall({ callerId: String(callerId), conversationId: String(conversationId) });
     });
   }
 
@@ -235,6 +248,15 @@ function App() {
     setActiveConv(null);
   }
 
+  const activeConvName = user && activeConv ? conversationName(activeConv, user.id) : "";
+  const otherUser = user && activeConv ? otherParticipant(activeConv, user.id) : null;
+  const otherUserOnline = otherUser ? onlineUsers.has(otherUser.id) : false;
+  const onStartCall = useCallback(() => {
+    if (otherUser && activeConv) {
+      startCall(String(otherUser.id), String(activeConv.id));
+    }
+  }, [otherUser, activeConv, startCall]);
+
   if (loading) return <div className="loading">{t("app.loading")}</div>;
 
   if (!user) {
@@ -247,8 +269,6 @@ function App() {
       />
     );
   }
-
-  const activeConvName = activeConv ? conversationName(activeConv, user.id) : "";
 
   return (
     <div className={`app ${activeConv || view === "profile" ? "show-chat" : "show-sidebar"}`}>
@@ -268,6 +288,9 @@ function App() {
         <ChatHeader
           activeConvName={activeConvName}
           onBack={chatBack}
+          onStartCall={onStartCall}
+          otherUserOnline={otherUserOnline}
+          callState={callState}
         />
         {view === "profile" ? (
           <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
@@ -312,6 +335,25 @@ function App() {
           </div>
         </div>
       )}
+      {incomingCall && (
+        <IncomingCallModal
+          callerName={users.find((u) => String(u.id) === incomingCall.callerId)?.username || "Unknown"}
+          onAccept={acceptCall}
+          onReject={rejectCall}
+        />
+      )}
+      <CallOverlay
+        callState={callState}
+        localStream={localStream}
+        remoteStream={remoteStream}
+        peerName={activeConvName}
+        callDuration={callDuration}
+        isAudioMuted={isAudioMuted}
+        isVideoEnabled={isVideoEnabled}
+        onEndCall={endCall}
+        onToggleAudio={toggleAudio}
+        onToggleVideo={toggleVideo}
+      />
     </div>
   );
 }

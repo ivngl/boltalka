@@ -44,5 +44,18 @@
   "profile.save": "Save",
   "profile.saving": "Saving...",
   "profile.update_failed": "Update failed",
-  "avatar.fallback": "?"
+  "avatar.fallback": "?",
+  "call.start_video": "Video call",
+  "call.calling": "Calling...",
+  "call.incoming": "Incoming...",
+  "call.connecting": "Connecting...",
+  "call.incoming_call": "Incoming video call",
+  "call.accept": "Accept",
+  "call.decline": "Decline",
+  "call.end": "End call",
+  "call.mute": "Mute",
+  "call.unmute": "Unmute",
+  "call.turn_off_video": "Turn off camera",
+  "call.turn_on_video": "Turn on camera",
+  "call.cancel": "Cancel"
 }
