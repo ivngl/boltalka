@@ -33,6 +33,9 @@ services:
       JWT_SECRET: ${JWT_SECRET?Required}
       REDIS_URL: redis://redis:6379
       PORT: 4000
+      VITE_TURN_URL: ${VITE_TURN_URL:-}
+      VITE_TURN_USERNAME: ${VITE_TURN_USERNAME:-}
+      VITE_TURN_CREDENTIAL: ${VITE_TURN_CREDENTIAL:-}
     volumes:
       - ./client:/app/client
       - /app/client/node_modules

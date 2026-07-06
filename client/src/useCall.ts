@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getSocket } from "./socket.ts";
 
+const TURN_URL = import.meta.env.VITE_TURN_URL;
+const TURN_USERNAME = import.meta.env.VITE_TURN_USERNAME;
+const TURN_CREDENTIAL = import.meta.env.VITE_TURN_CREDENTIAL;
+
 const PC_CONFIG: RTCConfiguration = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
-    { urls: "turn:openrelay.metered.ca:80" },
+    TURN_URL
+      ? { urls: TURN_URL, username: TURN_USERNAME, credential: TURN_CREDENTIAL }
+      : { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
   ],
 };
 
