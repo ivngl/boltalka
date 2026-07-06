@@ -21,7 +21,7 @@ import { conversationRoutes } from "./routes/conversations.js";
 
 const prisma = new PrismaClient();
 const app = express();
-app.set("trust proxy", 1);
+app.set("trust proxy", 2);
 const httpServer = createServer(app);
 
 /**
