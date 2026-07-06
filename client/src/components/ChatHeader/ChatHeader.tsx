@@ -1,7 +1,5 @@
 import { useTranslation } from "react-i18next";
-import i18n from "../../i18n.ts";
 import Avatar from "../Avatar/Avatar.tsx";
-import { useTheme } from "../../ThemeContext.tsx";
 import type { CallState } from "../../useCall.ts";
 import "./ChatHeader.css";
 
@@ -16,7 +14,6 @@ interface ChatHeaderProps {
 
 export default function ChatHeader({ activeConvName, onBack, onStartAudioCall, onStartVideoCall, otherUserOnline, callState }: ChatHeaderProps) {
   const { t } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
   const inCall = callState !== "idle" && callState !== undefined;
 
   return (
@@ -48,13 +45,7 @@ export default function ChatHeader({ activeConvName, onBack, onStartAudioCall, o
             </button>
           </>
         )}
-        <button onClick={toggleTheme} className="theme-btn" title="Toggle theme">
-          {theme === "light" ? "🌙" : "☀️"}
-        </button>
-        <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="lang-btn">
-          {i18n.language === "ru" ? "EN" : "RU"}
-        </button>
-      </div>
+        </div>
     </div>
   );
 }

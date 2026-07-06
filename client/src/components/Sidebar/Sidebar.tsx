@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n.ts";
 import Avatar from "../Avatar/Avatar.tsx";
+import { useTheme } from "../../ThemeContext.tsx";
 import { conversationName, otherParticipant } from "../helpers.ts";
 import "./Sidebar.css";
 import ConversationItem from "../ConversationItem/ConversationItem.tsx";
@@ -33,6 +35,7 @@ export default function Sidebar({
   onDeleteRequest,
 }: SidebarProps) {
   const { t } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
   const [chatSearch, setChatSearch] = useState("");
   const [newChatOpen, setNewChatOpen] = useState(false);
 
@@ -45,6 +48,12 @@ export default function Sidebar({
           </div>
         </div>
         <div className="sidebar-header-right">
+          <button onClick={toggleTheme} className="sidebar-theme-btn" title="Toggle theme">
+            {theme === "light" ? "🌙" : "☀️"}
+          </button>
+          <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="sidebar-lang-btn">
+            {i18n.language === "ru" ? "EN" : "RU"}
+          </button>
           <button onClick={onLogout} className="logout-btn">{t("chat.logout")}</button>
         </div>
       </div>

@@ -43,20 +43,6 @@
   letter-spacing: 0.05em;
 }
 
-.theme-btn,
-.lang-btn {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.theme-btn:hover,
-.lang-btn:hover,
 .call-btn:hover {
   color: var(--text-primary);
 }
