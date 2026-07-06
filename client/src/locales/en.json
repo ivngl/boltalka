@@ -59,5 +59,7 @@
   "call.unmute": "Unmute",
   "call.turn_off_video": "Turn off camera",
   "call.turn_on_video": "Turn on camera",
-  "call.cancel": "Cancel"
+  "call.cancel": "Cancel",
+  "menu.dark_mode": "Dark mode",
+  "menu.light_mode": "Light mode"
 }

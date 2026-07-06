@@ -38,6 +38,7 @@ export default function Sidebar({
   const { theme, toggleTheme } = useTheme();
   const [chatSearch, setChatSearch] = useState("");
   const [newChatOpen, setNewChatOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <aside className="sidebar">
@@ -48,13 +49,32 @@ export default function Sidebar({
           </div>
         </div>
         <div className="sidebar-header-right">
-          <button onClick={toggleTheme} className="sidebar-theme-btn" title="Toggle theme">
-            {theme === "light" ? "🌙" : "☀️"}
-          </button>
-          <button onClick={() => i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru")} className="sidebar-lang-btn">
-            {i18n.language === "ru" ? "EN" : "RU"}
-          </button>
-          <button onClick={onLogout} className="logout-btn">{t("chat.logout")}</button>
+          <div className="menu-wrapper">
+            <button onClick={() => setMenuOpen((p) => !p)} className="menu-btn" title="Menu">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="12" cy="19" r="2" />
+              </svg>
+            </button>
+            {menuOpen && (
+              <>
+                <div className="menu-backdrop" onClick={() => setMenuOpen(false)} />
+                <div className="menu-dropdown">
+                  <button onClick={() => { toggleTheme(); setMenuOpen(false); }} className="menu-item">
+                    {theme === "light" ? `🌙 ${t("menu.dark_mode")}` : `☀️ ${t("menu.light_mode")}`}
+                  </button>
+                  <button onClick={() => { i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru"); setMenuOpen(false); }} className="menu-item">
+                    🌐 {i18n.language === "ru" ? "English" : "Русский"}
+                  </button>
+                  <div className="menu-divider" />
+                  <button onClick={() => { onLogout(); setMenuOpen(false); }} className="menu-item menu-item-logout">
+                    🚪 {t("chat.logout")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className="sidebar-search">

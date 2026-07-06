@@ -59,5 +59,7 @@
   "call.unmute": "Включить микрофон",
   "call.turn_off_video": "Выключить камеру",
   "call.turn_on_video": "Включить камеру",
-  "call.cancel": "Отмена"
+  "call.cancel": "Отмена",
+  "menu.dark_mode": "Тёмная тема",
+  "menu.light_mode": "Светлая тема"
 }
