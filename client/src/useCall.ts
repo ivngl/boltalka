@@ -104,11 +104,11 @@ export function useCall(): UseCallReturn {
   async function ensurePC() {
     if (pcRef.current) return pcRef.current;
 
-    const video = callTypeRef.current === "video";
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video,
-      audio: true,
-    });
+    const constraints: MediaStreamConstraints = { audio: true };
+    if (callTypeRef.current === "video") {
+      constraints.video = true;
+    }
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
     localStreamRef.current = stream;
     setLocalStream(stream);
 
@@ -177,7 +177,8 @@ export function useCall(): UseCallReturn {
           targetId: peerIdRef.current,
           sdp: pc.localDescription,
         });
-      } catch {
+      } catch (err) {
+        console.error("ensurePC in onCallAccepted failed:", err);
         endCall();
       }
     };
@@ -307,7 +308,8 @@ export function useCall(): UseCallReturn {
 
     try {
       await ensurePC();
-    } catch {
+    } catch (err) {
+      console.error("ensurePC in acceptCall failed:", err);
       endCall();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
