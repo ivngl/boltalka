@@ -27,9 +27,6 @@ export default function ChatHeader({ activeConvName, onBack, onStartAudioCall, o
           </>
         )}
       </div>
-      <div className="chat-header-center">
-        <span className="chat-brand">{t("app.title")}</span>
-      </div>
       <div className="chat-header-right">
         {activeConvName && otherUserOnline && !inCall && (
           <>
