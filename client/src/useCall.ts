@@ -13,24 +13,27 @@ let turnFetchCount = 0;
 async function turnConfig(): Promise<{ url: string; username: string; credential: string } | null> {
   if (cachedTurn !== undefined && Date.now() < cachedTurnExpiry) return cachedTurn;
   const token = localStorage.getItem("token");
-  if (!token) return (cachedTurn = null);
+  if (!token) {
+    log("turnConfig: no token");
+    return (cachedTurn = null);
+  }
   try {
     log(`turnConfig: fetching (attempt ${++turnFetchCount})`);
     const res = await fetch("/api/turn-config", {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) {
-      log("turnConfig: not ok", res.status);
+      log("turnConfig: not ok", res.status, res.statusText);
       return (cachedTurn = null);
     }
     const data = await res.json();
     if (!data) {
-      log("turnConfig: empty response");
+      log("turnConfig: empty response - TURN not configured");
       return (cachedTurn = null);
     }
-    log("turnConfig: got config", data);
+    log("turnConfig: got config", data.url, "username:", data.username ? "present" : "missing");
     cachedTurn = data;
-    cachedTurnExpiry = Date.now() + 23 * 60 * 60 * 1000;
+    cachedTurnExpiry = Date.now() + 23 * 60 * 60 * 1000; // 23 hours
     return data;
   } catch (err) {
     log("turnConfig: fetch error", err);
@@ -38,16 +41,33 @@ async function turnConfig(): Promise<{ url: string; username: string; credential
   }
 }
 
+// Enhanced STUN/TURN configuration for better internet connectivity
 async function pcConfig(): Promise<RTCConfiguration> {
   const turn = await turnConfig();
   const config: RTCConfiguration = {
     iceServers: [
+      // Multiple STUN servers for better connectivity
       { urls: "stun:stun.l.google.com:19302" },
       { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" },
+      { urls: "stun:stun3.l.google.com:19302" },
+      { urls: "stun:stun4.l.google.com:19302" },
+      // Fallback STUN servers
+      { urls: "stun:stun.stunprotocol.org:3478" },
       ...(turn ? [{ urls: turn.url, username: turn.username, credential: turn.credential }] : []),
     ],
+    iceCandidatePoolSize: 10,
+    iceTransportPolicy: "all",
+    rtcpMuxPolicy: "require",
+    bundlePolicy: "max-bundle",
   };
-  log("pcConfig:", JSON.stringify(config));
+  
+  if (turn) {
+    log("pcConfig: TURN server configured:", turn.url);
+  } else {
+    log("pcConfig: WARNING - No TURN server configured. Calls may fail through restrictive NATs.");
+  }
+  
   return config;
 }
 
@@ -187,19 +207,50 @@ export function useCall(userId?: string | null): UseCallReturn {
     }
   }
 
-  async function ensurePC(role?: string) {
-    if (pcRef.current) {
-      log(`ensurePC(${role}): reusing existing PC`);
-      return pcRef.current;
-    }
-    const id = ++pcIdRef.current;
-    log(`ensurePC(${role}): creating PC #${id}`);
+  // Enhanced error handling for WebRTC failures
+const handleWebRTCError = (error: any, context: string) => {
+  let errorMessage = `WebRTC error in ${context}: ${error.message || error}`;
+  let userMessage = "Call connection failed";
+  
+  // Categorize errors for better user feedback
+  if (error.name === "NotAllowedError" || error.message?.includes("permission")) {
+    userMessage = "Camera/microphone permission denied";
+    log("Permission error - user needs to grant camera/microphone access");
+  } else if (error.message?.includes("ICE") || error.message?.includes("candidate")) {
+    userMessage = "Network connectivity issue - check your internet connection";
+    log("ICE connectivity error - may need TURN server for NAT traversal");
+  } else if (error.message?.includes("offer") || error.message?.includes("answer")) {
+    userMessage = "Call signaling error";
+    log("Signaling error - check WebSocket connection");
+  } else if (error.message?.includes("stream") || error.message?.includes("track")) {
+    userMessage = "Media device error";
+    log("Media stream error - check camera/microphone availability");
+  }
+  
+  log(errorMessage);
+  // Could show user-friendly error message to user
+  // alert(userMessage);
+  
+  return { errorMessage, userMessage };
+};
 
-    const constraints: MediaStreamConstraints = { audio: true };
-    if (callTypeRef.current === "video") {
-      constraints.video = true;
-    }
-    log(`ensurePC(${role}): getUserMedia constraints:`, constraints);
+// Update the ensurePC function to use better error handling
+async function ensurePC(role?: string) {
+  if (pcRef.current) {
+    log(`ensurePC(${role}): reusing existing PC`);
+    return pcRef.current;
+  }
+  const id = ++pcIdRef.current;
+  log(`ensurePC(${role}): creating PC #${id}`);
+
+  const constraints: MediaStreamConstraints = { audio: true };
+  if (callTypeRef.current === "video") {
+    constraints.video = true;
+  }
+  
+  log(`ensurePC(${role}): getUserMedia constraints:`, constraints);
+  
+  try {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     log(`ensurePC(${role}): got tracks:`, stream.getTracks().map(t => `${t.kind}:${t.label}:${t.enabled}`));
     localStreamRef.current = stream;
@@ -222,7 +273,11 @@ export function useCall(userId?: string | null): UseCallReturn {
 
     log(`ensurePC(${role}): PC #${id} ready`);
     return pc;
+  } catch (error) {
+    const { errorMessage, userMessage } = handleWebRTCError(error, `ensurePC(${role})`);
+    throw error;
   }
+}
 
   function registerHandlers(pc: RTCPeerConnection, role?: string) {
     let candidateCount = 0;
@@ -261,6 +316,7 @@ export function useCall(userId?: string | null): UseCallReturn {
         setStateIfMounted(setCallState, "connected");
         startTimer();
       } else if (pc.connectionState === "failed") {
+        log(`ensurePC(${role}): connection failed, ending call`);
         endCall();
       } else if (pc.connectionState === "disconnected") {
         if (!disconnectTimerRef.current) {
@@ -276,6 +332,7 @@ export function useCall(userId?: string | null): UseCallReturn {
     pc.oniceconnectionstatechange = () => {
       log(`ensurePC(${role}): ICE connection state:`, pc.iceConnectionState);
       if (pc.iceConnectionState === "failed") {
+        log(`ensurePC(${role}): ICE connection failed, ending call`);
         endCall();
       } else if (pc.iceConnectionState === "disconnected") {
         if (!disconnectTimerRef.current) {
@@ -286,6 +343,7 @@ export function useCall(userId?: string | null): UseCallReturn {
           }, 5000);
         }
       } else if (pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed") {
+        log(`ensurePC(${role}): ICE connected/completed, canceling grace timer`);
         cancelDisconnectTimer();
       }
     };
@@ -302,17 +360,29 @@ export function useCall(userId?: string | null): UseCallReturn {
   async function processPendingOffer(pc: RTCPeerConnection, role?: string) {
     if (!pendingOfferRef.current) return;
     log(`ensurePC(${role}): processing pending offer hasAudio:${pendingOfferRef.current.sdp?.includes("m=audio")} hasVideo:${pendingOfferRef.current.sdp?.includes("m=video")}`);
-    await pc.setRemoteDescription(
-      new RTCSessionDescription(pendingOfferRef.current),
-    );
-    pendingOfferRef.current = null;
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    log(`ensurePC(${role}): sent answer`);
-    getSocket()?.emit("answer", {
-      targetId: peerIdRef.current,
-      sdp: pc.localDescription,
-    });
+    
+    try {
+      await pc.setRemoteDescription(
+        new RTCSessionDescription(pendingOfferRef.current),
+      );
+      pendingOfferRef.current = null;
+      
+      // Only create answer if we're in the correct state
+      if (pc.signalingState === "have-remote-offer" || pc.signalingState === "have-local-pranswer") {
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        log(`ensurePC(${role}): sent answer`);
+        getSocket()?.emit("answer", {
+          targetId: peerIdRef.current,
+          sdp: pc.localDescription,
+        });
+      } else {
+        log(`ensurePC(${role}): cannot create answer, signaling state is ${pc.signalingState}`);
+      }
+    } catch (err) {
+      log(`ensurePC(${role}): error processing pending offer:`, err);
+      throw err;
+    }
   }
 
   function attachSocket(socket: Socket) {
@@ -374,14 +444,32 @@ export function useCall(userId?: string | null): UseCallReturn {
           }
           log("onOffer: setting remote description");
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-          log("onOffer: creating answer");
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          log("onOffer: answer sent");
-          getSocket()?.emit("answer", {
-            targetId: peerIdRef.current,
-            sdp: pc.localDescription,
-          });
+          
+          // Check state after setRemoteDescription
+          log(`onOffer: after setRemoteDescription, signaling state = ${pc.signalingState}`);
+          
+          // Only create answer if we're in the correct state
+          if (pc.signalingState === "have-remote-offer" || pc.signalingState === "have-local-pranswer") {
+            log("onOffer: creating answer");
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            log("onOffer: answer sent");
+            getSocket()?.emit("answer", {
+              targetId: peerIdRef.current,
+              sdp: pc.localDescription,
+            });
+          } else {
+            log(`onOffer: cannot create answer, signaling state is ${pc.signalingState}`);
+            // If we're not in the right state, we might need to end the call
+            // or wait for state transition
+            if (pc.signalingState === "have-local-offer") {
+              log("onOffer: glare resolution - we have local offer, remote offer ignored");
+              // This can happen during glare, we might want to handle it differently
+            } else {
+              console.error(`onOffer: unexpected signaling state ${pc.signalingState}`);
+              endCall();
+            }
+          }
         } else {
           log("onOffer: storing as pending offer");
           pendingOfferRef.current = sdp;
