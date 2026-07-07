@@ -28,14 +28,13 @@ export default function ConversationItem({
       className={`conv-item ${isActive ? "active" : ""}`}
       onClick={onSelect}
     >
-      <Avatar username={name} />
+      <Avatar username={name} online={online} />
       <div className="conv-info">
         <div className="conv-name">{name}</div>
         <div className="conv-preview">
           {conversation.messages?.[0]?.content?.slice(0, 30) || ""}
         </div>
       </div>
-      <div className={`online-dot ${online ? "online" : ""}`} />
       <button
         className="conv-delete"
         onClick={(e) => { e.stopPropagation(); onDeleteRequest(); }}

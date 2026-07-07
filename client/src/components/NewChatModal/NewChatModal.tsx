@@ -38,7 +38,7 @@ export default function NewChatModal({ users, onlineUsers, currentUserId, onStar
             .filter((u) => u.username.toLowerCase().includes(search.toLowerCase()))
             .map((u) => (
               <div key={u.id} className="user-item" onClick={() => { onStartDM(u.id); onClose(); }}>
-                <Avatar username={u.username} size={28} />
+                <Avatar username={u.username} size={28} online={onlineUsers.has(u.id)} />
                 <span>{u.username}</span>
                 <span className={`online-dot ${onlineUsers.has(u.id) ? "online" : ""}`} />
               </div>

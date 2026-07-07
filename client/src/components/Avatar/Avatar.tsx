@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import "./Avatar.css";
 
 const colors = [
   "#1f6feb", "#3fb950", "#d29922", "#f78166", "#db6d28",
@@ -16,32 +17,37 @@ function hashColor(name: string): string {
 interface AvatarProps {
   username: string;
   size?: number;
+  online?: boolean;
 }
 
-export default function Avatar({ username, size = 36 }: AvatarProps) {
+export default function Avatar({ username, size = 36, online }: AvatarProps) {
   const { t } = useTranslation();
   const letter = username?.charAt(0).toUpperCase() || t("avatar.fallback");
   const bg = hashColor(username || "");
 
+  const statusClass = online ? "online" : "";
+
   return (
-    <div
-      className="avatar"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: "50%",
-        background: bg,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 600,
-        fontSize: size * 0.45,
-        color: "#fff",
-        flexShrink: 0,
-        lineHeight: 1,
-      }}
-    >
-      {letter}
+    <div className={`avatar-wrapper ${statusClass}`}>
+      <div
+        className="avatar"
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          background: bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: 600,
+          fontSize: size * 0.45,
+          color: "#fff",
+          flexShrink: 0,
+          lineHeight: 1,
+        }}
+      >
+        {letter}
+      </div>
     </div>
   );
 }

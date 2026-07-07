@@ -22,7 +22,7 @@ export default function ChatHeader({ activeConvName, onBack, onStartAudioCall, o
         {activeConvName && (
           <>
             <button className="back-btn-mobile" onClick={onBack}>←</button>
-            <Avatar username={activeConvName} size={32} />
+            <Avatar username={activeConvName} size={32} online={otherUserOnline} />
             <span className="chat-conv-name">{activeConvName}</span>
           </>
         )}

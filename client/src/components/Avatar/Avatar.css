@@ -1,0 +1,26 @@
+.avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  line-height: 0;
+}
+
+.avatar-wrapper.online::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  outline: 3px solid var(--accent-green);
+  outline-offset: 2px;
+  pointer-events: none;
+}
+
+.avatar-wrapper.offline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  outline: 3px solid var(--text-secondary);
+  outline-offset: 2px;
+  opacity: 0.4;
+  pointer-events: none;
+}
