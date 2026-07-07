@@ -83,6 +83,10 @@
   background: var(--bg-tertiary);
 }
 
+.back-btn-icon {
+  transform: translateY(-2px);
+}
+
 @media (max-width: 768px) {
   .back-btn-mobile {
     display: inline-flex;

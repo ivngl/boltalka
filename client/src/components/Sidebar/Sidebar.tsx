@@ -84,7 +84,7 @@ export default function Sidebar({
           value={chatSearch}
           onChange={(e) => setChatSearch(e.target.value)}
         />
-        <button className="new-chat-btn" onClick={() => setNewChatOpen(true)}>+</button>
+        <button className="new-chat-btn" onClick={() => setNewChatOpen(true)}><span className="new-chat-icon">+</span></button>
       </div>
       <div className="conv-list">
         {conversations

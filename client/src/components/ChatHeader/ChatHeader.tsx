@@ -21,7 +21,7 @@ export default function ChatHeader({ activeConvName, onBack, onStartAudioCall, o
       <div className="chat-header-left">
         {activeConvName && (
           <>
-            <button className="back-btn-mobile" onClick={onBack}>←</button>
+            <button className="back-btn-mobile" onClick={onBack}><span className="back-btn-icon">←</span></button>
             <Avatar username={activeConvName} size={32} online={otherUserOnline} />
             <span className="chat-conv-name">{activeConvName}</span>
           </>

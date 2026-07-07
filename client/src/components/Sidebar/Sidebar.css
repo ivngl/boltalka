@@ -140,6 +140,10 @@
   background: var(--accent-blue-hover);
 }
 
+.new-chat-icon {
+  transform: translateY(-2px);
+}
+
 .conv-list {
   flex: 1;
   overflow-y: auto;
