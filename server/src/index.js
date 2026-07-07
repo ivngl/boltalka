@@ -59,7 +59,13 @@ const specs = swaggerJsdoc({
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.get("/api/openapi.json", (req, res) => res.json(specs));
 
-app.use(cors({ origin: process.env.CLIENT_URL || true }));
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+].filter(Boolean);
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 const uploadsDir = path.resolve(__dirname, "../uploads");
@@ -146,7 +152,7 @@ try {
 
 process.on("unhandledRejection", () => {});
 
-const io = new Server(httpServer, { cors: { origin: process.env.CLIENT_URL || "*" } });
+const io = new Server(httpServer, { cors: { origin: allowedOrigins } });
 
 if (pubClient && subClient) {
   try {

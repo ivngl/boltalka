@@ -14,7 +14,7 @@ db-stop:
 	docker compose down
 
 seed:
-	cd server && npm run db:seed
+	cd server && node prisma/seed.cjs
 
 dev:
 	@echo "Starting server and client..."

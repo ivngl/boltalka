@@ -41,8 +41,8 @@ function App() {
     callState, callType, localStream, remoteStream, callDuration,
     isAudioMuted, isVideoEnabled, incomingCall,
     startCall, acceptCall, rejectCall, endCall,
-    toggleAudio, toggleVideo, setIncomingCall,
-  } = useCall();
+    toggleAudio, toggleVideo, setIncomingCall, attachSocket,
+  } = useCall(user?.id);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -61,6 +61,7 @@ function App() {
 
   function initSocket(token: string) {
     const s = connectSocket(token);
+    attachSocket(s);
     s.on("new_message", (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
       setConversations((prev) => {

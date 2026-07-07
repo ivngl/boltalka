@@ -42,8 +42,13 @@ export default function CallOverlay({
   }, [localStream]);
 
   useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
+    const el = remoteVideoRef.current;
+    if (el && remoteStream) {
+      el.srcObject = remoteStream;
+      el.play().catch((err) => {
+        if (err.name !== "AbortError")
+          console.warn("remote video play() failed:", err);
+      });
     }
   }, [remoteStream]);
 

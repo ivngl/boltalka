@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/index.js",
+    "dev": "prisma generate && node --watch src/index.js",
     "dev:sqlite": "prisma generate --schema=prisma/schema.sqlite.prisma && prisma db push --schema=prisma/schema.sqlite.prisma && node --watch src/index.js",
     "start": "npx prisma migrate deploy && node src/index.js",
     "build": "prisma generate",
