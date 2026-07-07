@@ -58,6 +58,7 @@ export default function CallOverlay({
   const showControls = callState === "connecting" || callState === "connected";
   const isConnecting = callState === "calling" || callState === "ringing" || callState === "connecting";
   const isConnected = callState === "connected";
+  const showConnectingIndicator = callState === "connecting";
 
   return (
     <div className="call-overlay">
@@ -83,6 +84,13 @@ export default function CallOverlay({
               {callState === "ringing" && t("call.incoming")}
               {isConnecting && !isConnected && t("call.connecting")}
             </div>
+            {showConnectingIndicator && (
+              <div className="call-connecting-indicator">
+                <span />
+                <span />
+                <span />
+              </div>
+            )}
             {isConnected && (
               <div className="call-duration">{formatDuration(callDuration)}</div>
             )}

@@ -73,9 +73,11 @@ export function useCall(): UseCallReturn {
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const peerIdRef = useRef<string | null>(null);
   const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
+  const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
   const callTypeRef = useRef<CallType>("video");
 
   function stopTimer() {
@@ -103,6 +105,11 @@ export function useCall(): UseCallReturn {
       localStreamRef.current.getTracks().forEach((t) => t.stop());
       localStreamRef.current = null;
     }
+    if (remoteStreamRef.current) {
+      remoteStreamRef.current.getTracks().forEach((t) => t.stop());
+      remoteStreamRef.current = null;
+    }
+    pendingIceCandidatesRef.current = [];
     setLocalStream(null);
     setRemoteStream(null);
     setCallDuration(0);
@@ -117,6 +124,7 @@ export function useCall(): UseCallReturn {
   }, []);
 
   const endCall = useCallback(() => {
+    console.debug("useCall.endCall: ending call", peerIdRef.current);
     if (peerIdRef.current) {
       getSocket()?.emit("end_call", { targetId: peerIdRef.current });
     }
@@ -130,19 +138,23 @@ export function useCall(): UseCallReturn {
     if (callTypeRef.current === "video") {
       constraints.video = true;
     }
+    console.debug("useCall.ensurePC: acquiring local media", constraints);
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     localStreamRef.current = stream;
     setLocalStream(stream);
 
+    console.debug("useCall.ensurePC: creating RTCPeerConnection");
     const pc = new RTCPeerConnection(await pcConfig());
     pcRef.current = pc;
 
     stream.getTracks().forEach((track) => {
+      console.debug("useCall.ensurePC: adding local track", track.kind);
       pc.addTrack(track, stream);
     });
 
     pc.onicecandidate = (e) => {
       if (e.candidate && peerIdRef.current) {
+        console.debug("useCall.onicecandidate: sending candidate", e.candidate);
         getSocket()?.emit("ice_candidate", {
           targetId: peerIdRef.current,
           candidate: e.candidate.toJSON(),
@@ -151,9 +163,19 @@ export function useCall(): UseCallReturn {
     };
 
     pc.ontrack = (e) => {
-      if (e.streams[0]) {
-        setRemoteStream(e.streams[0]);
+      console.debug("useCall.ontrack: remote track received", e.track?.kind, e.streams);
+      const stream = e.streams && e.streams[0]
+        ? e.streams[0]
+        : remoteStreamRef.current || new MediaStream();
+
+      if (e.track && !stream.getTracks().some((track) => track.id === e.track.id)) {
+        stream.addTrack(e.track);
       }
+
+      if (stream !== remoteStreamRef.current) {
+        remoteStreamRef.current = stream;
+      }
+      setRemoteStream(stream);
     };
 
     pc.onconnectionstatechange = () => {
@@ -172,6 +194,7 @@ export function useCall(): UseCallReturn {
         new RTCSessionDescription(pendingOfferRef.current),
       );
       pendingOfferRef.current = null;
+      await flushPendingIceCandidates(pc);
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       getSocket()?.emit("answer", {
@@ -183,18 +206,32 @@ export function useCall(): UseCallReturn {
     return pc;
   }
 
+  async function flushPendingIceCandidates(pc: RTCPeerConnection) {
+    const candidates = pendingIceCandidatesRef.current;
+    pendingIceCandidatesRef.current = [];
+    for (const candidate of candidates) {
+      try {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (err) {
+        console.error("useCall.flushPendingIceCandidates failed:", err);
+      }
+    }
+  }
+
   // Socket event handlers — set up once
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
     const onCallAccepted = async () => {
+      console.debug("useCall.onCallAccepted: call accepted by remote user");
       setCallState("connecting");
       try {
         const pc = await ensurePC();
         if (!pc) return;
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
+        console.debug("useCall.onCallAccepted: sending offer", offer);
         getSocket()?.emit("offer", {
           targetId: peerIdRef.current,
           sdp: pc.localDescription,
@@ -214,12 +251,15 @@ export function useCall(): UseCallReturn {
     };
 
     const onOffer = async ({ sdp }: { sdp: RTCSessionDescriptionInit }) => {
+      console.debug("useCall.onOffer: received offer", sdp.type);
       try {
         const pc = pcRef.current;
         if (pc) {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+          await flushPendingIceCandidates(pc);
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
+          console.debug("useCall.onOffer: sending answer", answer);
           getSocket()?.emit("answer", {
             targetId: peerIdRef.current,
             sdp: pc.localDescription,
@@ -227,28 +267,39 @@ export function useCall(): UseCallReturn {
         } else {
           pendingOfferRef.current = sdp;
         }
-      } catch {
+      } catch (err) {
+        console.error("useCall.onOffer failed:", err);
         endCall();
       }
     };
 
     const onAnswer = async ({ sdp }: { sdp: RTCSessionDescriptionInit }) => {
+      console.debug("useCall.onAnswer: received answer", sdp.type);
       const pc = pcRef.current;
       if (pc && !pc.currentRemoteDescription) {
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-        } catch {
+          await flushPendingIceCandidates(pc);
+        } catch (err) {
+          console.error("useCall.onAnswer failed:", err);
           endCall();
         }
       }
     };
 
     const onIceCandidate = async ({ candidate }: { candidate: RTCIceCandidateInit }) => {
+      console.debug("useCall.onIceCandidate: received candidate", candidate);
+      if (!candidate) return;
+
       const pc = pcRef.current;
-      if (pc && candidate) {
+      if (pc && pc.remoteDescription && pc.remoteDescription.type) {
         try {
           await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch { /* ignore */ }
+        } catch (err) {
+          console.error("useCall.onIceCandidate failed:", err);
+        }
+      } else {
+        pendingIceCandidatesRef.current.push(candidate);
       }
     };
 
@@ -316,6 +367,7 @@ export function useCall(): UseCallReturn {
 
   const acceptCall = useCallback(async () => {
     if (!incomingCall) return;
+    console.debug("useCall.acceptCall: accepting incoming call", incomingCall);
     const callerId = incomingCall.callerId;
     peerIdRef.current = callerId;
     setPeerId(callerId);
