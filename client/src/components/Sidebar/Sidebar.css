@@ -68,9 +68,9 @@
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0;
   border: none;
   border-radius: 6px;
   background: none;
@@ -107,7 +107,7 @@
   letter-spacing: 0.5px;
   line-height: 1;
   padding: 2px 4px;
-  color: var(--text-secondary);
+  color: var(--accent-blue);
 }
 
 .menu-divider {
@@ -159,10 +159,6 @@
 
 .sidebar-search .new-chat-btn:hover {
   background: var(--accent-blue-hover);
-}
-
-.new-chat-icon {
-  transform: translateY(-2px);
 }
 
 .conv-list {
