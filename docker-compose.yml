@@ -53,6 +53,7 @@ services:
       PORT: 4000
       TURN_SECRET: ${TURN_SECRET}
       TURN_URL: ${TURN_URL:-turn:coturn:3478}
+      URL_PROTOCOL: ${URL_PROTOCOL:-http}
     volumes:
       - ./client:/app/client
       - /app/client/node_modules
@@ -65,10 +66,8 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - /root/certs:/certs:ro
     depends_on:
       - app
     restart: unless-stopped

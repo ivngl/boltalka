@@ -33,3 +33,14 @@ Copy `server/.env.example` to `server/.env` and set `DATABASE_URL` accordingly b
 - Default `TURN_URL` in Docker is `turn:coturn:3478` (Docker service name)
 - nginx proxies `/api/turn-config` — no special routing needed
 - For production: set `TURN_SECRET` in `.env`, expose UDP 3478 + 40000-40999 on firewall, replace `TURN_URL` with public server hostname
+
+## HTTP / HTTPS
+
+Base config runs on HTTP. Add `-f docker-compose.https.yml` for HTTPS mode:
+
+| Mode  | Command |
+|-------|---------|
+| HTTP  | `docker compose up -d` |
+| HTTPS | `docker compose -f docker-compose.yml -f docker-compose.https.yml up -d` |
+
+HTTPS mode requires self-signed certs at `/root/certs/bolt-talka.{crt,key}` on the host.
