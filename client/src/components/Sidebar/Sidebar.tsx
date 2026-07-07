@@ -6,6 +6,7 @@ import { useTheme } from "../../ThemeContext.tsx";
 import { conversationName, otherParticipant } from "../helpers.ts";
 import "./Sidebar.css";
 import ConversationItem from "../ConversationItem/ConversationItem.tsx";
+import { MenuIcon, LogoutIcon } from "../Icons/index.ts";
 import NewChatModal from "../NewChatModal/NewChatModal.tsx";
 import type { User, Conversation } from "../../types.ts";
 
@@ -62,14 +63,14 @@ export default function Sidebar({
                 <div className="menu-backdrop" onClick={() => setMenuOpen(false)} />
                 <div className="menu-dropdown">
                   <button onClick={() => { toggleTheme(); setMenuOpen(false); }} className="menu-item">
-                    {theme === "light" ? `🌙 ${t("menu.dark_mode")}` : `☀️ ${t("menu.light_mode")}`}
+                    <span className="menu-icon">{theme === "light" ? "🌙" : "☀️"}</span> {theme === "light" ? t("menu.dark_mode") : t("menu.light_mode")}
                   </button>
                   <button onClick={() => { i18n.changeLanguage(i18n.language === "ru" ? "en" : "ru"); setMenuOpen(false); }} className="menu-item">
-                    🌐 {i18n.language === "ru" ? "English" : "Русский"}
+                    <span className="lang-icon">{i18n.language === "ru" ? "EN" : "RU"}</span> {i18n.language === "ru" ? "English" : "Русский"}
                   </button>
                   <div className="menu-divider" />
                   <button onClick={() => { onLogout(); setMenuOpen(false); }} className="menu-item menu-item-logout">
-                    🚪 {t("chat.logout")}
+                    <span className="menu-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.89-2-2-2z"/></svg></span> {t("chat.logout")}
                   </button>
                 </div>
               </>

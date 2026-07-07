@@ -43,18 +43,19 @@
   display: none;
 }
 
-.attach-btn {
-  background: none;
+button.attach-btn {
+  background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.2rem;
   cursor: pointer;
-  padding: 0 0.3rem;
+  padding: 0.6rem;
   display: flex;
   align-items: center;
+  border-radius: 6px;
 }
 
-.attach-btn:hover {
+button.attach-btn:hover {
+  background: transparent;
   color: var(--text-primary);
 }
 
