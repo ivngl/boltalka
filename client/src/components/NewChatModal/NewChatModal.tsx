@@ -40,7 +40,6 @@ export default function NewChatModal({ users, onlineUsers, currentUserId, onStar
               <div key={u.id} className="user-item" onClick={() => { onStartDM(u.id); onClose(); }}>
                 <Avatar username={u.username} size={28} online={onlineUsers.has(u.id)} />
                 <span>{u.username}</span>
-                <span className={`online-dot ${onlineUsers.has(u.id) ? "online" : ""}`} />
               </div>
             ))}
         </div>
