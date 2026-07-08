@@ -2,7 +2,19 @@ import axios from "axios";
 import type { User, Message, Conversation, AuthResponse, UploadResult } from "./types.ts";
 
 const SERVER = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? "http://localhost:4000" : "");
-const api = axios.create({ baseURL: SERVER });
+export const api = axios.create({ baseURL: SERVER });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      delete api.defaults.headers.common["Authorization"];
+      window.location.reload();
+    }
+    return Promise.reject(error);
+  },
+);
 
 export function setToken(token: string): void {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Socket } from "socket.io-client";
 import { getSocket } from "./socket.ts";
+import { api } from "./api.ts";
 
 function log(...args: unknown[]) {
   console.log("[Boltalka]", ...args);
@@ -19,14 +20,7 @@ async function turnConfig(): Promise<{ url: string; username: string; credential
   }
   try {
     log(`turnConfig: fetching (attempt ${++turnFetchCount})`);
-    const res = await fetch("/api/turn-config", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) {
-      log("turnConfig: not ok", res.status, res.statusText);
-      return (cachedTurn = null);
-    }
-    const data = await res.json();
+    const { data } = await api.get("/api/turn-config");
     if (!data) {
       log("turnConfig: empty response - TURN not configured");
       return (cachedTurn = null);
@@ -216,6 +210,9 @@ const handleWebRTCError = (error: any, context: string) => {
   if (error.name === "NotAllowedError" || error.message?.includes("permission")) {
     userMessage = "Camera/microphone permission denied";
     log("Permission error - user needs to grant camera/microphone access");
+  } else if (error.message?.includes("secure connection") || error.message?.includes("HTTPS")) {
+    userMessage = "Camera/microphone access requires HTTPS. Ask the admin to enable HTTPS.";
+    log("Secure context error - page must be served over HTTPS for WebRTC");
   } else if (error.message?.includes("ICE") || error.message?.includes("candidate")) {
     userMessage = "Network connectivity issue - check your internet connection";
     log("ICE connectivity error - may need TURN server for NAT traversal");
@@ -251,6 +248,9 @@ async function ensurePC(role?: string) {
   log(`ensurePC(${role}): getUserMedia constraints:`, constraints);
   
   try {
+    if (!navigator.mediaDevices) {
+      throw new Error("Camera/microphone access requires a secure connection (HTTPS).");
+    }
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     log(`ensurePC(${role}): got tracks:`, stream.getTracks().map(t => `${t.kind}:${t.label}:${t.enabled}`));
     localStreamRef.current = stream;
