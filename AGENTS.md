@@ -44,3 +44,48 @@ Base config runs on HTTP. Add `-f docker-compose.https.yml` for HTTPS mode:
 | HTTPS | `docker compose -f docker-compose.yml -f docker-compose.https.yml up -d` |
 
 HTTPS mode requires self-signed certs at `/root/certs/bolt-talka.{crt,key}` on the host.
+
+## Production Logs & Debugging
+
+### Log levels
+`LOG_LEVEL` env var: `trace`, `debug`, `info`, `warn`, `error`, `fatal` (default: `info`).
+In Docker (non-TTY), Pino outputs newline-delimited JSON — pipe through `pino-pretty` for readability:
+
+```
+docker compose logs app | npx pino-pretty
+```
+
+### Viewing logs
+
+| Command | What it shows |
+|---|---|
+| `docker compose logs -f` | Tail all services |
+| `docker compose logs -f app` | Tail app only |
+| `docker compose logs -f nginx` | Tail nginx only |
+| `docker compose logs --tail=100 app` | Last 100 lines |
+| `docker compose logs app 2>&1 \| grep -i error` | Filter errors |
+
+### Debug mode
+Set `LOG_LEVEL=debug` and recreate:
+
+```
+LOG_LEVEL=debug docker compose up -d
+```
+
+### Nginx logs (inside container)
+Nginx logs aren't sent to stdout — access them via:
+
+```
+docker compose exec nginx tail -f /var/log/nginx/access.log
+docker compose exec nginx tail -f /var/log/nginx/error.log
+```
+
+### Common debugging commands
+
+| Action | Command |
+|---|---|
+| Check container health | `docker compose ps` |
+| Exec into app container | `docker compose exec app sh` |
+| Check PostgreSQL | `docker compose exec postgres psql -U boltalka -c "\dt"` |
+| Check Redis | `docker compose exec redis redis-cli ping` |
+| Check TURN server | `docker compose exec coturn ps aux` |
