@@ -34,6 +34,7 @@ export default function CallOverlay({
   const { t } = useTranslation();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (localVideoRef.current && localStream) {
@@ -49,6 +50,12 @@ export default function CallOverlay({
         if (err.name !== "AbortError")
           console.warn("remote video play() failed:", err);
       });
+    }
+  }, [remoteStream]);
+
+  useEffect(() => {
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
 
@@ -80,6 +87,7 @@ export default function CallOverlay({
         )}
         {(!remoteStream || isAudio) && (
           <div className="call-remote-placeholder">
+            {isAudio && <audio ref={remoteAudioRef} autoPlay playsInline />}
             <div className="call-peer-avatar">
               {peerName.charAt(0).toUpperCase()}
             </div>
