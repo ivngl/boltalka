@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -12,6 +18,7 @@ services:
     restart: unless-stopped
     networks:
       - boltalka-net
+    logging: *default-logging
 
   redis:
     image: redis:7-alpine
@@ -20,6 +27,7 @@ services:
     restart: unless-stopped
     networks:
       - boltalka-net
+    logging: *default-logging
 
   coturn:
     image: instrumentisto/coturn:latest
@@ -38,6 +46,7 @@ services:
     restart: unless-stopped
     networks:
       - boltalka-net
+    logging: *default-logging
 
   app:
     build: .
@@ -54,6 +63,7 @@ services:
       TURN_SECRET: ${TURN_SECRET}
       TURN_URL: ${TURN_URL:-turn:coturn:3478}
       URL_PROTOCOL: ${URL_PROTOCOL:-http}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - ./client:/app/client
       - /app/client/node_modules
@@ -61,6 +71,7 @@ services:
     restart: unless-stopped
     networks:
       - boltalka-net
+    logging: *default-logging
 
   nginx:
     image: nginx:alpine
@@ -74,6 +85,7 @@ services:
     restart: unless-stopped
     networks:
       - boltalka-net
+    logging: *default-logging
 
 volumes:
   pgdata:

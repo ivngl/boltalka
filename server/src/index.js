@@ -8,6 +8,8 @@ import { createServer } from "node:http";
 import multer from "multer";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import pino from "pino";
+import pinoHttp from "pino-http";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { Server } from "socket.io";
@@ -21,10 +23,19 @@ import { conversationRoutes } from "./routes/conversations.js";
 import { pushRoutes } from "./routes/push.js";
 import { initPush, sendNotification } from "./push.js";
 
+const logger = pino({
+  level: process.env.LOG_LEVEL || "info",
+  ...(process.stdout.isTTY
+    ? { transport: { target: "pino-pretty" } }
+    : {}),
+});
+
 const prisma = new PrismaClient();
 const app = express();
 app.set("trust proxy", 2);
 const httpServer = createServer(app);
+
+app.use(pinoHttp({ logger }));
 
 /**
  * @openapi
@@ -143,23 +154,32 @@ try {
       retryStrategy: () => null,
     });
     subClient = pubClient.duplicate();
-    pubClient.on("error", () => {});
-    pubClient.on("close", () => {});
-    subClient.on("error", () => {});
-    subClient.on("close", () => {});
+    pubClient.on("error", (err) => logger.error({ err }, "redis error"));
+    pubClient.on("close", () => logger.warn("redis connection closed"));
+    subClient.on("error", (err) => logger.error({ err }, "redis sub error"));
+    subClient.on("close", () => logger.warn("redis sub connection closed"));
   }
 } catch {
-  console.log("Redis unavailable — running without adapter");
+  logger.warn("Redis unavailable — running without adapter");
 }
 
-process.on("unhandledRejection", () => {});
+process.on("unhandledRejection", (reason) => {
+  logger.error({ err: reason }, "unhandled rejection");
+});
+
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "uncaught exception");
+  process.exit(1);
+});
 
 const io = new Server(httpServer, { cors: { origin: allowedOrigins } });
 
 if (pubClient && subClient) {
   try {
     io.adapter(createAdapter(pubClient, subClient));
-  } catch {}
+  } catch (err) {
+    logger.error({ err }, "failed to set redis adapter");
+  }
 }
 
 const userSockets = new Map();
@@ -214,6 +234,7 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
   const userId = socket.userId;
+  logger.info({ userId }, "socket connected");
   userSockets.set(userId, socket.id);
   socket.join(`user:${userId}`);
   for (const [onlineUserId] of userSockets) {
@@ -272,6 +293,7 @@ io.on("connection", (socket) => {
 
       if (ack) ack({ success: true, message });
     } catch (err) {
+      logger.error({ err, userId, conversationId: data.conversationId }, "send_message failed");
       if (ack) ack({ success: false, error: err.message });
     }
   });
@@ -309,6 +331,7 @@ io.on("connection", (socket) => {
       io.to(conversationId).emit("message_deleted", { messageId, conversationId });
       if (ack) ack({ success: true });
     } catch (err) {
+      logger.error({ err, userId, messageId, conversationId }, "delete_message failed");
       if (ack) ack({ success: false, error: err.message });
     }
   });
@@ -339,12 +362,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("offer", ({ targetId, sdp }) => {
-    console.log("[offer] from:", userId, "to:", targetId);
+    logger.info({ from: userId, to: targetId }, "webrtc offer");
     io.to(`user:${targetId}`).emit("offer", { sdp, from: userId });
   });
 
   socket.on("answer", ({ targetId, sdp }) => {
-    console.log("[answer] from:", userId, "to:", targetId);
+    logger.info({ from: userId, to: targetId }, "webrtc answer");
     io.to(`user:${targetId}`).emit("answer", { sdp, from: userId });
   });
 
@@ -365,6 +388,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    logger.info({ userId }, "socket disconnected");
     userSockets.delete(userId);
     io.emit("presence", { userId, online: false });
   });
@@ -372,5 +396,5 @@ io.on("connection", (socket) => {
 
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info({ port: PORT }, "server started");
 });
