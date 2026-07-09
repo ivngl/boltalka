@@ -34,7 +34,15 @@ Copy `server/.env.example` to `server/.env` and set `DATABASE_URL` accordingly b
 - nginx proxies `/api/turn-config` — no special routing needed
 - For production: set `TURN_SECRET` in `.env`, expose UDP 3478 + 40000-40999 on firewall, replace `TURN_URL` with public server hostname
 
-## HTTP / HTTPS
+## Push Notifications / VAPID
+
+Web Push uses VAPID keys. Dev keys are in `server/.env.example`. For production, generate fresh ones:
+
+```
+npx web-push generate-vapid-keys
+```
+
+Set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` in your `server/.env` and in a `.env` file in the project root (Docker Compose reads it automatically). Both must be present; push is silently disabled otherwise.
 
 Base config runs on HTTP. Add `-f docker-compose.https.yml` for HTTPS mode:
 

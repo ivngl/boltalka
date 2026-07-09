@@ -18,7 +18,8 @@ export async function subscribePush(
       applicationServerKey: publicKey,
     });
     return sub;
-  } catch {
+  } catch (e) {
+    console.warn("[Boltalka] push subscribe failed:", e);
     return null;
   }
 }

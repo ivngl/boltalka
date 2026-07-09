@@ -64,6 +64,8 @@ services:
       TURN_URL: ${TURN_URL:-turn:coturn:3478}
       URL_PROTOCOL: ${URL_PROTOCOL:-http}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
     volumes:
       - ./client:/app/client
       - /app/client/node_modules
