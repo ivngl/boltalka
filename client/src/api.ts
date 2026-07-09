@@ -74,3 +74,16 @@ export async function uploadFile(file: File): Promise<UploadResult> {
   });
   return data;
 }
+
+export async function getVapidPublicKey(): Promise<string> {
+  const { data } = await api.get("/api/push/vapid-public-key");
+  return data.publicKey;
+}
+
+export async function subscribePushServer(subscription: { endpoint: string; p256dh: string; auth: string }): Promise<void> {
+  await api.post("/api/push/subscribe", subscription);
+}
+
+export async function unsubscribePushServer(endpoint: string): Promise<void> {
+  await api.delete("/api/push/subscribe", { data: { endpoint } });
+}

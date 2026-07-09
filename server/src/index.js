@@ -18,6 +18,8 @@ import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { authRoutes } from "./routes/auth.js";
 import { conversationRoutes } from "./routes/conversations.js";
+import { pushRoutes } from "./routes/push.js";
+import { initPush, sendNotification } from "./push.js";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -161,9 +163,11 @@ if (pubClient && subClient) {
 }
 
 const userSockets = new Map();
+initPush();
 
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma, io));
+app.use("/api/push", pushRoutes(prisma));
 
 /**
  * @openapi
@@ -247,6 +251,24 @@ io.on("connection", (socket) => {
         where: { id: data.conversationId },
         data: { updatedAt: new Date() },
       });
+
+      const participants = await prisma.conversationParticipant.findMany({
+        where: { conversationId: data.conversationId, userId: { not: userId } },
+        include: { user: { select: { pushSubscriptions: true } } },
+      });
+
+      for (const p of participants) {
+        if (userSockets.has(p.userId)) continue;
+        for (const sub of p.user.pushSubscriptions) {
+          const result = await sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            { title: message.sender?.username || "Boltalka", body: message.content || (data.fileName ? `Sent a file: ${data.fileName}` : ""), url: "/" },
+          );
+          if (result.expired) {
+            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+          }
+        }
+      }
 
       if (ack) ack({ success: true, message });
     } catch (err) {

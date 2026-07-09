@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.ts";
-import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation } from "./api.ts";
+import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation, getVapidPublicKey, subscribePushServer } from "./api.ts";
+import { registerSW, subscribePush, unsubscribePush } from "./push.ts";
 import Profile from "./components/Profile/Profile.tsx";
 import AuthScreen from "./components/AuthScreen/AuthScreen.tsx";
 import Sidebar from "./components/Sidebar/Sidebar.tsx";
@@ -129,6 +130,7 @@ function App() {
     initSocket(data.token);
     loadData();
     requestNotif();
+    setupPush();
   }
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
@@ -141,6 +143,17 @@ function App() {
     initSocket(data.token);
     loadData();
     requestNotif();
+    setupPush();
+  }
+
+  async function setupPush() {
+    const swReg = await registerSW();
+    if (!swReg) return;
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const publicKey = await getVapidPublicKey();
+    if (!publicKey) return;
+    const sub = await subscribePush(swReg, publicKey);
+    if (sub) await subscribePushServer({ endpoint: sub.endpoint, p256dh: sub.toJSON().keys?.p256dh ?? "", auth: sub.toJSON().keys?.auth ?? "" });
   }
 
   function requestNotif() {
@@ -149,7 +162,9 @@ function App() {
     }
   }
 
-  function logout() {
+  async function logout() {
+    const swReg = await navigator.serviceWorker?.getRegistration();
+    if (swReg) await unsubscribePush(swReg);
     localStorage.removeItem("token");
     disconnectSocket();
     setUser(null);
