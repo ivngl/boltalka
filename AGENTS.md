@@ -43,7 +43,18 @@ Base config runs on HTTP. Add `-f docker-compose.https.yml` for HTTPS mode:
 | HTTP  | `docker compose up -d` |
 | HTTPS | `docker compose -f docker-compose.yml -f docker-compose.https.yml up -d` |
 
-HTTPS mode requires self-signed certs at `/root/certs/bolt-talka.{crt,key}` on the host.
+HTTPS mode uses Let's Encrypt for trusted certificates. Get one for your sslip.io domain:
+
+```
+docker run --rm \
+  -v $(pwd)/certbot-webroot:/var/www/html \
+  -v /etc/letsencrypt:/etc/letsencrypt \
+  certbot/certbot certonly --webroot -w /var/www/html -d <IP>.sslip.io
+```
+
+Then restart nginx: `docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --force-recreate nginx`
+
+Auto-renew daily via cron: `0 3 * * * docker run --rm -v $(pwd)/certbot-webroot:/var/www/html -v /etc/letsencrypt:/etc/letsencrypt certbot/certbot renew && docker compose -f $(pwd)/docker-compose.yml -f $(pwd)/docker-compose.https.yml exec nginx nginx -s reload`
 
 ## Production Logs & Debugging
 
