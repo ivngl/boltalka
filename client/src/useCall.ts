@@ -171,6 +171,8 @@ export function useCall(userId?: string | null): UseCallReturn {
     pendingIceRef.current = [];
     pendingOfferRef.current = null;
     peerIdRef.current = null;
+    acceptingRef.current = false;
+    callAcceptedInProgressRef.current = false;
     callTypeRef.current = "video";
     setStateIfMounted(setLocalStream, null);
     setStateIfMounted(setRemoteStream, null);
