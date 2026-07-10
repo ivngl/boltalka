@@ -151,7 +151,7 @@ try {
       lazyConnect: true,
       enableOfflineQueue: false,
       maxRetriesPerRequest: null,
-      retryStrategy: () => null,
+      retryStrategy: (times) => Math.min(times * 200, 5000),
     });
     subClient = pubClient.duplicate();
     pubClient.on("error", (err) => logger.error({ err }, "redis error"));
