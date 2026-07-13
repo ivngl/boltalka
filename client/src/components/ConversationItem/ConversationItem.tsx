@@ -126,11 +126,9 @@ export default function ConversationItem({
         onSelect();
       }}
     >
-      <div onClick={onOpenProfile} style={{ cursor: "pointer" }}>
+      <div onClick={onOpenProfile} style={{ cursor: "pointer", display: "flex", flex: 1}}>
         <Avatar username={displayNameStr} online={online} />
-      </div>
-      <div className="conv-info">
-        {editingAlias ? (
+                {editingAlias ? (
           <input
             ref={inputRef}
             className="conv-alias-input"
@@ -147,10 +145,15 @@ export default function ConversationItem({
             <span className="conv-username">{username}</span>
           </div>
         )}
-        <div className="conv-preview">
-          {conversation.messages?.[0]?.content?.slice(0, 30) || ""}
-        </div>
       </div>
+
+
+        <div className="conv-preview">
+          <span>
+            {conversation.messages?.[0]?.content?.slice(0, 30) || ""}
+          </span>
+        </div>
+
       <div className="conv-menu-wrapper">
         <button
           className="conv-menu-btn"
