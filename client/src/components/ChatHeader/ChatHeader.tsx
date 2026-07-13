@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import Avatar from "../Avatar/Avatar.tsx";
-import type { CallState } from "../../useCall.ts";
-import type { Conversation, Participant } from "../../types.ts";
 import { setParticipantAlias } from "../../api.ts";
-import "./ChatHeader.css";
+import type { Conversation, Participant } from "../../types.ts";
+import type { CallState } from "../../useCall.ts";
+import Avatar from "../Avatar/Avatar.tsx";
 import PhoneIcon from "../Icons/PhoneIcon.tsx";
 import VideoCamIcon from "../Icons/VideoCamIcon.tsx";
+import "./ChatHeader.css";
 
 interface ChatHeaderProps {
   activeConvName: string;
@@ -78,23 +78,19 @@ export default function ChatHeader({
     <div className="chat-header">
       <div className="chat-header-left">
         {profileTitle ? (
-          <button className="back-btn-profile" onClick={onBack}>
+          <button className="back-btn" onClick={onBack}>
             <span className="back-btn-icon">←</span>
           </button>
         ) : activeConvName && (
           <>
-            <button className="back-btn-mobile" onClick={onBack}><span className="back-btn-icon">←</span></button>
+            <button className="back-btn" onClick={onBack}><span className="back-btn-icon">←</span></button>
             <div
               className="chat-header-user"
               onClick={() => { if (onParticipantClick && other) onParticipantClick(other); }}
-              style={{ cursor:"pointer", display: "flex", alignItems: "center", gap: "0.5rem" }}
             >
               <Avatar username={activeConvName} avatar={other?.user.avatar} size={32} online={otherUserOnline} />
               {other ? (
-                <>
-                  <span className="chat-conv-name">{other.alias || other.user.name || other.user.username}</span>
-                  <span className="chat-conv-username">{other.user.username}</span>
-                </>
+                <span className="chat-conv-name">{other.alias || other.user.name || other.user.username}</span>
               ) : (
                 <span className="chat-conv-name">{activeConvName}</span>
               )}

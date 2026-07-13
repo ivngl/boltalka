@@ -10,7 +10,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.7rem;
   min-width: 0;
 }
 
@@ -27,6 +27,13 @@
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
+}
+
+.chat-header-user {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
 }
 
 .chat-conv-username {
@@ -79,36 +86,20 @@
   align-items: center;
 }
 
-.back-btn-mobile {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.back-btn-mobile:hover {
-  background: var(--bg-tertiary);
-}
-
-.back-btn-profile {
+.back-btn {
   display: inline-flex;
   align-items: center;
   background: none;
   border: none;
   color: var(--text-primary);
   font-size: 1.5rem;
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0;
   border-radius: 6px;
   cursor: pointer;
   line-height: 1;
 }
 
-.back-btn-profile:hover {
+.back-btn:hover {
   background: var(--bg-tertiary);
 }
 
@@ -137,7 +128,7 @@
 }
 
 @media (max-width: 768px) {
-  .back-btn-mobile {
+  .back-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;

@@ -97,7 +97,7 @@ export default function Sidebar({
           .map((c) => {
             const textName = conversationName(c, user.id);
             const other = otherParticipant(c, user.id);
-            const displayNameNode = other ? (other.alias || other.name ) : textName;
+            const displayNameNode = other ? (other.alias || other.name || other.username) : textName;
             return (
               <ConversationItem
                 key={c.id}
