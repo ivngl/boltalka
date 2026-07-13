@@ -10,11 +10,12 @@ import ChatHeader from "./components/ChatHeader/ChatHeader.tsx";
 import MessageList from "./components/MessageList/MessageList.tsx";
 import MessageForm from "./components/MessageForm/MessageForm.tsx";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal/ConfirmDeleteModal.tsx";
+import ParticipantProfile from "./components/ParticipantProfile/ParticipantProfile.tsx";
 import CallOverlay from "./components/CallOverlay/CallOverlay.tsx";
 import IncomingCallModal from "./components/IncomingCallModal/IncomingCallModal.tsx";
 import { conversationName, otherParticipant } from "./components/helpers.tsx";
 import { useCall } from "./useCall.ts";
-import type { User, Message, Conversation, ViewState } from "./types.ts";
+import type { User, Message, Conversation, Participant, ViewState } from "./types.ts";
 import "./App.css";
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
   const [sending, setSending] = useState(false);
   const [confirmDeleteConvId, setConfirmDeleteConvId] = useState<number | null>(null);
   const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<number | null>(null);
+  const [profileParticipant, setProfileParticipant] = useState<Participant | null>(null);
 
   const [view, setView] = useState<ViewState>("auth");
   const activeConvRef = useRef<Conversation | null>(null);
@@ -354,21 +356,26 @@ function App() {
         onStartDM={startDM}
         onDeleteRequest={(convId) => setConfirmDeleteConvId(convId)}
         onAliasChanged={handleAliasChanged}
+        onParticipantClick={(p) => setProfileParticipant(p as Participant)}
       />
       <main className="chat-area">
         <ChatHeader
           activeConvName={activeConvName}
           activeConv={activeConv}
           currentUserId={user?.id}
-          onBack={chatBack}
+          onBack={view === "profile" ? () => setView("chat") : profileParticipant ? () => setProfileParticipant(null) : chatBack}
           onStartAudioCall={onStartAudioCall}
           onStartVideoCall={onStartVideoCall}
           otherUserOnline={otherUserOnline}
           callState={callState}
           onAliasChanged={handleAliasChanged}
+          onParticipantClick={(p) => setProfileParticipant(p)}
+          profileTitle={view === "profile" ? user.username : profileParticipant ? (profileParticipant.alias || profileParticipant.user.name || profileParticipant.user.username) : undefined}
         />
         {view === "profile" ? (
-          <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
+          <Profile user={user} onUpdate={handleUpdateUser} />
+        ) : profileParticipant ? (
+          <ParticipantProfile participant={profileParticipant} />
         ) : !activeConv ? (
           <div className="empty-state">{t("chat.empty")}</div>
         ) : (

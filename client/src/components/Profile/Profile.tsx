@@ -9,10 +9,9 @@ import "./Profile.css";
 interface ProfileProps {
   user: User;
   onUpdate: (user: User) => void;
-  onBack: () => void;
 }
 
-export default function Profile({ user, onUpdate, onBack }: ProfileProps) {
+export default function Profile({ user, onUpdate }: ProfileProps) {
   const { t } = useTranslation();
   const [username, setUsername] = useState(user.username);
   const [name, setName] = useState(user.name || "");
@@ -50,10 +49,6 @@ export default function Profile({ user, onUpdate, onBack }: ProfileProps) {
 
   return (
     <div className="profile-page">
-      <div className="profile-header">
-        <button className="back-btn" onClick={onBack}>{t("profile.back")}</button>
-        <h2>{t("profile.title")}</h2>
-      </div>
       <div className="profile-avatar">
         <Avatar username={user.username} size={80} />
       </div>

@@ -1,4 +1,5 @@
 .conv-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -19,9 +20,20 @@
   min-width: 0;
 }
 
+.conv-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
 .conv-name {
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+.conv-username {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 .conv-preview {
@@ -32,23 +44,85 @@
   text-overflow: ellipsis;
 }
 
-.conv-delete {
+.conv-menu-wrapper {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding-right: 0.75rem;
+  border-radius: 6px;
+}
+
+.conv-menu-wrapper:hover {
+  background: var(--bg-secondary);
+}
+
+.conv-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  padding: 4px 0;
+}
+
+.conv-menu-wrapper:hover {
+  background: var(--bg-secondary);
+}
+
+.conv-menu-btn {
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0 0.2rem;
+  font-size: 1rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
   line-height: 1;
-  opacity: 0;
-  transition: opacity 0.15s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
-.conv-item:hover .conv-delete {
-  opacity: 1;
+.conv-menu-btn:hover {
+  color: var(--text-primary);
 }
 
-.conv-delete:hover {
+.conv-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  padding: 4px 0;
+}
+
+.conv-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.conv-menu-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.conv-menu-item-danger {
   color: var(--accent-red);
 }
 
@@ -62,31 +136,4 @@
   background: var(--bg-secondary);
   color: var(--text-primary);
   outline: none;
-}
-
-.context-menu {
-  position: fixed;
-  z-index: 1000;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 140px;
-  padding: 4px 0;
-}
-
-.context-menu-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 6px 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.85rem;
-  color: var(--text-primary);
-}
-
-.context-menu-item:hover {
-  background: var(--bg-tertiary);
 }

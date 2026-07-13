@@ -11,7 +11,7 @@
 .profile-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   width: 100%;
   max-width: 400px;
   margin-bottom: 1.5rem;
@@ -22,11 +22,21 @@
 }
 
 .back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
+  border: none;
   color: var(--text-primary);
-  padding: 0.3rem 0.8rem;
+  font-size: 1.5rem;
+  padding: 0.2rem 0.5rem;
   border-radius: 6px;
-  font-size: 0.85rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.back-btn:hover {
+  background: var(--bg-tertiary);
 }
 
 .profile-avatar {

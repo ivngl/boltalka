@@ -14,12 +14,24 @@
   min-width: 0;
 }
 
+.chat-header-avatar {
+  line-height: 0;
+}
+
 .chat-conv-name {
   font-weight: 600;
   font-size: 0.95rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.chat-conv-name-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.chat-conv-username {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 .chat-header-center {
@@ -80,6 +92,23 @@
 }
 
 .back-btn-mobile:hover {
+  background: var(--bg-tertiary);
+}
+
+.back-btn-profile {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.back-btn-profile:hover {
   background: var(--bg-tertiary);
 }
 

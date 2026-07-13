@@ -22,6 +22,7 @@ interface SidebarProps {
   onStartDM: (userId: number) => void;
   onDeleteRequest: (convId: number) => void;
   onAliasChanged?: (conversationId: number, userId: number, alias: string | null) => void;
+  onParticipantClick?: (participant: { user: { id: number; username: string; name?: string }; alias?: string; joinedAt?: string }) => void;
 }
 
 export default function Sidebar({
@@ -36,6 +37,7 @@ export default function Sidebar({
   onStartDM,
   onDeleteRequest,
   onAliasChanged,
+  onParticipantClick,
 }: SidebarProps) {
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -54,11 +56,7 @@ export default function Sidebar({
         <div className="sidebar-header-right">
           <div className="menu-wrapper">
             <button onClick={() => setMenuOpen((p) => !p)} className="menu-btn" title="Menu">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <circle cx="12" cy="5" r="2" />
-                <circle cx="12" cy="12" r="2" />
-                <circle cx="12" cy="19" r="2" />
-              </svg>
+              <MenuIcon />
             </button>
             {menuOpen && (
               <>
@@ -72,7 +70,7 @@ export default function Sidebar({
                   </button>
                   <div className="menu-divider" />
                   <button onClick={() => { onLogout(); setMenuOpen(false); }} className="menu-item menu-item-logout">
-                    <span className="menu-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.89-2-2-2z"/></svg></span> {t("chat.logout")}
+                    <span className="menu-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.89-2-2-2z" /></svg></span> {t("chat.logout")}
                   </button>
                 </div>
               </>
@@ -102,12 +100,14 @@ export default function Sidebar({
                 conversation={c}
                 name={displayNameNode}
                 displayName={textName}
+                username={other?.alias ? other.username : undefined}
                 currentUserId={user.id}
                 isActive={activeConv?.id === c.id}
                 online={onlineUsers.has(other?.id ?? 0)}
                 onSelect={() => onSelectConversation(c)}
                 onDeleteRequest={() => onDeleteRequest(c.id)}
                 onAliasChanged={onAliasChanged}
+                onAvatarClick={onParticipantClick}
               />
             );
           })}
