@@ -87,3 +87,7 @@ export async function subscribePushServer(subscription: { endpoint: string; p256
 export async function unsubscribePushServer(endpoint: string): Promise<void> {
   await api.delete("/api/push/subscribe", { data: { endpoint } });
 }
+
+export async function setParticipantAlias(conversationId: number, userId: number, alias: string | null): Promise<void> {
+  await api.put(`/conversations/${conversationId}/participants/${userId}/alias`, { alias });
+}

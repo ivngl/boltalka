@@ -64,5 +64,9 @@
   "call.turn_on_video": "Turn on camera",
   "call.cancel": "Cancel",
   "menu.dark_mode": "Dark mode",
-  "menu.light_mode": "Light mode"
+  "menu.light_mode": "Light mode",
+  "chat.set_alias": "Set nickname",
+  "chat.edit_alias": "Edit nickname",
+  "chat.clear_alias": "Clear nickname",
+  "chat.alias_placeholder": "Nickname"
 }

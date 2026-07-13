@@ -1,14 +1,17 @@
 import { useTranslation } from "react-i18next";
+import { displayName } from "../helpers.tsx";
 import type { Message } from "../../types.ts";
+import "../shared.css";
 import "./MessageBubble.css";
 
 interface MessageBubbleProps {
   message: Message;
   isMine: boolean;
+  senderAlias?: string;
   onDelete: (messageId: number) => void;
 }
 
-export default function MessageBubble({ message, isMine, onDelete }: MessageBubbleProps) {
+export default function MessageBubble({ message, isMine, senderAlias, onDelete }: MessageBubbleProps) {
   const { t } = useTranslation();
   const secureUrl = message.fileUrl?.replace(/^http:\/\//i, "https://");
 
@@ -25,7 +28,7 @@ export default function MessageBubble({ message, isMine, onDelete }: MessageBubb
 
   return (
     <div className={`msg ${isMine ? "mine" : ""}`}>
-      {!isMine && <div className="msg-sender">{message.sender?.username}</div>}
+      {!isMine && <div className="msg-sender">{message.sender ? displayName(message.sender, senderAlias) : ""}</div>}
       {message.fileUrl && (
         <div className="msg-file">
           {message.fileType?.startsWith("image/") ? (

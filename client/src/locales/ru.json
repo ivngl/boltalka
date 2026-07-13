@@ -64,5 +64,9 @@
   "call.turn_on_video": "Включить камеру",
   "call.cancel": "Отмена",
   "menu.dark_mode": "Тёмная тема",
-  "menu.light_mode": "Светлая тема"
+  "menu.light_mode": "Светлая тема",
+  "chat.set_alias": "Задать никнейм",
+  "chat.edit_alias": "Изменить никнейм",
+  "chat.clear_alias": "Убрать никнейм",
+  "chat.alias_placeholder": "Никнейм"
 }

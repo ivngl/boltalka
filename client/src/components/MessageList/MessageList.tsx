@@ -8,10 +8,11 @@ interface MessageListProps {
   messages: Message[];
   currentUserId: number;
   typingUsers: Record<number, boolean>;
+  senderAliases: Record<number, string>;
   onDeleteMessage: (messageId: number) => void;
 }
 
-export default function MessageList({ messages, currentUserId, typingUsers, onDeleteMessage }: MessageListProps) {
+export default function MessageList({ messages, currentUserId, typingUsers, senderAliases, onDeleteMessage }: MessageListProps) {
   const { t } = useTranslation();
   const msgEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -22,7 +23,7 @@ export default function MessageList({ messages, currentUserId, typingUsers, onDe
   return (
     <div className="messages">
       {messages.map((m) => (
-        <MessageBubble key={m.id} message={m} isMine={m.senderId === currentUserId} onDelete={onDeleteMessage} />
+        <MessageBubble key={m.id} message={m} isMine={m.senderId === currentUserId} senderAlias={m.senderId !== currentUserId ? senderAliases[m.senderId] : undefined} onDelete={onDeleteMessage} />
       ))}
       {Object.entries(typingUsers).filter(([, v]) => v).length > 0 && (
         <div className="typing-indicator">{t("chat.typing")}</div>

@@ -15,20 +15,6 @@ function auth(req, res, next) {
 export function conversationRoutes(prisma, io) {
   const router = Router();
 
-  /**
-   * @openapi
-   * /conversations:
-   *   get:
-   *     tags: [Conversations]
-   *     summary: List all conversations for the current user
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: List of conversations
-   *       401:
-   *         description: Unauthorized
-   */
   router.get("/", auth, async (req, res) => {
     const conversations = await prisma.conversation.findMany({
       where: {
@@ -37,7 +23,7 @@ export function conversationRoutes(prisma, io) {
       include: {
         participants: {
           include: {
-            user: { select: { id: true, username: true, avatar: true } },
+            user: { select: { id: true, username: true, name: true, avatar: true } },
           },
         },
         messages: {
@@ -45,7 +31,7 @@ export function conversationRoutes(prisma, io) {
           orderBy: { createdAt: "desc" },
           take: 1,
           include: {
-            sender: { select: { id: true, username: true } },
+            sender: { select: { id: true, username: true, name: true } },
           },
         },
       },
@@ -54,26 +40,38 @@ export function conversationRoutes(prisma, io) {
     res.json(conversations);
   });
 
-  /**
-   * @openapi
-   * /conversations/users:
-   *   get:
-   *     tags: [Conversations]
-   *     summary: List all other users
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: List of users
-   *       401:
-   *         description: Unauthorized
-   */
   router.get("/users", auth, async (req, res) => {
     const users = await prisma.user.findMany({
       where: { id: { not: req.userId } },
-      select: { id: true, username: true, avatar: true },
+      select: { id: true, username: true, name: true, avatar: true },
     });
     res.json(users);
+  });
+
+  router.put("/:id/participants/:userId/alias", auth, async (req, res) => {
+    const { id, userId } = req.params;
+    const { alias } = req.body;
+
+    const participant = await prisma.conversationParticipant.findUnique({
+      where: { userId_conversationId: { userId: req.userId, conversationId: id } },
+    });
+    if (!participant) return res.status(403).json({ error: "Not a participant" });
+
+    const target = await prisma.conversationParticipant.findUnique({
+      where: { userId_conversationId: { userId, conversationId: id } },
+    });
+    if (!target) return res.status(404).json({ error: "User not in conversation" });
+
+    const updated = await prisma.conversationParticipant.update({
+      where: { userId_conversationId: { userId, conversationId: id } },
+      data: { alias: alias || null },
+      include: {
+        user: { select: { id: true, username: true, name: true, avatar: true } },
+      },
+    });
+
+    if (io) io.to(id).emit("participant_updated", { conversationId: id, participant: updated });
+    res.json(updated);
   });
 
   /**
@@ -104,13 +102,15 @@ export function conversationRoutes(prisma, io) {
       where: { id },
       include: {
         participants: {
-          include: { user: { select: { id: true, username: true, avatar: true } } },
+          include: {
+            user: { select: { id: true, username: true, name: true, avatar: true } },
+          },
         },
         messages: {
           where: { deletedAt: null },
           orderBy: { createdAt: "desc" },
           take: 1,
-          include: { sender: { select: { id: true, username: true } } },
+          include: { sender: { select: { id: true, username: true, name: true } } },
         },
       },
     });
@@ -165,7 +165,7 @@ export function conversationRoutes(prisma, io) {
       orderBy: { createdAt: "desc" },
       take: Number(limit),
       include: {
-        sender: { select: { id: true, username: true, avatar: true } },
+        sender: { select: { id: true, username: true, name: true, avatar: true } },
       },
     });
     res.json(messages.reverse());
@@ -227,7 +227,7 @@ export function conversationRoutes(prisma, io) {
         fileType: fileType || null,
         fileSize: fileSize ? Number(fileSize) : null,
       },
-      include: { sender: { select: { id: true, username: true, avatar: true } } },
+      include: { sender: { select: { id: true, username: true, name: true, avatar: true } } },
     });
 
     await prisma.conversation.update({
@@ -289,7 +289,7 @@ export function conversationRoutes(prisma, io) {
         },
         include: {
           participants: {
-            include: { user: { select: { id: true, username: true, avatar: true } } },
+            include: { user: { select: { id: true, username: true, name: true, avatar: true } } },
           },
         },
       });
@@ -306,7 +306,7 @@ export function conversationRoutes(prisma, io) {
       },
       include: {
         participants: {
-          include: { user: { select: { id: true, username: true, avatar: true } } },
+          include: { user: { select: { id: true, username: true, name: true, avatar: true } } },
         },
       },
     });

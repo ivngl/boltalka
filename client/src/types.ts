@@ -22,6 +22,7 @@ export interface Message {
 export interface Participant {
   user: User;
   joinedAt: string;
+  alias?: string;
 }
 
 export interface Conversation {

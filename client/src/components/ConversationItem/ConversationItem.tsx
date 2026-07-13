@@ -1,45 +1,182 @@
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import Avatar from "../Avatar/Avatar.tsx";
 import type { Conversation } from "../../types.ts";
+import { setParticipantAlias } from "../../api.ts";
 import "./ConversationItem.css";
 import "../shared.css";
+import MenuIcon from "../Icons/MenuIcon.tsx";
 
 interface ConversationItemProps {
+  onOpenProfile: () => void;
   conversation: Conversation;
-  name: string;
+  name: ReactNode;
+  displayName: string;
+  username?: string;
+  currentUserId: number;
   isActive: boolean;
   online: boolean;
   onSelect: () => void;
   onDeleteRequest: () => void;
+  onAliasChanged?: (conversationId: number, userId: number, alias: string | null) => void;
+  onAvatarClick?: (participant: { user: { id: number; username: string; name?: string }; alias?: string; joinedAt?: string }) => void;
 }
 
 export default function ConversationItem({
+  onOpenProfile,
   conversation,
   name,
+  displayName: displayNameStr,
+  username,
+  currentUserId,
   isActive,
   online,
   onSelect,
   onDeleteRequest,
+  onAliasChanged,
+  onAvatarClick,
 }: ConversationItemProps) {
   const { t } = useTranslation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editingAlias, setEditingAlias] = useState(false);
+  const [aliasValue, setAliasValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef(false);
+  const originalAliasRef = useRef("");
+
+  useEffect(() => {
+    if (editingAlias && inputRef.current) inputRef.current.focus();
+  }, [editingAlias]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  const other = conversation.participants?.find((p) => p.user.id !== currentUserId);
+
+  const handleSetAlias = () => {
+    setMenuOpen(false);
+    const val = other?.alias || other?.user.name || "";
+    setAliasValue(val);
+    originalAliasRef.current = val.trim();
+    setEditingAlias(true);
+  };
+
+  const handleClearAlias = async () => {
+    if (!other) return;
+    setMenuOpen(false);
+    try {
+      await setParticipantAlias(conversation.id, other.user.id, null);
+      onAliasChanged?.(conversation.id, other.user.id, null);
+    } catch (err) {
+      console.error("Failed to clear alias", err);
+    }
+  };
+
+  const handleAliasSubmit = async () => {
+    if (!other) return;
+    const val = aliasValue.trim();
+    if (val === originalAliasRef.current) {
+      setEditingAlias(false);
+      return;
+    }
+    try {
+      await setParticipantAlias(conversation.id, other.user.id, val || null);
+      onAliasChanged?.(conversation.id, other.user.id, val || null);
+      setEditingAlias(false);
+    } catch (err) {
+      console.error("Failed to set alias", err);
+    }
+  };
+
+  const handleAliasKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleAliasSubmit();
+    else if (e.key === "Escape") {
+      cancelRef.current = true;
+      setEditingAlias(false);
+    }
+  };
+
+  const handleAliasBlur = () => {
+    if (cancelRef.current) {
+      cancelRef.current = false;
+      return;
+    }
+    handleAliasSubmit();
+  };
+
+  const handleDelete = () => {
+    setMenuOpen(false);
+    onDeleteRequest();
+  };
 
   return (
     <div
       className={`conv-item ${isActive ? "active" : ""}`}
-      onClick={onSelect}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest(".conv-menu-wrapper")) return;
+        onSelect();
+      }}
     >
-      <Avatar username={name} online={online} />
+      <div onClick={onOpenProfile} style={{ cursor: "pointer" }}>
+        <Avatar username={displayNameStr} online={online} />
+      </div>
       <div className="conv-info">
-        <div className="conv-name">{name}</div>
+        {editingAlias ? (
+          <input
+            ref={inputRef}
+            className="conv-alias-input"
+            value={aliasValue}
+            onChange={(e) => setAliasValue(e.target.value)}
+            onBlur={handleAliasBlur}
+            onKeyDown={handleAliasKeyDown}
+            placeholder={t("chat.alias_placeholder", "Nickname")}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <div className="conv-name-row">
+            <span className="conv-name">{name}</span>
+            {username && <span className="conv-username">{username}</span>}
+          </div>
+        )}
         <div className="conv-preview">
           {conversation.messages?.[0]?.content?.slice(0, 30) || ""}
         </div>
       </div>
-      <button
-        className="conv-delete"
-        onClick={(e) => { e.stopPropagation(); onDeleteRequest(); }}
-        title={t("chat.delete_chat")}
-      >×</button>
+      <div className="conv-menu-wrapper">
+        <hr />
+        <button
+          className="conv-menu-btn"
+          onClick={(e) => { e.stopPropagation(); setMenuOpen((p) => !p); }}
+        >
+          <MenuIcon />
+        </button>
+        {menuOpen && (
+          <div ref={menuRef} className="conv-menu-dropdown">
+            {conversation.type === "dm" && other && (
+              <button className="conv-menu-item" onClick={handleSetAlias}>
+                {other.alias ? t("chat.edit_alias", "Edit nickname") : t("chat.set_alias", "Set nickname")}
+              </button>
+            )}
+            {conversation.type === "dm" && other?.alias && (
+              <button className="conv-menu-item" onClick={handleClearAlias}>
+                {t("chat.clear_alias", "Clear nickname")}
+              </button>
+            )}
+            <button className="conv-menu-item conv-menu-item-danger" onClick={handleDelete}>
+              {t("chat.delete_chat")}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

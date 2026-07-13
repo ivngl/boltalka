@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { connectSocket, disconnectSocket, getSocket } from "./socket.ts";
 import { setToken, register, login, getMe, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation, getVapidPublicKey, subscribePushServer } from "./api.ts";
@@ -12,7 +12,7 @@ import MessageForm from "./components/MessageForm/MessageForm.tsx";
 import ConfirmDeleteModal from "./components/ConfirmDeleteModal/ConfirmDeleteModal.tsx";
 import CallOverlay from "./components/CallOverlay/CallOverlay.tsx";
 import IncomingCallModal from "./components/IncomingCallModal/IncomingCallModal.tsx";
-import { conversationName, otherParticipant } from "./components/helpers.ts";
+import { conversationName, otherParticipant } from "./components/helpers.tsx";
 import { useCall } from "./useCall.ts";
 import type { User, Message, Conversation, ViewState } from "./types.ts";
 import "./App.css";
@@ -102,6 +102,23 @@ function App() {
     s.on("stop_typing", ({ userId, conversationId }: { userId: number; conversationId: number }) => {
       if (conversationId !== activeConv?.id) return;
       setTypingUsers((prev) => ({ ...prev, [userId]: false }));
+    });
+    s.on("participant_updated", ({ conversationId, participant }: { conversationId: number; participant: { user: { id: number }; alias?: string } }) => {
+      const updateParticipants = (prev: Conversation[]) =>
+        prev.map((c) => {
+          if (c.id !== conversationId) return c;
+          return {
+            ...c,
+            participants: c.participants.map((p) =>
+              p.user.id === participant.user.id ? { ...p, alias: participant.alias } : p
+            ),
+          };
+        });
+      setConversations(updateParticipants);
+      setActiveConv((prev) => {
+        if (!prev || prev.id !== conversationId) return prev;
+        return updateParticipants([prev])[0];
+      });
     });
     s.on("message_deleted", ({ messageId }: { messageId: number }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
@@ -265,6 +282,37 @@ function App() {
   }
 
   const activeConvName = user && activeConv ? conversationName(activeConv, user.id) : "";
+  const senderAliases = useMemo(() => {
+    if (!activeConv || !user) return {};
+    const map: Record<number, string> = {};
+    for (const p of activeConv.participants) {
+      if (p.user.id !== user.id && p.alias) map[p.user.id] = p.alias;
+    }
+    return map;
+  }, [activeConv, user]);
+
+  const handleAliasChanged = useCallback((conversationId: number, userId: number, alias: string | null) => {
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id !== conversationId) return c;
+        return {
+          ...c,
+          participants: c.participants.map((p) =>
+            p.user.id === userId ? { ...p, alias: alias ?? undefined } : p
+          ),
+        };
+      })
+    );
+    setActiveConv((prev) => {
+      if (!prev || prev.id !== conversationId) return prev;
+      return {
+        ...prev,
+        participants: prev.participants.map((p) =>
+          p.user.id === userId ? { ...p, alias: alias ?? undefined } : p
+        ),
+      };
+    });
+  }, []);
   const otherUser = user && activeConv ? otherParticipant(activeConv, user.id) : null;
   const otherUserOnline = otherUser ? onlineUsers.has(otherUser.id) : false;
   const onStartAudioCall = useCallback(() => {
@@ -305,15 +353,19 @@ function App() {
         onSelectConversation={selectConversation}
         onStartDM={startDM}
         onDeleteRequest={(convId) => setConfirmDeleteConvId(convId)}
+        onAliasChanged={handleAliasChanged}
       />
       <main className="chat-area">
         <ChatHeader
           activeConvName={activeConvName}
+          activeConv={activeConv}
+          currentUserId={user?.id}
           onBack={chatBack}
           onStartAudioCall={onStartAudioCall}
           onStartVideoCall={onStartVideoCall}
           otherUserOnline={otherUserOnline}
           callState={callState}
+          onAliasChanged={handleAliasChanged}
         />
         {view === "profile" ? (
           <Profile user={user} onUpdate={handleUpdateUser} onBack={() => setView("chat")} />
@@ -325,6 +377,7 @@ function App() {
               messages={messages}
               currentUserId={user.id}
               typingUsers={typingUsers}
+              senderAliases={senderAliases}
               onDeleteMessage={handleDeleteMessage}
             />
             <MessageForm

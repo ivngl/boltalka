@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n.ts";
 import Avatar from "../Avatar/Avatar.tsx";
 import { useTheme } from "../../ThemeContext.tsx";
-import { conversationName, otherParticipant } from "../helpers.ts";
+import { displayName, conversationName, otherParticipant } from "../helpers.tsx";
 import "./Sidebar.css";
 import ConversationItem from "../ConversationItem/ConversationItem.tsx";
 import { MenuIcon, LogoutIcon } from "../Icons/index.ts";
@@ -21,6 +21,7 @@ interface SidebarProps {
   onSelectConversation: (conv: Conversation) => void;
   onStartDM: (userId: number) => void;
   onDeleteRequest: (convId: number) => void;
+  onAliasChanged?: (conversationId: number, userId: number, alias: string | null) => void;
 }
 
 export default function Sidebar({
@@ -34,6 +35,7 @@ export default function Sidebar({
   onSelectConversation,
   onStartDM,
   onDeleteRequest,
+  onAliasChanged,
 }: SidebarProps) {
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -91,17 +93,21 @@ export default function Sidebar({
         {conversations
           .filter((c) => conversationName(c, user.id).toLowerCase().includes(chatSearch.toLowerCase()))
           .map((c) => {
-            const name = conversationName(c, user.id);
+            const textName = conversationName(c, user.id);
             const other = otherParticipant(c, user.id);
+            const displayNameNode = other ? displayName(other, other.alias) : textName;
             return (
               <ConversationItem
                 key={c.id}
                 conversation={c}
-                name={name}
+                name={displayNameNode}
+                displayName={textName}
+                currentUserId={user.id}
                 isActive={activeConv?.id === c.id}
                 online={onlineUsers.has(other?.id ?? 0)}
                 onSelect={() => onSelectConversation(c)}
                 onDeleteRequest={() => onDeleteRequest(c.id)}
+                onAliasChanged={onAliasChanged}
               />
             );
           })}
