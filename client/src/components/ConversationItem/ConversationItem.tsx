@@ -126,33 +126,34 @@ export default function ConversationItem({
         onSelect();
       }}
     >
-      <div onClick={(e) => { e.stopPropagation(); onOpenProfile(); }} style={{ cursor: "pointer", display: "flex", flex: 1 }}>
+      <div>
         <Avatar username={displayNameStr} avatar={other?.user.avatar} online={online} />
-                {editingAlias ? (
-          <input
-            ref={inputRef}
-            className="conv-alias-input"
-            value={aliasValue}
-            onChange={(e) => setAliasValue(e.target.value)}
-            onBlur={handleAliasBlur}
-            onKeyDown={handleAliasKeyDown}
-            placeholder={t("chat.alias_placeholder", "Nickname")}
-            onClick={(e) => e.stopPropagation()}
-          />
-        ) : (
-          <div className="conv-name-row">
-            <span className="conv-name">{name}</span>
-            <span className="conv-username">{username}</span>
-          </div>
-        )}
       </div>
-
-
+      <div className="conv-content">
+        <div className="conv-name-row">
+          {editingAlias ? (
+            <input
+              ref={inputRef}
+              className="conv-alias-input"
+              value={aliasValue}
+              onChange={(e) => setAliasValue(e.target.value)}
+              onBlur={handleAliasBlur}
+              onKeyDown={handleAliasKeyDown}
+              placeholder={t("chat.alias_placeholder", "Nickname")}
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <>
+              <span className="conv-name">{name}</span>
+            </>
+          )}
+        </div>
         <div className="conv-preview">
           <span>
             {conversation.messages?.[0]?.content?.slice(0, 30) || t("chat.no_messages", "Click to write a message")}
           </span>
         </div>
+      </div>
 
       <div className="conv-menu-wrapper">
         <button
