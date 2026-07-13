@@ -343,7 +343,7 @@ function App() {
   }
 
   return (
-    <div className={`app ${activeConv || view === "profile" ? "show-chat" : "show-sidebar"}`}>
+    <div className={`app ${activeConv || view === "profile" || profileParticipant ? "show-chat" : "show-sidebar"}`}>
       <Sidebar
         user={user}
         conversations={conversations}
