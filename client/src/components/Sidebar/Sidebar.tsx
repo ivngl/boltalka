@@ -48,8 +48,8 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <div className="sidebar-header-left">
-          <div onClick={onOpenProfile} className="header-avatar">
+        <div className="sidebar-header-left" onClick={onOpenProfile} style={{ cursor: "pointer" }}>
+          <div className="header-avatar">
             <Avatar username={user.username} avatar={user.avatar} size={28} />
           </div>
           <div className="header-user-info">

@@ -85,21 +85,20 @@ export default function ChatHeader({
           <>
             <button className="back-btn-mobile" onClick={onBack}><span className="back-btn-icon">←</span></button>
             <div
-              className="chat-header-avatar"
+              className="chat-header-user"
               onClick={() => { if (onParticipantClick && other) onParticipantClick(other); }}
-              style={{ cursor: other ? "pointer" : undefined }}
+              style={{ cursor:"pointer", display: "flex", alignItems: "center", gap: "0.5rem" }}
             >
               <Avatar username={activeConvName} avatar={other?.user.avatar} size={32} online={otherUserOnline} />
+              {other ? (
+                <>
+                  <span className="chat-conv-name">{other.alias || other.user.name || other.user.username}</span>
+                  <span className="chat-conv-username">{other.user.username}</span>
+                </>
+              ) : (
+                <span className="chat-conv-name">{activeConvName}</span>
+              )}
             </div>
-
-            {other ? (
-              <>
-                <span className="chat-conv-name">{other.alias || other.user.name || other.user.username}</span>
-                <span className="chat-conv-username">{other.user.username}</span>
-              </>
-            ) : (
-              <span className="chat-conv-name">{activeConvName}</span>
-            )}
 
           </>
         )}
