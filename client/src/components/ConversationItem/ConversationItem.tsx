@@ -150,7 +150,7 @@ export default function ConversationItem({
 
         <div className="conv-preview">
           <span>
-            {conversation.messages?.[0]?.content?.slice(0, 30) || ""}
+            {conversation.messages?.[0]?.content?.slice(0, 30) || t("chat.no_messages", "Click to write a message")}
           </span>
         </div>
 

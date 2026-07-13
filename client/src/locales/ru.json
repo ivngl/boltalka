@@ -70,5 +70,6 @@
   "chat.set_alias": "Задать никнейм",
   "chat.edit_alias": "Изменить никнейм",
   "chat.clear_alias": "Убрать никнейм",
-  "chat.alias_placeholder": "Никнейм"
+  "chat.alias_placeholder": "Никнейм",
+  "chat.no_messages": "Нажмите, чтобы написать сообщение"
 }
