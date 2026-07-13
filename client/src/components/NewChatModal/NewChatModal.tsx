@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Avatar from "../Avatar/Avatar.tsx";
+import { displayName } from "../helpers.tsx";
 import type { User } from "../../types.ts";
 import "./NewChatModal.css";
 import "../shared.css";
@@ -35,11 +36,11 @@ export default function NewChatModal({ users, onlineUsers, currentUserId, onStar
         <div className="new-chat-popup-list">
           {users
             .filter((u) => u.id !== currentUserId)
-            .filter((u) => u.username.toLowerCase().includes(search.toLowerCase()))
+            .filter((u) => u.username.toLowerCase().includes(search.toLowerCase()) || (u.name && u.name.toLowerCase().includes(search.toLowerCase())))
             .map((u) => (
               <div key={u.id} className="user-item" onClick={() => { onStartDM(u.id); onClose(); }}>
                 <Avatar username={u.username} size={28} online={onlineUsers.has(u.id)} />
-                <span>{u.username}</span>
+                <span>{displayName(u)}</span>
               </div>
             ))}
         </div>

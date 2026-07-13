@@ -21,3 +21,9 @@
 .online-dot.online {
   background: var(--accent-green);
 }
+
+.display-username {
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-size: 0.85em;
+}
