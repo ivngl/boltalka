@@ -22,8 +22,7 @@
 
 .conv-name-row {
   display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
+  flex-direction: column;
 }
 
 .conv-name {
@@ -32,7 +31,7 @@
 }
 
 .conv-username {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
 }
 

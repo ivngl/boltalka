@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import Avatar from "../Avatar/Avatar.tsx";
-import type { Conversation } from "../../types.ts";
 import { setParticipantAlias } from "../../api.ts";
-import "./ConversationItem.css";
-import "../shared.css";
+import type { Conversation } from "../../types.ts";
+import Avatar from "../Avatar/Avatar.tsx";
 import MenuIcon from "../Icons/MenuIcon.tsx";
+import "../shared.css";
+import "./ConversationItem.css";
 
 interface ConversationItemProps {
   onOpenProfile: () => void;
@@ -144,7 +144,7 @@ export default function ConversationItem({
         ) : (
           <div className="conv-name-row">
             <span className="conv-name">{name}</span>
-            {username && <span className="conv-username">{username}</span>}
+            <span className="conv-username">{username}</span>
           </div>
         )}
         <div className="conv-preview">

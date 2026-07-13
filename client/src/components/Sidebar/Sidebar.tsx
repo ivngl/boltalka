@@ -52,6 +52,10 @@ export default function Sidebar({
           <div onClick={onOpenProfile} className="header-avatar">
             <Avatar username={user.username} size={28} />
           </div>
+          <div className="header-user-info">
+            <span className="header-display-name">{user.name || user.username}</span>
+            <span className="header-username">{user.username}</span>
+          </div>
         </div>
         <div className="sidebar-header-right">
           <div className="menu-wrapper">
@@ -93,14 +97,14 @@ export default function Sidebar({
           .map((c) => {
             const textName = conversationName(c, user.id);
             const other = otherParticipant(c, user.id);
-            const displayNameNode = other ? displayName(other, other.alias) : textName;
+            const displayNameNode = other ? (other.alias || other.name ) : textName;
             return (
               <ConversationItem
                 key={c.id}
                 conversation={c}
                 name={displayNameNode}
                 displayName={textName}
-                username={other?.alias ? other.username : undefined}
+                username={other?.username}
                 currentUserId={user.id}
                 isActive={activeConv?.id === c.id}
                 online={onlineUsers.has(other?.id ?? 0)}
