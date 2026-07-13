@@ -24,10 +24,6 @@
   flex: 1;
 }
 
-.conv-name-row:hover {
-  background: var(--bg-tertiary);
-}
-
 .conv-name {
   font-weight: 600;
   font-size: 0.95rem;
