@@ -50,7 +50,7 @@ export function conversationRoutes(prisma, io) {
 
   router.put("/:id/participants/:userId/alias", auth, async (req, res) => {
     const { id, userId } = req.params;
-    const { alias } = req.body;
+    const alias = typeof req.body.alias === "string" ? req.body.alias.trim() : req.body.alias;
 
     const participant = await prisma.conversationParticipant.findUnique({
       where: { userId_conversationId: { userId: req.userId, conversationId: id } },
