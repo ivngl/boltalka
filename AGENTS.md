@@ -15,6 +15,8 @@ Use lowercase, no scope.
 - `make seed` — seed test users (alice, bob, charlie / password123)
 - `make lint` — client ESLint
 - `make client` / `make server` — start individually
+- `docker compose logs -f [service]` — tail logs (app, nginx, postgres, redis)
+- `docker compose exec [service] sh` — shell into a container
 
 ## DB modes
 
