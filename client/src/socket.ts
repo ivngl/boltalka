@@ -1,6 +1,6 @@
 import { io, type Socket } from "socket.io-client";
 
-const SERVER = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? "http://localhost:4000" : "");
+const SERVER = import.meta.env.VITE_SERVER_URL || "";
 let socket: Socket | null = null;
 
 export function connectSocket(token: string): Socket {

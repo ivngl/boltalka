@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { User, Message, Conversation, AuthResponse, UploadResult } from "./types.ts";
 
-const SERVER = import.meta.env.VITE_SERVER_URL || (import.meta.env.DEV ? "http://localhost:4000" : "");
+const SERVER = import.meta.env.VITE_SERVER_URL || "";
 export const api = axios.create({ baseURL: SERVER });
 
 api.interceptors.response.use(

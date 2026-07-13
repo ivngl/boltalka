@@ -77,6 +77,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
+  "http://192.168.1.71:5173",
+  "http://192.168.1.36:5173",
 ].filter(Boolean);
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
