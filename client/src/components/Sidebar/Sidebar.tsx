@@ -6,7 +6,7 @@ import { useTheme } from "../../ThemeContext.tsx";
 import { displayName, conversationName, otherParticipant } from "../helpers.tsx";
 import "./Sidebar.css";
 import ConversationItem from "../ConversationItem/ConversationItem.tsx";
-import { MenuIcon, LogoutIcon } from "../Icons/index.ts";
+import { SettingsIcon, LogoutIcon } from "../Icons/index.ts";
 import NewChatModal from "../NewChatModal/NewChatModal.tsx";
 import type { User, Conversation } from "../../types.ts";
 
@@ -56,7 +56,7 @@ export default function Sidebar({
         <div className="sidebar-header-right">
           <div className="menu-wrapper">
             <button onClick={() => setMenuOpen((p) => !p)} className="menu-btn" title="Menu">
-              <MenuIcon />
+              <SettingsIcon />
             </button>
             {menuOpen && (
               <>
