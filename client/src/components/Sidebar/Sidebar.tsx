@@ -111,6 +111,7 @@ export default function Sidebar({
                 onSelect={() => onSelectConversation(c)}
                 onDeleteRequest={() => onDeleteRequest(c.id)}
                 onAliasChanged={onAliasChanged}
+                onOpenProfile={() => { if (other && onParticipantClick) onParticipantClick({ user: other, alias: other.alias }); }}
                 onAvatarClick={onParticipantClick}
               />
             );

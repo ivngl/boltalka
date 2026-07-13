@@ -126,7 +126,7 @@ export default function ConversationItem({
         onSelect();
       }}
     >
-      <div onClick={onOpenProfile} style={{ cursor: "pointer", display: "flex", flex: 1}}>
+      <div onClick={(e) => { e.stopPropagation(); onOpenProfile(); }} style={{ cursor: "pointer", display: "flex", flex: 1 }}>
         <Avatar username={displayNameStr} avatar={other?.user.avatar} online={online} />
                 {editingAlias ? (
           <input
