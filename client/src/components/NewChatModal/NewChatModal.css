@@ -62,6 +62,21 @@
   background: var(--bg-tertiary);
 }
 
+.user-item-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.user-item-name {
+  font-weight: 600;
+}
+
+.user-item-username {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .new-chat-popup {
     width: calc(100% - 2rem);

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Avatar from "../Avatar/Avatar.tsx";
-import { displayName } from "../helpers.tsx";
 import type { User } from "../../types.ts";
 import "./NewChatModal.css";
 import "../shared.css";
@@ -40,7 +39,10 @@ export default function NewChatModal({ users, onlineUsers, currentUserId, onStar
             .map((u) => (
               <div key={u.id} className="user-item" onClick={() => { onStartDM(u.id); onClose(); }}>
                 <Avatar username={u.username} size={28} online={onlineUsers.has(u.id)} />
-                <span>{displayName(u)}</span>
+                <div className="user-item-info">
+                  <span className="user-item-name">{u.name || u.username}</span>
+                  {u.name && <span className="user-item-username">{u.username}</span>}
+                </div>
               </div>
             ))}
         </div>
