@@ -22,7 +22,7 @@ interface SidebarProps {
   onStartDM: (userId: number) => void;
   onDeleteRequest: (convId: number) => void;
   onAliasChanged?: (conversationId: number, userId: number, alias: string | null) => void;
-  onParticipantClick?: (participant: { user: { id: number; username: string; name?: string }; alias?: string; joinedAt?: string }) => void;
+  onParticipantClick?: (participant: { user: { id: number; username: string; name?: string }; alias?: string; joinedAt?: string }, conversationId?: number) => void;
 }
 
 export default function Sidebar({
@@ -111,7 +111,7 @@ export default function Sidebar({
                 onSelect={() => onSelectConversation(c)}
                 onDeleteRequest={() => onDeleteRequest(c.id)}
                 onAliasChanged={onAliasChanged}
-                onOpenProfile={() => { if (other && onParticipantClick) onParticipantClick({ user: other, alias: other.alias }); }}
+                onOpenProfile={() => { if (other && onParticipantClick) onParticipantClick({ user: other, alias: other.alias }, c.id); }}
                 onAvatarClick={onParticipantClick}
               />
             );

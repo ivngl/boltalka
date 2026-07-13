@@ -32,6 +32,7 @@ function App() {
   const [confirmDeleteConvId, setConfirmDeleteConvId] = useState<number | null>(null);
   const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<number | null>(null);
   const [profileParticipant, setProfileParticipant] = useState<Participant | null>(null);
+  const [profileConvId, setProfileConvId] = useState<number | undefined>(undefined);
 
   const [view, setView] = useState<ViewState>("auth");
   const activeConvRef = useRef<Conversation | null>(null);
@@ -356,26 +357,26 @@ function App() {
         onStartDM={startDM}
         onDeleteRequest={(convId) => setConfirmDeleteConvId(convId)}
         onAliasChanged={handleAliasChanged}
-        onParticipantClick={(p) => setProfileParticipant(p as Participant)}
+        onParticipantClick={(p, convId) => { setProfileParticipant(p as Participant); setProfileConvId(convId); }}
       />
       <main className="chat-area">
         <ChatHeader
           activeConvName={activeConvName}
           activeConv={activeConv}
           currentUserId={user?.id}
-          onBack={view === "profile" ? () => setView("chat") : profileParticipant ? () => setProfileParticipant(null) : chatBack}
+          onBack={view === "profile" ? () => setView("chat") : profileParticipant ? () => { setProfileParticipant(null); setProfileConvId(undefined); } : chatBack}
           onStartAudioCall={onStartAudioCall}
           onStartVideoCall={onStartVideoCall}
           otherUserOnline={otherUserOnline}
           callState={callState}
           onAliasChanged={handleAliasChanged}
-          onParticipantClick={(p) => setProfileParticipant(p)}
+          onParticipantClick={(p) => { setProfileParticipant(p); setProfileConvId(activeConv?.id); }}
           profileTitle={view === "profile" ? user.username : profileParticipant ? (profileParticipant.alias || profileParticipant.user.name || profileParticipant.user.username) : undefined}
         />
         {view === "profile" ? (
           <Profile user={user} onUpdate={handleUpdateUser} />
         ) : profileParticipant ? (
-          <ParticipantProfile participant={profileParticipant} />
+          <ParticipantProfile participant={profileParticipant} conversationId={profileConvId} onAliasChanged={handleAliasChanged} />
         ) : !activeConv ? (
           <div className="empty-state">{t("chat.empty")}</div>
         ) : (
