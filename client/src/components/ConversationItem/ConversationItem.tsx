@@ -152,7 +152,6 @@ export default function ConversationItem({
         </div>
       </div>
       <div className="conv-menu-wrapper">
-        <hr />
         <button
           className="conv-menu-btn"
           onClick={(e) => { e.stopPropagation(); setMenuOpen((p) => !p); }}
