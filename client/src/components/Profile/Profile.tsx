@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Avatar from "../Avatar/Avatar.tsx";
-import { updateProfile } from "../../api.ts";
+import { updateProfile, uploadFile } from "../../api.ts";
 import type { User } from "../../types.ts";
 import type { AxiosError } from "axios";
 import "./Profile.css";
@@ -15,10 +15,25 @@ export default function Profile({ user, onUpdate }: ProfileProps) {
   const { t } = useTranslation();
   const [username, setUsername] = useState(user.username);
   const [name, setName] = useState(user.name || "");
+  const [avatar, setAvatar] = useState(user.avatar || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    try {
+      const result = await uploadFile(file);
+      setAvatar(result.url);
+    } catch {
+      setError(t("profile.avatar_upload_failed", "Failed to upload avatar"));
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,6 +43,7 @@ export default function Profile({ user, onUpdate }: ProfileProps) {
       const body: Record<string, string> = {};
       if (username !== user.username) body.username = username;
       if (name !== (user.name || "")) body.name = name;
+      if (avatar !== (user.avatar || "")) body.avatar = avatar;
       if (newPassword) {
         body.currentPassword = currentPassword;
         body.newPassword = newPassword;
@@ -49,8 +65,16 @@ export default function Profile({ user, onUpdate }: ProfileProps) {
 
   return (
     <div className="profile-page">
-      <div className="profile-avatar">
-        <Avatar username={user.username} size={80} />
+      <div className="profile-avatar" onClick={() => fileInputRef.current?.click()}>
+        <Avatar username={user.username} avatar={avatar} size={80} />
+        <div className="avatar-overlay">{t("profile.change_photo", "Change photo")}</div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={handleAvatarChange}
+        />
       </div>
       <form className="profile-form" onSubmit={handleSave}>
         <label>

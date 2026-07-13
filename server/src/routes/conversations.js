@@ -31,7 +31,7 @@ export function conversationRoutes(prisma, io) {
           orderBy: { createdAt: "desc" },
           take: 1,
           include: {
-            sender: { select: { id: true, username: true, name: true } },
+            sender: { select: { id: true, username: true, name: true, avatar: true } },
           },
         },
       },
@@ -110,7 +110,7 @@ export function conversationRoutes(prisma, io) {
           where: { deletedAt: null },
           orderBy: { createdAt: "desc" },
           take: 1,
-          include: { sender: { select: { id: true, username: true, name: true } } },
+          include: { sender: { select: { id: true, username: true, name: true, avatar: true } } },
         },
       },
     });

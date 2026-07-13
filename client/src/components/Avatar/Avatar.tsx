@@ -16,11 +16,12 @@ function hashColor(name: string): string {
 
 interface AvatarProps {
   username: string;
+  avatar?: string;
   size?: number;
   online?: boolean;
 }
 
-export default function Avatar({ username, size = 36, online }: AvatarProps) {
+export default function Avatar({ username, avatar, size = 36, online }: AvatarProps) {
   const { t } = useTranslation();
   const letter = username?.charAt(0).toUpperCase() || t("avatar.fallback");
   const bg = hashColor(username || "");
@@ -29,25 +30,40 @@ export default function Avatar({ username, size = 36, online }: AvatarProps) {
 
   return (
     <div className={`avatar-wrapper ${statusClass}`}>
-      <div
-        className="avatar"
-        style={{
-          width: size,
-          height: size,
-          borderRadius: "50%",
-          background: bg,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: 600,
-          fontSize: size * 0.45,
-          color: "#fff",
-          flexShrink: 0,
-          lineHeight: 1,
-        }}
-      >
-        {letter}
-      </div>
+      {avatar ? (
+        <img
+          className="avatar"
+          src={avatar}
+          alt={username}
+          style={{
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            objectFit: "cover",
+            flexShrink: 0,
+          }}
+        />
+      ) : (
+        <div
+          className="avatar"
+          style={{
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            background: bg,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: 600,
+            fontSize: size * 0.45,
+            color: "#fff",
+            flexShrink: 0,
+            lineHeight: 1,
+          }}
+        >
+          {letter}
+        </div>
+      )}
     </div>
   );
 }

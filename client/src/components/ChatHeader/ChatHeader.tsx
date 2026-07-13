@@ -89,7 +89,7 @@ export default function ChatHeader({
               onClick={() => { if (onParticipantClick && other) onParticipantClick(other); }}
               style={{ cursor: other ? "pointer" : undefined }}
             >
-              <Avatar username={activeConvName} size={32} online={otherUserOnline} />
+              <Avatar username={activeConvName} avatar={other?.user.avatar} size={32} online={otherUserOnline} />
             </div>
 
             {other ? (

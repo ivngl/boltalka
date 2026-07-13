@@ -127,7 +127,7 @@ export default function ConversationItem({
       }}
     >
       <div onClick={onOpenProfile} style={{ cursor: "pointer", display: "flex", flex: 1}}>
-        <Avatar username={displayNameStr} online={online} />
+        <Avatar username={displayNameStr} avatar={other?.user.avatar} online={online} />
                 {editingAlias ? (
           <input
             ref={inputRef}

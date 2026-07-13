@@ -66,7 +66,7 @@ export function authRoutes(prisma) {
   });
 
   router.put("/profile", auth, async (req, res) => {
-    const { username, name, currentPassword, newPassword } = req.body;
+    const { username, name, avatar, currentPassword, newPassword } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -80,6 +80,9 @@ export function authRoutes(prisma) {
     }
     if (name !== undefined) {
       update.name = name || null;
+    }
+    if (avatar !== undefined) {
+      update.avatar = avatar || null;
     }
     if (newPassword) {
       if (!currentPassword) {

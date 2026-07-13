@@ -15,7 +15,7 @@ export default function ParticipantProfile({ participant }: ParticipantProfilePr
   return (
     <div className="profile-page">
       <div className="profile-avatar">
-        <Avatar username={user.username} size={80} />
+        <Avatar username={user.username} avatar={user.avatar} size={80} />
       </div>
       <div className="profile-info">
         <div className="profile-info-row">

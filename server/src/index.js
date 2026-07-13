@@ -139,7 +139,7 @@ app.post("/upload", auth, upload.single("file"), (req, res) => {
   const file = req.file;
   if (!file) return res.status(400).json({ error: "No file provided" });
   res.json({
-    url: `${process.env.URL_PROTOCOL || "https"}://${req.get("host")}/uploads/${file.filename}`,
+    url: `/uploads/${file.filename}`,
     name: file.originalname,
     type: file.mimetype,
     size: file.size,
@@ -266,7 +266,7 @@ io.on("connection", (socket) => {
           fileType: data.fileType || null,
           fileSize: data.fileSize ? Number(data.fileSize) : null,
         },
-        include: { sender: { select: { id: true, username: true, avatar: true } } },
+        include: { sender: { select: { id: true, username: true, name: true, avatar: true } } },
       });
       io.to(data.conversationId).emit("new_message", message);
 

@@ -47,6 +47,8 @@
   "profile.save": "Сохранить",
   "profile.saving": "Сохранение...",
   "profile.update_failed": "Ошибка обновления",
+  "profile.change_photo": "Изменить фото",
+  "profile.avatar_upload_failed": "Не удалось загрузить аватар",
   "avatar.fallback": "?",
   "call.start_audio": "Аудиозвонок",
   "call.start_video": "Видеозвонок",

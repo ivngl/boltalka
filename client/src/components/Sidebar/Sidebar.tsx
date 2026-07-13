@@ -3,10 +3,10 @@ import { useTranslation } from "react-i18next";
 import i18n from "../../i18n.ts";
 import Avatar from "../Avatar/Avatar.tsx";
 import { useTheme } from "../../ThemeContext.tsx";
-import { displayName, conversationName, otherParticipant } from "../helpers.tsx";
+import { conversationName, otherParticipant } from "../helpers.tsx";
 import "./Sidebar.css";
 import ConversationItem from "../ConversationItem/ConversationItem.tsx";
-import { SettingsIcon, LogoutIcon } from "../Icons/index.ts";
+import { SettingsIcon } from "../Icons/index.ts";
 import NewChatModal from "../NewChatModal/NewChatModal.tsx";
 import type { User, Conversation } from "../../types.ts";
 
@@ -50,7 +50,7 @@ export default function Sidebar({
       <div className="sidebar-header">
         <div className="sidebar-header-left">
           <div onClick={onOpenProfile} className="header-avatar">
-            <Avatar username={user.username} size={28} />
+            <Avatar username={user.username} avatar={user.avatar} size={28} />
           </div>
           <div className="header-user-info">
             <span className="header-display-name">{user.name || user.username}</span>
