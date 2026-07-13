@@ -16,49 +16,19 @@ function auth(req, res, next) {
 export function authRoutes(prisma) {
   const router = Router();
 
-  /**
-   * @openapi
-   * /auth/register:
-   *   post:
-   *     tags: [Auth]
-   *     summary: Register a new user
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required: [username, email, password]
-   *             properties:
-   *               username:
-   *                 type: string
-   *               email:
-   *                 type: string
-   *               password:
-   *                 type: string
-   *     responses:
-   *       201:
-   *         description: User created
-   *       400:
-   *         description: Missing fields
-   *       409:
-   *         description: Username or email taken
-   */
   router.post("/register", async (req, res) => {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: "Missing fields" });
+    const { username, password, name } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
     }
-    const existing = await prisma.user.findFirst({
-      where: { OR: [{ username }, { email }] },
-    });
+    const existing = await prisma.user.findUnique({ where: { username } });
     if (existing) {
-      return res.status(409).json({ error: "Username or email taken" });
+      return res.status(409).json({ error: "Username taken" });
     }
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { username, email, password: hashed },
-      select: { id: true, username: true, email: true, avatar: true },
+      data: { username, password: hashed, name: name || null },
+      select: { id: true, username: true, name: true, avatar: true },
     });
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -66,33 +36,12 @@ export function authRoutes(prisma) {
     res.status(201).json({ user, token });
   });
 
-  /**
-   * @openapi
-   * /auth/login:
-   *   post:
-   *     tags: [Auth]
-   *     summary: Log in with email and password
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required: [email, password]
-   *             properties:
-   *               email:
-   *                 type: string
-   *               password:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: Logged in successfully
-   *       401:
-   *         description: Invalid credentials
-   */
   router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+    const user = await prisma.user.findUnique({ where: { username } });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     const valid = await bcrypt.compare(password, user.password);
@@ -102,73 +51,22 @@ export function authRoutes(prisma) {
       expiresIn: "7d",
     });
     res.json({
-      user: { id: user.id, username: user.username, email: user.email, avatar: user.avatar },
+      user: { id: user.id, username: user.username, name: user.name, avatar: user.avatar },
       token,
     });
   });
 
-  /**
-   * @openapi
-   * /auth/me:
-   *   get:
-   *     tags: [Auth]
-   *     summary: Get the currently authenticated user
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: Current user data
-   *       401:
-   *         description: Unauthorized
-   *       404:
-   *         description: User not found
-   */
   router.get("/me", auth, async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { id: true, username: true, email: true, avatar: true, createdAt: true },
+      select: { id: true, username: true, name: true, avatar: true, createdAt: true },
     });
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   });
 
-  /**
-   * @openapi
-   * /auth/profile:
-   *   put:
-   *     tags: [Auth]
-   *     summary: Update user profile
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               username:
-   *                 type: string
-   *               email:
-   *                 type: string
-   *               currentPassword:
-   *                 type: string
-   *               newPassword:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: Profile updated
-   *       400:
-   *         description: Bad request
-   *       401:
-   *         description: Unauthorized
-   *       404:
-   *         description: User not found
-   *       409:
-   *         description: Username or email taken
-   */
   router.put("/profile", auth, async (req, res) => {
-    const { username, email, currentPassword, newPassword } = req.body;
+    const { username, name, currentPassword, newPassword } = req.body;
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
     if (!user) return res.status(404).json({ error: "User not found" });
 
@@ -180,12 +78,8 @@ export function authRoutes(prisma) {
       if (taken) return res.status(409).json({ error: "Username taken" });
       update.username = username;
     }
-    if (email !== undefined) {
-      const taken = await prisma.user.findFirst({
-        where: { email, id: { not: req.userId } },
-      });
-      if (taken) return res.status(409).json({ error: "Email taken" });
-      update.email = email;
+    if (name !== undefined) {
+      update.name = name || null;
     }
     if (newPassword) {
       if (!currentPassword) {
@@ -201,7 +95,7 @@ export function authRoutes(prisma) {
     const updated = await prisma.user.update({
       where: { id: req.userId },
       data: update,
-      select: { id: true, username: true, email: true, avatar: true },
+      select: { id: true, username: true, name: true, avatar: true },
     });
     res.json(updated);
   });

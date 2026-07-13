@@ -20,13 +20,13 @@ export function setToken(token: string): void {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
-export async function register(username: string, email: string, password: string): Promise<AuthResponse> {
-  const { data } = await api.post("/auth/register", { username, email, password });
+export async function register(username: string, password: string, name?: string): Promise<AuthResponse> {
+  const { data } = await api.post("/auth/register", { username, password, name });
   return data;
 }
 
-export async function login(email: string, password: string): Promise<AuthResponse> {
-  const { data } = await api.post("/auth/login", { email, password });
+export async function login(username: string, password: string): Promise<AuthResponse> {
+  const { data } = await api.post("/auth/login", { username, password });
   return data;
 }
 

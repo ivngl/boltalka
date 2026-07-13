@@ -5,16 +5,16 @@ const prisma = new PrismaClient();
 
 async function main() {
   const users = [
-    { username: "alice", email: "alice@example.com", password: "password123" },
-    { username: "bob", email: "bob@example.com", password: "password123" },
-    { username: "charlie", email: "charlie@example.com", password: "password123" },
+    { username: "alice", password: "password123" },
+    { username: "bob", password: "password123" },
+    { username: "charlie", password: "password123" },
   ];
 
   for (const u of users) {
-    const exists = await prisma.user.findUnique({ where: { email: u.email } });
+    const exists = await prisma.user.findUnique({ where: { username: u.username } });
     if (!exists) {
       const hashed = await bcrypt.hash(u.password, 10);
-      await prisma.user.create({ data: { username: u.username, email: u.email, password: hashed } });
+      await prisma.user.create({ data: { username: u.username, password: hashed } });
       console.log(`Created user ${u.username}`);
     } else {
       console.log(`User ${u.username} already exists`);

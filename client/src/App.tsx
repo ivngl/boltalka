@@ -123,7 +123,7 @@ function App() {
   async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const data = await register(fd.get("username") as string, fd.get("email") as string, fd.get("password") as string);
+    const data = await register(fd.get("username") as string, fd.get("password") as string, (fd.get("name") as string) || undefined);
     localStorage.setItem("token", data.token);
     setToken(data.token);
     setUser(data.user);
@@ -136,7 +136,7 @@ function App() {
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const data = await login(fd.get("email") as string, fd.get("password") as string);
+    const data = await login(fd.get("username") as string, fd.get("password") as string);
     localStorage.setItem("token", data.token);
     setToken(data.token);
     setUser(data.user);

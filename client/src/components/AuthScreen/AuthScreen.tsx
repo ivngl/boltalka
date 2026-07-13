@@ -19,7 +19,7 @@ export default function AuthScreen({ view, onLogin, onRegister, setView }: AuthS
           <div className="auth-tabs">
             <form onSubmit={onLogin}>
               <h2>{t("auth.login.title")}</h2>
-              <input name="email" type="email" placeholder={t("auth.login.email")} required />
+              <input name="username" placeholder={t("auth.register.username")} required autoFocus />
               <input name="password" type="password" placeholder={t("auth.login.password")} required />
               <button type="submit">{t("auth.login.submit")}</button>
             </form>
@@ -30,8 +30,8 @@ export default function AuthScreen({ view, onLogin, onRegister, setView }: AuthS
           <div className="auth-tabs">
             <form onSubmit={onRegister}>
               <h2>{t("auth.register.title")}</h2>
-              <input name="username" placeholder={t("auth.register.username")} required />
-              <input name="email" type="email" placeholder={t("auth.register.email")} required />
+              <input name="username" placeholder={t("auth.register.username")} required autoFocus />
+              <input name="name" placeholder={t("auth.register.name")} />
               <input name="password" type="password" placeholder={t("auth.register.password")} required />
               <button type="submit">{t("auth.register.submit")}</button>
             </form>

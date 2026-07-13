@@ -15,7 +15,7 @@ interface ProfileProps {
 export default function Profile({ user, onUpdate, onBack }: ProfileProps) {
   const { t } = useTranslation();
   const [username, setUsername] = useState(user.username);
-  const [email, setEmail] = useState(user.email);
+  const [name, setName] = useState(user.name || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -28,7 +28,7 @@ export default function Profile({ user, onUpdate, onBack }: ProfileProps) {
     try {
       const body: Record<string, string> = {};
       if (username !== user.username) body.username = username;
-      if (email !== user.email) body.email = email;
+      if (name !== (user.name || "")) body.name = name;
       if (newPassword) {
         body.currentPassword = currentPassword;
         body.newPassword = newPassword;
@@ -63,13 +63,15 @@ export default function Profile({ user, onUpdate, onBack }: ProfileProps) {
           <input value={username} onChange={(e) => setUsername(e.target.value)} />
         </label>
         <label>
-          {t("profile.email")}
-          <input value={email} onChange={(e) => setEmail(e.target.value)} />
+          {t("profile.name")}
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("profile.name_placeholder")} />
         </label>
-        <label>
-          {t("profile.member_since")}
-          <input value={new Date(user.createdAt).toLocaleDateString()} disabled />
-        </label>
+        {user.createdAt && (
+          <label>
+            {t("profile.member_since")}
+            <input value={new Date(user.createdAt).toLocaleDateString()} disabled />
+          </label>
+        )}
         <hr />
         <label>
           {t("profile.current_password")}

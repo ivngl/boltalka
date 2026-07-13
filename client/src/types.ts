@@ -1,8 +1,8 @@
 export interface User {
   id: number;
   username: string;
-  email: string;
-  createdAt: string;
+  name?: string;
+  createdAt?: string;
 }
 
 export interface Message {
@@ -10,7 +10,7 @@ export interface Message {
   content: string;
   conversationId: number;
   senderId: number;
-  sender?: { id: number; username: string };
+  sender?: { id: number; username: string; name?: string };
   createdAt: string;
   deletedAt?: string;
   fileUrl?: string;
