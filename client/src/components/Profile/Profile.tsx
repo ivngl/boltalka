@@ -127,8 +127,8 @@ export default function Profile({ user, onUpdate, onLogout }: ProfileProps) {
         </button>
       </form>
 
-      <form onSubmit={onDeleteProfile}>
-        <button type="submit" className="save-btn">Delete Profile</button>
+      <form className="profile-form" onSubmit={onDeleteProfile}>
+        <button type="submit" className="delete-profile-btn">{t("profile.delete_profile", "Delete Profile")}</button>
       </form>
     </div>
   );

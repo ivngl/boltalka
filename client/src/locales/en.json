@@ -49,6 +49,8 @@
   "profile.update_failed": "Update failed",
   "profile.change_photo": "Change photo",
   "profile.avatar_upload_failed": "Failed to upload avatar",
+  "profile.delete_profile": "Delete Profile",
+  "profile.delete_failed": "Failed to delete profile",
   "avatar.fallback": "?",
   "call.start_audio": "Voice call",
   "call.start_video": "Video call",

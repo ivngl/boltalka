@@ -130,6 +130,23 @@
   background: var(--accent-blue-hover);
 }
 
+.delete-profile-btn {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 1rem;
+  background: var(--accent-red);
+  color: var(--text-white);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.delete-profile-btn:hover {
+  opacity: 0.8;
+}
+
 @media (max-width: 480px) {
   .profile-page {
     padding: 1rem;

@@ -49,6 +49,8 @@
   "profile.update_failed": "Ошибка обновления",
   "profile.change_photo": "Изменить фото",
   "profile.avatar_upload_failed": "Не удалось загрузить аватар",
+  "profile.delete_profile": "Удалить профиль",
+  "profile.delete_failed": "Не удалось удалить профиль",
   "avatar.fallback": "?",
   "call.start_audio": "Аудиозвонок",
   "call.start_video": "Видеозвонок",
