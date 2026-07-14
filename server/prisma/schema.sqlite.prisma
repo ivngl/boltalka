@@ -98,10 +98,13 @@ model TopicMessage {
   content   String
   senderId  String
   topicId   String
+  parentId  String?
   createdAt DateTime @default(now())
 
-  sender User  @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  topic  Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  sender   User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  topic    Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  parent   TopicMessage? @relation("TopicReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  TopicMessage[] @relation("TopicReplies")
 
   @@index([topicId, createdAt])
 }

@@ -113,7 +113,7 @@ export async function createTopic(title: string, description?: string): Promise<
   return data;
 }
 
-export async function sendTopicMessage(topicId: string, content: string): Promise<TopicMessage> {
-  const { data } = await api.post(`/topics/${topicId}/messages`, { content });
+export async function sendTopicMessage(topicId: string, content: string, parentId?: string): Promise<TopicMessage> {
+  const { data } = await api.post(`/topics/${topicId}/messages`, { content, parentId });
   return data;
 }

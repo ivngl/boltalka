@@ -32,6 +32,13 @@ export function topicRoutes(prisma) {
       include: {
         creator: { select: { id: true, username: true, name: true, avatar: true } },
         _count: { select: { messages: true } },
+        messages: {
+          select: {
+            sender: { select: { id: true, username: true, name: true, avatar: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 3,
+        },
       },
       orderBy: { updatedAt: "desc" },
     });
@@ -75,17 +82,25 @@ export function topicRoutes(prisma) {
   });
 
   router.post("/:id/messages", auth, async (req, res) => {
-    const { content } = req.body;
+    const { content, parentId } = req.body;
     if (!content) return res.status(400).json({ error: "Content is required" });
 
     const topic = await prisma.topic.findUnique({ where: { id: req.params.id } });
     if (!topic) return res.status(404).json({ error: "Topic not found" });
+
+    if (parentId) {
+      const parent = await prisma.topicMessage.findUnique({ where: { id: parentId } });
+      if (!parent || parent.topicId !== req.params.id) {
+        return res.status(400).json({ error: "Invalid parent message" });
+      }
+    }
 
     const message = await prisma.topicMessage.create({
       data: {
         content,
         senderId: req.userId,
         topicId: req.params.id,
+        parentId: parentId || null,
       },
       include: { sender: { select: { id: true, username: true, name: true, avatar: true } } },
     });

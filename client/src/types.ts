@@ -65,5 +65,6 @@ export interface TopicMessage {
   content: string;
   sender: User;
   topicId: string;
+  parentId?: string | null;
   createdAt: string;
 }
