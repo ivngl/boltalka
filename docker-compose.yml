@@ -67,8 +67,6 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
     volumes:
-      - ./client:/app/client
-      - /app/client/node_modules
       - uploads:/app/server/uploads
     restart: unless-stopped
     networks:
