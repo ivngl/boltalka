@@ -176,7 +176,7 @@ export default function TopicDetailPage() {
   const msgEndRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
-    if (!id) return;
+    if (!id || !user) return;
     setLoading(true);
     try {
       const data = await getTopic(id);
@@ -186,7 +186,7 @@ export default function TopicDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, user]);
 
   useEffect(() => {
     load();

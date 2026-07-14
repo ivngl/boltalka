@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { createTopic, getTopics } from "../api.ts";
+import { useAuth } from "../contexts/AuthContext.tsx";
 import type { Topic } from "../types.ts";
 import TopicItem from "../components/TopicItem/TopicItem.tsx";
 import "./TopicsPage.css";
@@ -9,6 +10,7 @@ import "./TopicsPage.css";
 export default function TopicsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -27,8 +29,9 @@ export default function TopicsPage() {
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     load(search || undefined);
-  }, [load, search]);
+  }, [load, search, user]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);

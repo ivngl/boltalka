@@ -22,6 +22,11 @@ export default defineConfig({
       "/topics": {
         target: "http://localhost:4000",
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes("text/html")) {
+            return "/index.html";
+          }
+        },
       },
       "/upload": {
         target: "http://localhost:4000",
