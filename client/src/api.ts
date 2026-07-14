@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { User, Message, Conversation, AuthResponse, UploadResult } from "./types.ts";
+import type { User, Message, Conversation, AuthResponse, UploadResult, Topic, TopicMessage } from "./types.ts";
 
 const SERVER = import.meta.env.VITE_SERVER_URL || "";
 export const api = axios.create({ baseURL: SERVER });
@@ -95,4 +95,25 @@ export async function unsubscribePushServer(endpoint: string): Promise<void> {
 
 export async function setParticipantAlias(conversationId: number, userId: number, alias: string | null): Promise<void> {
   await api.put(`/conversations/${conversationId}/participants/${userId}/alias`, { alias });
+}
+
+export async function getTopics(search?: string): Promise<Topic[]> {
+  const params = search ? { search } : {};
+  const { data } = await api.get("/topics", { params });
+  return data;
+}
+
+export async function getTopic(id: string): Promise<Topic> {
+  const { data } = await api.get(`/topics/${id}`);
+  return data;
+}
+
+export async function createTopic(title: string, description?: string): Promise<Topic> {
+  const { data } = await api.post("/topics", { title, description });
+  return data;
+}
+
+export async function sendTopicMessage(topicId: string, content: string): Promise<TopicMessage> {
+  const { data } = await api.post(`/topics/${topicId}/messages`, { content });
+  return data;
 }

@@ -1,27 +1,28 @@
+import { PrismaClient } from "@prisma/client";
+import { createAdapter } from "@socket.io/redis-adapter";
+import cors from "cors";
 import "dotenv/config";
 import express from "express";
-import path from "node:path";
-import fs from "node:fs";
-import crypto from "node:crypto";
-import { fileURLToPath } from "node:url";
-import { createServer } from "node:http";
+import { Redis } from "ioredis";
+import jwt from "jsonwebtoken";
 import multer from "multer";
-import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import { createServer } from "node:http";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import pino from "pino";
 import pinoHttp from "pino-http";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { Server } from "socket.io";
-import { createAdapter } from "@socket.io/redis-adapter";
-import { Redis } from "ioredis";
-import cors from "cors";
-import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+import { initPush, sendNotification } from "./push.js";
 import { authRoutes } from "./routes/auth.js";
 import { conversationRoutes } from "./routes/conversations.js";
 import { pushRoutes } from "./routes/push.js";
-import { initPush, sendNotification } from "./push.js";
+import { topicRoutes } from "./routes/topics.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
@@ -190,6 +191,7 @@ initPush();
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma, io));
 app.use("/api/push", pushRoutes(prisma));
+app.use("/topics", topicRoutes(prisma));
 
 /**
  * @openapi

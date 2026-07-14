@@ -48,3 +48,22 @@ export interface UploadResult {
   type: string;
   size: number;
 }
+
+export interface Topic {
+  id: string;
+  title: string;
+  description?: string;
+  creator: User;
+  messages?: TopicMessage[];
+  _count?: { messages: number };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TopicMessage {
+  id: string;
+  content: string;
+  sender: User;
+  topicId: string;
+  createdAt: string;
+}

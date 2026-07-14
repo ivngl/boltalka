@@ -19,6 +19,8 @@ model User {
   conversationOwner  Conversation[]             @relation("ConversationOwner")
   participants       ConversationParticipant[]
   pushSubscriptions  PushSubscription[]
+  createdTopics      Topic[]                    @relation("TopicCreator")
+  topicMessages      TopicMessage[]
 }
 
 model Conversation {
@@ -77,4 +79,29 @@ model Message {
   conversation Conversation @relation(fields: [conversationId], references: [id])
 
   @@index([conversationId, createdAt])
+}
+
+model Topic {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  creatorId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator  User           @relation("TopicCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  messages TopicMessage[]
+}
+
+model TopicMessage {
+  id        String   @id @default(uuid())
+  content   String
+  senderId  String
+  topicId   String
+  createdAt DateTime @default(now())
+
+  sender User  @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  topic  Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId, createdAt])
 }
