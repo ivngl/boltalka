@@ -1,6 +1,7 @@
 import { Navigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/AuthContext.tsx";
+import "../components/AuthScreen/AuthScreen.css";
 
 export default function LoginPage() {
   const { t } = useTranslation();
