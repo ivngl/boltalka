@@ -110,11 +110,24 @@ export function authRoutes(prisma) {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const profile = await prisma.user.findUnique({ where: { id } });
-    if (!profile) return res.status(404).json({ error: "Profile not found" });
+    try {
+      const profile = await prisma.user.findUnique({ where: { id } });
+      if (!profile) return res.status(404).json({ error: "Profile not found" });
 
-    await prisma.user.delete({ where: { id } });
-    res.json({ ok: true });
+      await prisma.$transaction([
+        prisma.topicMessage.deleteMany({ where: { senderId: id } }),
+        prisma.topic.deleteMany({ where: { creatorId: id } }),
+        prisma.message.deleteMany({ where: { senderId: id } }),
+        prisma.conversationParticipant.deleteMany({ where: { userId: id } }),
+        prisma.pushSubscription.deleteMany({ where: { userId: id } }),
+        prisma.conversation.deleteMany({ where: { ownerId: id } }),
+        prisma.user.delete({ where: { id } }),
+      ]);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("Delete profile error:", err);
+      res.status(500).json({ error: "Failed to delete profile" });
+    }
   });
 
   return router;
