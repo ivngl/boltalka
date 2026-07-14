@@ -36,6 +36,8 @@ export default function ChatPage() {
   const isProfileView = location.pathname === "/profile";
   const isConversationView = !!location.pathname.match(/^\/conversation\//);
   const isUserView = !!location.pathname.match(/^\/user\//);
+  const isTopicsView = location.pathname === "/topics";
+  const isSocietiesView = location.pathname === "/societies";
 
   const activeConv = useMemo(() => {
     if (!convIdFromUrl || !isConversationView) return null;
@@ -293,9 +295,13 @@ export default function ChatPage() {
 
   const profileTitle = isProfileView
     ? user.username
-    : profileParticipant
-      ? (profileParticipant.alias || profileParticipant.user.name || profileParticipant.user.username)
-      : undefined;
+    : isTopicsView
+      ? t("nav.topics", "Topics")
+      : isSocietiesView
+        ? t("nav.societies", "Societies")
+        : profileParticipant
+          ? (profileParticipant.alias || profileParticipant.user.name || profileParticipant.user.username)
+          : undefined;
 
   const handleBack = isProfileView
     ? () => navigate("/")
@@ -304,7 +310,7 @@ export default function ChatPage() {
       : () => navigate("/");
 
   return (
-    <div className={`app ${activeConv || isProfileView || profileParticipant ? "show-chat" : "show-sidebar"}`}>
+    <div className={`app ${activeConv || isProfileView || profileParticipant || isTopicsView || isSocietiesView ? "show-chat" : "show-sidebar"}`}>
       <Sidebar
         user={user}
         conversations={conversations}
