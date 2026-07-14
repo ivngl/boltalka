@@ -329,7 +329,7 @@ export default function ChatPage() {
         }}
       />
       <main className="chat-area">
-        {!isTopicDetailView && (
+        {!isTopicDetailView && !isTopicsView && !isSocietiesView && (
           <ChatHeader
             activeConvName={activeConvName}
             activeConv={activeConv}
