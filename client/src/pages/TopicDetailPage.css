@@ -30,6 +30,7 @@
 .topic-detail-header-info {
   flex: 1;
   min-width: 0;
+  width: 100px;
 }
 
 .topic-detail-title {
@@ -37,6 +38,8 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .topic-detail-desc {
