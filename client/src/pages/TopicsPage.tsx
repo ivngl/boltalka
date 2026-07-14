@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { createTopic, getTopics } from "../api.ts";
-import TopicItem from "../components/TopicItem/TopicItem.tsx";
 import type { Topic } from "../types.ts";
+import TopicItem from "../components/TopicItem/TopicItem.tsx";
 import "./TopicsPage.css";
 
 export default function TopicsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -97,7 +99,7 @@ export default function TopicsPage() {
             <p>{t("topics.empty", "No topics yet")}</p>
           </div>
         ) : (
-          topics?.map((topic) => <TopicItem key={topic.id} topic={topic} />)
+          topics?.map((topic) => <TopicItem key={topic.id} topic={topic} onClick={(t) => navigate(`/topics/${t.id}`)} />)
         )}
       </div>
     </div>

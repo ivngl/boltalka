@@ -11,6 +11,7 @@ import ConversationPage from "./pages/ConversationPage.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import ParticipantProfilePage from "./pages/ParticipantProfilePage.tsx";
 import TopicsPage from "./pages/TopicsPage.tsx";
+import TopicDetailPage from "./pages/TopicDetailPage.tsx";
 import SocietiesPage from "./pages/SocietiesPage.tsx";
 import "./App.css";
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="user/:id" element={<ParticipantProfilePage />} />
           <Route path="topics" element={<TopicsPage />} />
+          <Route path="topics/:id" element={<TopicDetailPage />} />
           <Route path="societies" element={<SocietiesPage />} />
         </Route>
       </Routes>

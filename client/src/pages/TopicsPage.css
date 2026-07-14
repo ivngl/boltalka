@@ -35,7 +35,7 @@
 }
 
 .topics-search:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-blue);
 }
 
 .topics-create-btn {
@@ -43,7 +43,7 @@
   height: 36px;
   border: none;
   border-radius: 8px;
-  background: var(--accent);
+  background: var(--accent-blue);
   color: white;
   font-size: 1.25rem;
   cursor: pointer;
@@ -72,7 +72,7 @@
 }
 
 .topics-create-form input:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-blue);
 }
 
 .topics-create-actions {
@@ -96,7 +96,7 @@
 }
 
 .topics-create-actions button[type="submit"] {
-  background: var(--accent);
+  background: var(--accent-blue);
   color: white;
 }
 

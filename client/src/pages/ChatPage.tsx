@@ -37,6 +37,7 @@ export default function ChatPage() {
   const isConversationView = !!location.pathname.match(/^\/conversation\//);
   const isUserView = !!location.pathname.match(/^\/user\//);
   const isTopicsView = location.pathname === "/topics";
+  const isTopicDetailView = !!location.pathname.match(/^\/topics\/[^/]+$/);
   const isSocietiesView = location.pathname === "/societies";
 
   const activeConv = useMemo(() => {
@@ -310,7 +311,7 @@ export default function ChatPage() {
       : () => navigate("/");
 
   return (
-    <div className={`app ${activeConv || isProfileView || profileParticipant || isTopicsView || isSocietiesView ? "show-chat" : "show-sidebar"}`}>
+    <div className={`app ${activeConv || isProfileView || profileParticipant || isTopicsView || isTopicDetailView || isSocietiesView ? "show-chat" : "show-sidebar"}`}>
       <Sidebar
         user={user}
         conversations={conversations}
@@ -328,21 +329,23 @@ export default function ChatPage() {
         }}
       />
       <main className="chat-area">
-        <ChatHeader
-          activeConvName={activeConvName}
-          activeConv={activeConv}
-          currentUserId={user?.id}
-          onBack={handleBack}
-          onStartAudioCall={onStartAudioCall}
-          onStartVideoCall={onStartVideoCall}
-          otherUserOnline={otherUserOnline}
-          callState={callState}
-          onAliasChanged={handleAliasChanged}
-          onParticipantClick={(p) => {
-            navigate(`/user/${p.user.id}`, { state: { conversationId: activeConv?.id } });
-          }}
-          profileTitle={profileTitle}
-        />
+        {!isTopicDetailView && (
+          <ChatHeader
+            activeConvName={activeConvName}
+            activeConv={activeConv}
+            currentUserId={user?.id}
+            onBack={handleBack}
+            onStartAudioCall={onStartAudioCall}
+            onStartVideoCall={onStartVideoCall}
+            otherUserOnline={otherUserOnline}
+            callState={callState}
+            onAliasChanged={handleAliasChanged}
+            onParticipantClick={(p) => {
+              navigate(`/user/${p.user.id}`, { state: { conversationId: activeConv?.id } });
+            }}
+            profileTitle={profileTitle}
+          />
+        )}
         <Outlet context={{
           user,
           activeConv,

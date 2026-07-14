@@ -4,14 +4,15 @@ import "./TopicItem.css";
 
 interface Props {
   topic: Topic;
+  onClick?: (topic: Topic) => void;
 }
 
-export default function TopicItem({ topic }: Props) {
+export default function TopicItem({ topic, onClick }: Props) {
   const { t } = useTranslation();
   const count = topic._count?.messages ?? 0;
 
   return (
-    <div className="topic-item">
+    <div className="topic-item" onClick={() => onClick?.(topic)}>
       <div className="topic-item-avatar">
         {topic.creator.avatar ? (
           <img src={topic.creator.avatar} alt="" />
