@@ -52,8 +52,4 @@
   .bottom-nav-label {
     font-size: 0.65rem;
   }
-
-  .app {
-    padding-bottom: calc(3.2rem + env(safe-area-inset-bottom, 0px));
-  }
 }
