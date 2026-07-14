@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { deleteProfile, updateProfile, uploadFile } from "../../api.ts";
 import type { User } from "../../types.ts";
 import Avatar from "../Avatar/Avatar.tsx";
+import Button from "../../ui/Button.tsx";
 import "./Profile.css";
 
 interface ProfileProps {
@@ -122,13 +123,13 @@ export default function Profile({ user, onUpdate, onLogout }: ProfileProps) {
           />
         </label>
         {error && <div className="profile-error">{error}</div>}
-        <button type="submit" className="save-btn" disabled={saving}>
+        <Button type="submit" variant="primary" fullWidth disabled={saving}>
           {saving ? t("profile.saving") : t("profile.save")}
-        </button>
+        </Button>
       </form>
 
       <form className="profile-form" onSubmit={onDeleteProfile}>
-        <button type="submit" className="delete-profile-btn">{t("profile.delete_profile", "Delete Profile")}</button>
+        <Button type="submit" variant="danger" fullWidth>{t("profile.delete_profile", "Delete Profile")}</Button>
       </form>
     </div>
   );

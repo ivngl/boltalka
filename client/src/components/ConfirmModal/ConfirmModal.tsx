@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import Button from "../../ui/Button.tsx";
 import "../ConfirmDeleteModal/ConfirmDeleteModal.css";
 
 interface ConfirmModalProps {
@@ -23,8 +24,8 @@ export default function ConfirmModal({ title, message, confirmLabel, onConfirm, 
           <p>{message}</p>
         </div>
         <div className="confirm-popup-buttons">
-          <button className="confirm-cancel" onClick={onCancel}>{t("common.cancel", "Cancel")}</button>
-          <button className="confirm-delete" onClick={onConfirm}>{confirmLabel || t("common.delete", "Delete")}</button>
+          <Button variant="ghost" size="sm" onClick={onCancel}>{t("common.cancel", "Cancel")}</Button>
+          <Button variant="danger" size="sm" onClick={onConfirm}>{confirmLabel || t("common.delete", "Delete")}</Button>
         </div>
       </div>
     </div>
