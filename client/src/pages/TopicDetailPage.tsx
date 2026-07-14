@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.tsx";
-import { getTopic, sendTopicMessage } from "../api.ts";
+import { getTopic, sendTopicMessage, editTopicMessage, deleteTopicMessage } from "../api.ts";
 import Avatar from "../components/Avatar/Avatar.tsx";
 import type { Topic, TopicMessage } from "../types.ts";
 import "./TopicDetailPage.css";
@@ -43,30 +43,119 @@ function buildTree(messages: TopicMessage[]): CommentNode[] {
 
 interface CommentProps {
   node: CommentNode;
+  activeReplyId: string | null;
   onReply: (m: TopicMessage) => void;
+  onCancelReply: () => void;
+  onSendReply: (parentId: string, content: string) => Promise<void>;
+  onEdit: (messageId: string, content: string) => Promise<void>;
+  onDelete: (messageId: string) => Promise<void>;
+  user: { id: string; username: string; avatar?: string };
+  sending: boolean;
   t: (key: string, fallback: string, opts?: Record<string, unknown>) => string;
 }
 
-function Comment({ node, onReply, t }: CommentProps) {
+function Comment({ node, activeReplyId, onReply, onCancelReply, onSendReply, onEdit, onDelete, user, sending, t }: CommentProps) {
   const m = node.message;
+  const [replyText, setReplyText] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(m.content);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const editInputRef = useRef<HTMLInputElement | null>(null);
+  const isActive = activeReplyId === m.id;
+  const isOwn = m.sender.id === user.id;
+
+  useEffect(() => {
+    if (isActive) inputRef.current?.focus();
+  }, [isActive]);
+
+  useEffect(() => {
+    if (editing) editInputRef.current?.focus();
+  }, [editing]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const content = replyText.trim();
+    if (!content || sending) return;
+    await onSendReply(m.id, content);
+    setReplyText("");
+  }
+
+  async function handleEditSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const content = editText.trim();
+    if (!content || content === m.content) { setEditing(false); return; }
+    await onEdit(m.id, content);
+    setEditing(false);
+  }
+
+  function handleEditKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Escape") { setEditText(m.content); setEditing(false); }
+  }
+
+  function handleDelete() {
+    if (window.confirm(t("topics.confirmDelete", "Delete this comment?"))) {
+      onDelete(m.id);
+    }
+  }
+
   return (
     <div className="topic-comment">
       <Avatar username={m.sender.username} avatar={m.sender.avatar} size={36} />
       <div className="topic-comment-body">
-              <div className="topic-comment-meta">
-                <span className="topic-comment-name">
-                  {m.sender.name || m.sender.username}
-                </span>
-                <span className="topic-comment-time">{timeAgo(m.createdAt, t)}</span>
-              </div>
-              <div className="topic-comment-text-row">
-                <span className="topic-comment-text">{m.content}</span>
-                <button className="topic-comment-reply-btn" onClick={() => onReply(m)} title={t("topics.reply", "Reply")}>+</button>
-              </div>
+        <div className="topic-comment-meta">
+          <span className="topic-comment-name">
+            {m.sender.name || m.sender.username}
+          </span>
+          <span className="topic-comment-time">{timeAgo(m.createdAt, t)}</span>
+        </div>
+        {editing ? (
+          <form className="topic-edit-form" onSubmit={handleEditSubmit}>
+            <input
+              ref={editInputRef}
+              type="text"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onKeyDown={handleEditKeyDown}
+            />
+            <div className="topic-edit-actions">
+              <button type="submit" disabled={sending || !editText.trim()}>{t("topics.save", "Save")}</button>
+              <button type="button" onClick={() => { setEditText(m.content); setEditing(false); }}>{t("topics.cancel", "Cancel")}</button>
+            </div>
+          </form>
+        ) : (
+          <div className="topic-comment-text-row">
+            <span className="topic-comment-text">{m.content}</span>
+            <div className="topic-comment-actions">
+              <button className="topic-comment-reply-btn" onClick={() => onReply(m)} title={t("topics.reply", "Reply")}>+</button>
+              {isOwn && (
+                <>
+                  <button className="topic-comment-edit-btn" onClick={() => setEditing(true)} title={t("topics.edit", "Edit")}>✎</button>
+                  <button className="topic-comment-delete-btn" onClick={handleDelete} title={t("topics.delete", "Delete")}>🗑</button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        {isActive && (
+          <form className="topic-inline-reply" onSubmit={handleSubmit}>
+            <Avatar username={user.username} avatar={user.avatar} size={24} />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder={t("topics.replyTo", "Reply to {{name}}...", { name: m.sender.name || m.sender.username })}
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+            />
+            <button type="submit" disabled={sending || !replyText.trim()}>
+              ↗
+            </button>
+            <button type="button" className="topic-inline-reply-cancel" onClick={onCancelReply}>×</button>
+          </form>
+        )}
         {node.children.length > 0 && (
           <div className="topic-comment-replies">
             {node.children.map((child) => (
-              <Comment key={child.message.id} node={child} onReply={onReply} t={t} />
+              <Comment key={child.message.id} node={child} activeReplyId={activeReplyId} onReply={onReply} onCancelReply={onCancelReply} onSendReply={onSendReply} onEdit={onEdit} onDelete={onDelete} user={user} sending={sending} t={t} />
             ))}
           </div>
         )}
@@ -82,11 +171,8 @@ export default function TopicDetailPage() {
   const navigate = useNavigate();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
-  const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-  const [replyTo, setReplyTo] = useState<string | null>(null);
-  const [replyToId, setReplyToId] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const msgEndRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
@@ -131,33 +217,47 @@ export default function TopicDetailPage() {
   }
 
   function handleReply(m: TopicMessage) {
-    setReplyTo(m.sender.name || m.sender.username);
-    setReplyToId(m.id);
-    setText("");
-    inputRef.current?.focus();
+    setActiveReplyId((prev) => prev === m.id ? null : m.id);
   }
 
   function cancelReply() {
-    setReplyTo(null);
-    setReplyToId(null);
-    setText("");
+    setActiveReplyId(null);
   }
 
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    const content = text.trim();
-    if (!content || sending) return;
+  async function handleSendReply(parentId: string, content: string) {
     setSending(true);
     try {
-      const msg = await sendTopicMessage(topic!.id, content, replyToId || undefined);
+      const msg = await sendTopicMessage(topic!.id, content, parentId);
       setTopic((prev) => prev ? { ...prev, messages: [...(prev.messages || []), msg] } : prev);
-      setText("");
-      setReplyTo(null);
-      setReplyToId(null);
+      setActiveReplyId(null);
     } catch {
       // ignore
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleEdit(messageId: string, content: string) {
+    try {
+      const updated = await editTopicMessage(topic!.id, messageId, content);
+      setTopic((prev) => prev ? {
+        ...prev,
+        messages: (prev.messages || []).map((m) => m.id === messageId ? updated : m),
+      } : prev);
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handleDelete(messageId: string) {
+    try {
+      await deleteTopicMessage(topic!.id, messageId);
+      setTopic((prev) => prev ? {
+        ...prev,
+        messages: (prev.messages || []).filter((m) => m.id !== messageId),
+      } : prev);
+    } catch {
+      // ignore
     }
   }
 
@@ -184,32 +284,10 @@ export default function TopicDetailPage() {
           </div>
         )}
         {tree.map((node) => (
-          <Comment key={node.message.id} node={node} onReply={handleReply} t={t} />
+          <Comment key={node.message.id} node={node} activeReplyId={activeReplyId} onReply={handleReply} onCancelReply={cancelReply} onSendReply={handleSendReply} onEdit={handleEdit} onDelete={handleDelete} user={user} sending={sending} t={t} />
         ))}
         <div ref={msgEndRef} />
       </div>
-      <form className="topic-reply-form" onSubmit={handleSend}>
-        <Avatar username={user.username} avatar={user.avatar} size={32} />
-        <div className="topic-reply-input-wrap">
-          {replyTo && (
-            <span className="topic-reply-to">
-              Replying to <strong>{replyTo}</strong>
-              <button type="button" className="topic-reply-cancel" onClick={cancelReply}>×</button>
-            </span>
-          )}
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder={replyTo ? t("topics.replyTo", "Reply to {{name}}...", { name: replyTo }) : t("topics.replyPlaceholder", "Add a reply...")}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            autoFocus
-          />
-        </div>
-        <button type="submit" disabled={sending || !text.trim()}>
-          {sending ? "..." : "↗"}
-        </button>
-      </form>
     </>
   );
 }

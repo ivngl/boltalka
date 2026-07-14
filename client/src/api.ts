@@ -117,3 +117,12 @@ export async function sendTopicMessage(topicId: string, content: string, parentI
   const { data } = await api.post(`/topics/${topicId}/messages`, { content, parentId });
   return data;
 }
+
+export async function editTopicMessage(topicId: string, messageId: string, content: string): Promise<TopicMessage> {
+  const { data } = await api.put(`/topics/${topicId}/messages/${messageId}`, { content });
+  return data;
+}
+
+export async function deleteTopicMessage(topicId: string, messageId: string): Promise<void> {
+  await api.delete(`/topics/${topicId}/messages/${messageId}`);
+}

@@ -83,6 +83,44 @@
   gap: 0.15rem;
 }
 
+.topic-comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.topic-comment:hover .topic-comment-actions {
+  opacity: 1;
+}
+
+.topic-comment-edit-btn,
+.topic-comment-delete-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.topic-comment-edit-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.topic-comment-delete-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-red);
+}
+
 .topic-comment-text {
   font-size: 0.9rem;
   color: var(--text-body);
@@ -125,75 +163,37 @@
   border-bottom: none;
 }
 
-.topic-reply-form {
+.topic-inline-reply {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  gap: 0.5rem;
+  margin-top: 0.4rem;
 }
 
-.topic-reply-form input {
+.topic-inline-reply input {
   flex: 1;
   min-width: 0;
-  padding: 0.6rem 0.8rem;
-  border-radius: 20px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 16px;
   background: var(--bg-input);
   color: var(--text-primary);
   border: none;
   outline: none;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 
-.topic-reply-input-wrap {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.topic-reply-to {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding-left: 0.5rem;
-}
-
-.topic-reply-to strong {
-  color: var(--text-primary);
-}
-
-.topic-reply-cancel {
-  border: none;
-  background: none;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-}
-
-.topic-reply-cancel:hover {
-  color: var(--accent-red);
-}
-
-.topic-reply-form input:focus {
+.topic-inline-reply input:focus {
   box-shadow: 0 0 0 2px var(--accent-blue);
 }
 
-.topic-reply-form button {
-  width: 32px;
-  height: 32px;
+.topic-inline-reply button {
+  width: 26px;
+  height: 26px;
   border: none;
   border-radius: 50%;
   background: var(--accent-blue);
   color: var(--text-white);
-  font-size: 1rem;
+  font-size: 0.8rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -201,13 +201,80 @@
   flex-shrink: 0;
 }
 
-.topic-reply-form button:hover {
+.topic-inline-reply button:hover {
   background: var(--accent-blue-hover);
 }
 
-.topic-reply-form button:disabled {
+.topic-inline-reply button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.topic-inline-reply-cancel {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  font-size: 1rem !important;
+}
+
+.topic-inline-reply-cancel:hover {
+  color: var(--accent-red) !important;
+  background: transparent !important;
+}
+
+.topic-edit-form {
+  margin-top: 0.3rem;
+}
+
+.topic-edit-form input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 16px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: none;
+  outline: none;
+  font-size: 0.8rem;
+}
+
+.topic-edit-form input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
+.topic-edit-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.topic-edit-actions button {
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.topic-edit-actions button:first-child {
+  background: var(--accent-blue);
+  color: var(--text-white);
+}
+
+.topic-edit-actions button:first-child:hover {
+  background: var(--accent-blue-hover);
+}
+
+.topic-edit-actions button:first-child:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.topic-edit-actions button:last-child {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.topic-edit-actions button:last-child:hover {
+  color: var(--text-primary);
 }
 
 .topic-detail-empty {

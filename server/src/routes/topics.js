@@ -113,5 +113,34 @@ export function topicRoutes(prisma) {
     res.status(201).json(message);
   });
 
+  router.put("/:topicId/messages/:messageId", auth, async (req, res) => {
+    const { content } = req.body;
+    if (!content) return res.status(400).json({ error: "Content is required" });
+
+    const message = await prisma.topicMessage.findUnique({ where: { id: req.params.messageId } });
+    if (!message) return res.status(404).json({ error: "Message not found" });
+    if (message.senderId !== req.userId) return res.status(403).json({ error: "Not your message" });
+    if (message.topicId !== req.params.topicId) return res.status(400).json({ error: "Topic mismatch" });
+
+    const updated = await prisma.topicMessage.update({
+      where: { id: req.params.messageId },
+      data: { content },
+      include: { sender: { select: { id: true, username: true, name: true, avatar: true } } },
+    });
+
+    res.json(updated);
+  });
+
+  router.delete("/:topicId/messages/:messageId", auth, async (req, res) => {
+    const message = await prisma.topicMessage.findUnique({ where: { id: req.params.messageId } });
+    if (!message) return res.status(404).json({ error: "Message not found" });
+    if (message.senderId !== req.userId) return res.status(403).json({ error: "Not your message" });
+    if (message.topicId !== req.params.topicId) return res.status(400).json({ error: "Topic mismatch" });
+
+    await prisma.topicMessage.delete({ where: { id: req.params.messageId } });
+
+    res.json({ success: true });
+  });
+
   return router;
 }
