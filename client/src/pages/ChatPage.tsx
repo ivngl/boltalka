@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useParams, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { connectSocket, disconnectSocket, getSocket } from "../socket.ts";
 import { setToken, getConversations, getMessages, createConversation, getUsers, uploadFile, deleteConversation, getVapidPublicKey, subscribePushServer } from "../api.ts";
@@ -10,8 +10,6 @@ import ChatHeader from "../components/ChatHeader/ChatHeader.tsx";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal/ConfirmDeleteModal.tsx";
 import IncomingCallModal from "../components/IncomingCallModal/IncomingCallModal.tsx";
 import CallOverlay from "../components/CallOverlay/CallOverlay.tsx";
-import ParticipantProfile from "../components/ParticipantProfile/ParticipantProfile.tsx";
-import ProfilePage from "./ProfilePage.tsx";
 import { conversationName, otherParticipant } from "../components/helpers.tsx";
 import { useCall } from "../useCall.ts";
 import type { User, Message, Conversation, Participant } from "../types.ts";
@@ -20,10 +18,10 @@ export default function ChatPage() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { id: convIdFromUrl, id: userIdFromUrl } = useParams<{ id: string }>();
   const location = useLocation();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
@@ -31,11 +29,33 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
   const [confirmDeleteConvId, setConfirmDeleteConvId] = useState<number | null>(null);
   const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<number | null>(null);
-  const [profileParticipant, setProfileParticipant] = useState<Participant | null>(null);
-  const [profileConvId, setProfileConvId] = useState<number | undefined>(undefined);
 
   const activeConvRef = useRef<Conversation | null>(null);
   const conversationsRef = useRef<Conversation[]>([]);
+
+  const isProfileView = location.pathname === "/profile";
+  const isConversationView = !!location.pathname.match(/^\/conversation\//);
+  const isUserView = !!location.pathname.match(/^\/user\//);
+
+  const activeConv = useMemo(() => {
+    if (!convIdFromUrl || !isConversationView) return null;
+    return conversations.find((c) => String(c.id) === convIdFromUrl) ?? null;
+  }, [convIdFromUrl, isConversationView, conversations]);
+
+  const profileParticipant = useMemo(() => {
+    if (!userIdFromUrl || !isUserView) return null;
+    const targetUser = users.find((u) => String(u.id) === userIdFromUrl);
+    if (!targetUser) return null;
+    const conv = conversations.find((c) =>
+      c.participants.some((p) => String(p.user.id) === userIdFromUrl)
+    );
+    const existing = conv?.participants.find((p) => String(p.user.id) === userIdFromUrl);
+    return {
+      user: targetUser,
+      joinedAt: existing?.joinedAt || new Date().toISOString(),
+      alias: existing?.alias,
+    } as Participant;
+  }, [userIdFromUrl, isUserView, users, conversations]);
 
   useEffect(() => { activeConvRef.current = activeConv; }, [activeConv]);
   useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
@@ -46,21 +66,6 @@ export default function ChatPage() {
     startCall, acceptCall, rejectCall, endCall,
     toggleAudio, toggleVideo, setIncomingCall, attachSocket,
   } = useCall(String(user?.id));
-
-  const isProfileView = location.pathname === "/profile";
-
-  useEffect(() => {
-    if (!user) return;
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    setToken(token);
-    initSocket(token);
-    loadData();
-    requestNotif();
-    setupPush();
-    return () => { disconnectSocket(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
 
   function initSocket(token: string) {
     const s = connectSocket(token);
@@ -85,7 +90,7 @@ export default function ChatPage() {
           n.onclick = () => {
             window.focus();
             const found = conversationsRef.current.find((c) => c.id === msg.conversationId);
-            if (found) selectConversation(found);
+            if (found) navigate(`/conversation/${found.id}`);
           };
         }
       }
@@ -117,10 +122,6 @@ export default function ChatPage() {
           };
         });
       setConversations(updateParticipants);
-      setActiveConv((prev) => {
-        if (!prev || prev.id !== conversationId) return prev;
-        return updateParticipants([prev])[0];
-      });
     });
     s.on("message_deleted", ({ messageId }: { messageId: number }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
@@ -154,22 +155,35 @@ export default function ChatPage() {
     }
   }
 
+  useEffect(() => {
+    if (!user) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    setToken(token);
+    initSocket(token);
+    loadData();
+    requestNotif();
+    setupPush();
+    return () => { disconnectSocket(); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    if (activeConv) {
+      getMessages(activeConv.id).then(setMessages);
+    } else {
+      setMessages([]);
+    }
+  }, [activeConv]);
+
   async function handleLogout() {
     const swReg = await navigator.serviceWorker?.getRegistration();
     if (swReg) await unsubscribePush(swReg);
     disconnectSocket();
     setConversations([]);
-    setActiveConv(null);
     setMessages([]);
     logout();
     navigate("/login", { replace: true });
-  }
-
-  function selectConversation(conv: Conversation) {
-    setActiveConv(conv);
-    if (conv) {
-      getMessages(conv.id).then(setMessages);
-    }
   }
 
   async function startDM(otherUserId: number) {
@@ -179,7 +193,7 @@ export default function ChatPage() {
       return exists ? prev : [conv, ...prev];
     });
     getSocket()?.emit("join_conversation", conv.id);
-    selectConversation(conv);
+    navigate(`/conversation/${conv.id}`);
   }
 
   async function handleDeleteConversation(convId: number) {
@@ -187,8 +201,7 @@ export default function ChatPage() {
       await deleteConversation(convId);
       setConversations((prev) => prev.filter((c) => c.id !== convId));
       if (activeConv?.id === convId) {
-        setActiveConv(null);
-        setMessages([]);
+        navigate("/");
       }
       getSocket()?.emit("leave_conversation", convId);
     } catch { /* ignore */ }
@@ -238,16 +251,6 @@ export default function ChatPage() {
     setConfirmDeleteMsgId(null);
   }
 
-  function chatBack() {
-    setActiveConv(null);
-    setMessages([]);
-  }
-
-  function openProfileFromSidebar() {
-    navigate("/profile");
-    setActiveConv(null);
-  }
-
   const handleAliasChanged = useCallback((conversationId: number, userId: number, alias: string | null) => {
     setConversations((prev) =>
       prev.map((c) => {
@@ -260,15 +263,6 @@ export default function ChatPage() {
         };
       })
     );
-    setActiveConv((prev) => {
-      if (!prev || prev.id !== conversationId) return prev;
-      return {
-        ...prev,
-        participants: prev.participants.map((p) =>
-          p.user.id === userId ? { ...p, alias: alias ?? undefined } : p
-        ),
-      };
-    });
   }, []);
 
   const activeConvName = user && activeConv ? conversationName(activeConv, user.id) : "";
@@ -305,9 +299,9 @@ export default function ChatPage() {
 
   const handleBack = isProfileView
     ? () => navigate("/")
-    : profileParticipant
-      ? () => { setProfileParticipant(null); setProfileConvId(undefined); }
-      : chatBack;
+    : isUserView
+      ? () => navigate(-1)
+      : () => navigate("/");
 
   return (
     <div className={`app ${activeConv || isProfileView || profileParticipant ? "show-chat" : "show-sidebar"}`}>
@@ -318,12 +312,14 @@ export default function ChatPage() {
         onlineUsers={onlineUsers}
         users={users}
         onLogout={handleLogout}
-        onOpenProfile={openProfileFromSidebar}
-        onSelectConversation={selectConversation}
+        onOpenProfile={() => navigate("/profile")}
+        onSelectConversation={(conv) => navigate(`/conversation/${conv.id}`)}
         onStartDM={startDM}
         onDeleteRequest={(convId) => setConfirmDeleteConvId(convId)}
         onAliasChanged={handleAliasChanged}
-        onParticipantClick={(p, convId) => { setProfileParticipant(p as Participant); setProfileConvId(convId); }}
+        onParticipantClick={(p, convId) => {
+          navigate(`/user/${p.user.id}`, { state: { conversationId: convId } });
+        }}
       />
       <main className="chat-area">
         <ChatHeader
@@ -336,32 +332,26 @@ export default function ChatPage() {
           otherUserOnline={otherUserOnline}
           callState={callState}
           onAliasChanged={handleAliasChanged}
-          onParticipantClick={(p) => { setProfileParticipant(p); setProfileConvId(activeConv?.id); }}
+          onParticipantClick={(p) => {
+            navigate(`/user/${p.user.id}`, { state: { conversationId: activeConv?.id } });
+          }}
           profileTitle={profileTitle}
         />
-        {isProfileView ? (
-          <ProfilePage />
-        ) : profileParticipant ? (
-          <ParticipantProfile participant={profileParticipant} conversationId={profileConvId} onAliasChanged={handleAliasChanged} />
-        ) : (
-          <Outlet context={{
-            user,
-            activeConv,
-            messages,
-            typingUsers,
-            senderAliases,
-            users,
-            onlineUsers,
-            profileParticipant,
-            profileConvId,
-            handleDeleteMessage,
-            handleSend,
-            sending,
-            handleAliasChanged,
-            setProfileParticipant,
-            setProfileConvId,
-          }} />
-        )}
+        <Outlet context={{
+          user,
+          activeConv,
+          messages,
+          typingUsers,
+          senderAliases,
+          users,
+          onlineUsers,
+          conversations,
+          profileParticipant,
+          handleDeleteMessage,
+          handleSend,
+          sending,
+          handleAliasChanged,
+        }} />
       </main>
       {confirmDeleteConvId && (
         <ConfirmDeleteModal

@@ -6,6 +6,9 @@ import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import ChatPage from "./pages/ChatPage.tsx";
 import ChatContent from "./pages/ChatContent.tsx";
+import ConversationPage from "./pages/ConversationPage.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
+import ParticipantProfilePage from "./pages/ParticipantProfilePage.tsx";
 import "./App.css";
 
 function App() {
@@ -27,6 +30,9 @@ function App() {
         }
       >
         <Route index element={<ChatContent />} />
+        <Route path="conversation/:id" element={<ConversationPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="user/:id" element={<ParticipantProfilePage />} />
       </Route>
     </Routes>
   );
