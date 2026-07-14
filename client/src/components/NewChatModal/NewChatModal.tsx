@@ -30,7 +30,6 @@ export default function NewChatModal({ users, onlineUsers, currentUserId, onStar
           placeholder={t("chat.search_users")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          autoFocus
         />
         <div className="new-chat-popup-list">
           {users

@@ -25,7 +25,7 @@ export default function MessageForm({ sending, onSend }: MessageFormProps) {
 
   return (
     <form className="msg-form" onSubmit={handleSubmit}>
-      <input type="text" placeholder={selectedFile ? `📎 ${selectedFile.name}` : t("chat.message_placeholder")} autoFocus />
+      <input type="text" placeholder={selectedFile ? `📎 ${selectedFile.name}` : t("chat.message_placeholder")} />
       <input type="file" ref={fileInputRef} className="file-input" onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)} />
       <button type="button" className="attach-btn" onClick={() => fileInputRef.current?.click()} title={t("chat.attach_file")}>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
