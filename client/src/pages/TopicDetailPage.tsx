@@ -62,12 +62,25 @@ function Comment({ node, activeReplyId, onReply, onCancelReply, onSendReply, onE
   const [editText, setEditText] = useState(m.content);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const editInputRef = useRef<HTMLInputElement | null>(null);
+  const replyFormRef = useRef<HTMLFormElement | null>(null);
   const isActive = activeReplyId === m.id;
   const isOwn = m.sender.id === user.id;
 
   useEffect(() => {
     if (isActive) inputRef.current?.focus();
   }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive || !replyFormRef.current) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (replyFormRef.current && !replyFormRef.current.contains(e.target as Node)) {
+        onCancelReply();
+        setReplyText("");
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isActive, onCancelReply]);
 
   useEffect(() => {
     if (editing) editInputRef.current?.focus();
@@ -136,7 +149,7 @@ function Comment({ node, activeReplyId, onReply, onCancelReply, onSendReply, onE
           </div>
         )}
         {isActive && (
-          <form className="topic-inline-reply" onSubmit={handleSubmit}>
+          <form className="topic-inline-reply" ref={replyFormRef} onSubmit={handleSubmit}>
             <Avatar username={user.username} avatar={user.avatar} size={24} />
             <input
               ref={inputRef}
