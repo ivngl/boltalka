@@ -29,7 +29,7 @@ model Conversation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  owner        User?                      @relation("ConversationOwner", fields: [ownerId], references: [id])
+  owner        User?                      @relation("ConversationOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   messages     Message[]
   participants ConversationParticipant[]
 }
@@ -40,8 +40,8 @@ model ConversationParticipant {
   joinedAt       DateTime @default(now())
   alias          String?
 
-  user         User         @relation(fields: [userId], references: [id])
-  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@id([userId, conversationId])
 }
@@ -55,7 +55,7 @@ model PushSubscription {
   userAgent String?
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -73,7 +73,7 @@ model Message {
   createdAt      DateTime @default(now())
   deletedAt      DateTime?
 
-  sender       User         @relation(fields: [senderId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
   conversation Conversation @relation(fields: [conversationId], references: [id])
 
   @@index([conversationId, createdAt])

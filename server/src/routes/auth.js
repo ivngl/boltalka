@@ -1,5 +1,5 @@
-import { Router } from "express";
 import bcrypt from "bcryptjs";
+import { Router } from "express";
 import jwt from "jsonwebtoken";
 
 function auth(req, res, next) {
@@ -101,6 +101,20 @@ export function authRoutes(prisma) {
       select: { id: true, username: true, name: true, avatar: true },
     });
     res.json(updated);
+  });
+
+  router.delete("/profile/:id", auth, async (req, res) => {
+    const { id } = req.params;
+
+    if (req.userId !== id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const profile = await prisma.user.findUnique({ where: { id } });
+    if (!profile) return res.status(404).json({ error: "Profile not found" });
+
+    await prisma.user.delete({ where: { id } });
+    res.json({ ok: true });
   });
 
   return router;

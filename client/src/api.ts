@@ -61,6 +61,11 @@ export async function updateProfile(body: Record<string, unknown>): Promise<User
   return data;
 }
 
+export async function deleteProfile(id: string | number): Promise<void> {
+  await api.delete(`/auth/profile/${id}`);
+
+}
+
 export async function deleteConversation(id: number): Promise<void> {
   const { data } = await api.delete(`/conversations/${id}`);
   return data;

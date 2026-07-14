@@ -1,17 +1,18 @@
-import { useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import Avatar from "../Avatar/Avatar.tsx";
-import { updateProfile, uploadFile } from "../../api.ts";
-import type { User } from "../../types.ts";
 import type { AxiosError } from "axios";
+import React, { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { deleteProfile, updateProfile, uploadFile } from "../../api.ts";
+import type { User } from "../../types.ts";
+import Avatar from "../Avatar/Avatar.tsx";
 import "./Profile.css";
 
 interface ProfileProps {
   user: User;
   onUpdate: (user: User) => void;
+  onLogout: () => void;
 }
 
-export default function Profile({ user, onUpdate }: ProfileProps) {
+export default function Profile({ user, onUpdate, onLogout }: ProfileProps) {
   const { t } = useTranslation();
   const [username, setUsername] = useState(user.username);
   const [name, setName] = useState(user.name || "");
@@ -35,6 +36,16 @@ export default function Profile({ user, onUpdate }: ProfileProps) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  async function onDeleteProfile(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      await deleteProfile(user.id);
+      onLogout();
+    } catch (err) {
+      const axiosErr = err as AxiosError<{ error: string }>;
+      setError(axiosErr.response?.data?.error || t("profile.delete_failed", "Failed to delete profile"));
+    }
+  }
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -114,6 +125,10 @@ export default function Profile({ user, onUpdate }: ProfileProps) {
         <button type="submit" className="save-btn" disabled={saving}>
           {saving ? t("profile.saving") : t("profile.save")}
         </button>
+      </form>
+
+      <form onSubmit={onDeleteProfile}>
+        <button type="submit" className="save-btn">Delete Profile</button>
       </form>
     </div>
   );
