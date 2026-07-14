@@ -126,3 +126,7 @@ export async function editTopicMessage(topicId: string, messageId: string, conte
 export async function deleteTopicMessage(topicId: string, messageId: string): Promise<void> {
   await api.delete(`/topics/${topicId}/messages/${messageId}`);
 }
+
+export async function deleteTopic(id: string): Promise<void> {
+  await api.delete(`/topics/${id}`);
+}

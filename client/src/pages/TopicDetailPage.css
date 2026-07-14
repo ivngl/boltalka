@@ -7,6 +7,26 @@
   background: var(--bg-secondary);
 }
 
+.topic-delete-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.topic-delete-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-red);
+}
+
 .topic-detail-header-info {
   flex: 1;
   min-width: 0;

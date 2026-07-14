@@ -113,6 +113,17 @@ export function topicRoutes(prisma) {
     res.status(201).json(message);
   });
 
+  router.delete("/:id", auth, async (req, res) => {
+    const topic = await prisma.topic.findUnique({ where: { id: req.params.id } });
+    if (!topic) return res.status(404).json({ error: "Topic not found" });
+    if (topic.creatorId !== req.userId) return res.status(403).json({ error: "Not your topic" });
+
+    await prisma.topicMessage.deleteMany({ where: { topicId: req.params.id } });
+    await prisma.topic.delete({ where: { id: req.params.id } });
+
+    res.json({ success: true });
+  });
+
   router.put("/:topicId/messages/:messageId", auth, async (req, res) => {
     const { content } = req.body;
     if (!content) return res.status(400).json({ error: "Content is required" });

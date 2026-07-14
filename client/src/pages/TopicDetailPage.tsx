@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.tsx";
-import { getTopic, sendTopicMessage, editTopicMessage, deleteTopicMessage } from "../api.ts";
+import { getTopic, sendTopicMessage, editTopicMessage, deleteTopicMessage, deleteTopic } from "../api.ts";
 import Avatar from "../components/Avatar/Avatar.tsx";
 import type { Topic, TopicMessage } from "../types.ts";
 import "./TopicDetailPage.css";
@@ -261,6 +261,16 @@ export default function TopicDetailPage() {
     }
   }
 
+  async function handleDeleteTopic() {
+    if (!window.confirm(t("topics.confirmDeleteTopic", "Delete this topic and all its comments?"))) return;
+    try {
+      await deleteTopic(topic!.id);
+      navigate("/topics", { replace: true });
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <>
       <div className="topic-detail-header">
@@ -273,6 +283,9 @@ export default function TopicDetailPage() {
             <p className="topic-detail-desc">{topic.description}</p>
           )}
         </div>
+        {topic.creator.id === user.id && (
+          <button className="topic-delete-btn" onClick={handleDeleteTopic} title={t("topics.deleteTopic", "Delete topic")}>🗑</button>
+        )}
       </div>
       <div className="topic-comments">
         <div className="topic-comments-count">
