@@ -76,6 +76,10 @@
   gap: 1rem;
 }
 
+.profile-delete-form {
+  margin-top: 1rem;
+}
+
 .profile-form label {
   display: flex;
   flex-direction: column;
