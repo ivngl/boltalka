@@ -50,6 +50,7 @@
   "profile.change_photo": "Изменить фото",
   "profile.avatar_upload_failed": "Не удалось загрузить аватар",
   "profile.delete_profile": "Удалить профиль",
+  "profile.confirm_delete": "Вы уверены, что хотите удалить профиль? Это действие нельзя отменить.",
   "profile.delete_failed": "Не удалось удалить профиль",
   "avatar.fallback": "?",
   "call.start_audio": "Аудиозвонок",

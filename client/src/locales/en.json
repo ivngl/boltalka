@@ -50,6 +50,7 @@
   "profile.change_photo": "Change photo",
   "profile.avatar_upload_failed": "Failed to upload avatar",
   "profile.delete_profile": "Delete Profile",
+  "profile.confirm_delete": "Are you sure you want to delete your profile? This action cannot be undone.",
   "profile.delete_failed": "Failed to delete profile",
   "avatar.fallback": "?",
   "call.start_audio": "Voice call",

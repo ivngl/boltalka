@@ -5,6 +5,7 @@ import { deleteProfile, updateProfile, uploadFile } from "../../api.ts";
 import type { User } from "../../types.ts";
 import Avatar from "../Avatar/Avatar.tsx";
 import Button from "../../ui/Button.tsx";
+import ConfirmModal from "../ConfirmModal/ConfirmModal.tsx";
 import "./Profile.css";
 
 interface ProfileProps {
@@ -22,6 +23,7 @@ export default function Profile({ user, onUpdate, onLogout }: ProfileProps) {
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -37,16 +39,6 @@ export default function Profile({ user, onUpdate, onLogout }: ProfileProps) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function onDeleteProfile(e: React.FormEvent) {
-    e.preventDefault();
-    try {
-      await deleteProfile(user.id);
-      onLogout();
-    } catch (err) {
-      const axiosErr = err as AxiosError<{ error: string }>;
-      setError(axiosErr.response?.data?.error || t("profile.delete_failed", "Failed to delete profile"));
-    }
-  }
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
@@ -128,9 +120,26 @@ export default function Profile({ user, onUpdate, onLogout }: ProfileProps) {
         </Button>
       </form>
 
-      <form className="profile-form profile-delete-form" onSubmit={onDeleteProfile}>
-        <Button type="submit" variant="danger" fullWidth>{t("profile.delete_profile", "Delete Profile")}</Button>
-      </form>
+      <div className="profile-delete-form">
+        <Button type="button" variant="danger" fullWidth onClick={() => setShowDeleteConfirm(true)}>{t("profile.delete_profile", "Delete Profile")}</Button>
+      </div>
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title={t("profile.delete_profile", "Delete Profile")}
+          message={t("profile.confirm_delete", "Are you sure you want to delete your profile? This action cannot be undone.")}
+          onConfirm={async () => {
+            setShowDeleteConfirm(false);
+            try {
+              await deleteProfile(user.id);
+              onLogout();
+            } catch (err) {
+              const axiosErr = err as AxiosError<{ error: string }>;
+              setError(axiosErr.response?.data?.error || t("profile.delete_failed", "Failed to delete profile"));
+            }
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 }
