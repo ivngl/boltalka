@@ -53,14 +53,16 @@ function Comment({ node, onReply, t }: CommentProps) {
     <div className="topic-comment">
       <Avatar username={m.sender.username} avatar={m.sender.avatar} size={36} />
       <div className="topic-comment-body">
-        <div className="topic-comment-meta">
-          <span className="topic-comment-name">
-            {m.sender.name || m.sender.username}
-          </span>
-          <span className="topic-comment-time">{timeAgo(m.createdAt, t)}</span>
-          <button className="topic-comment-reply-btn" onClick={() => onReply(m)} title={t("topics.reply", "Reply")}>+</button>
-        </div>
-        <div className="topic-comment-text">{m.content}</div>
+              <div className="topic-comment-meta">
+                <span className="topic-comment-name">
+                  {m.sender.name || m.sender.username}
+                </span>
+                <span className="topic-comment-time">{timeAgo(m.createdAt, t)}</span>
+              </div>
+              <div className="topic-comment-text-row">
+                <span className="topic-comment-text">{m.content}</span>
+                <button className="topic-comment-reply-btn" onClick={() => onReply(m)} title={t("topics.reply", "Reply")}>+</button>
+              </div>
         {node.children.length > 0 && (
           <div className="topic-comment-replies">
             {node.children.map((child) => (
