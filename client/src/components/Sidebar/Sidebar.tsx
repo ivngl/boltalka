@@ -122,7 +122,7 @@ export default function Sidebar({
           users={users}
           onlineUsers={onlineUsers}
           currentUserId={user.id}
-          onStartDM={startDM}
+          onStartDM={onStartDM}
           onClose={() => setNewChatOpen(false)}
         />
       )}
