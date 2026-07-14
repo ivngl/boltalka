@@ -4,12 +4,15 @@ import "./TopicItem.css";
 
 interface Props {
   topic: Topic;
+  currentUserId?: string;
   onClick?: (topic: Topic) => void;
+  onDelete?: (topic: Topic) => void;
 }
 
-export default function TopicItem({ topic, onClick }: Props) {
+export default function TopicItem({ topic, currentUserId, onClick, onDelete }: Props) {
   const { t } = useTranslation();
   const count = topic._count?.messages ?? 0;
+  const isOwn = currentUserId === topic.creator.id;
 
   return (
     <div className="topic-item" onClick={() => onClick?.(topic)}>
@@ -34,6 +37,9 @@ export default function TopicItem({ topic, onClick }: Props) {
           {topic.creator.name || topic.creator.username}
         </span>
       </div>
+      {isOwn && onDelete && (
+        <button className="topic-item-delete-btn" onClick={(e) => { e.stopPropagation(); onDelete(topic); }} title={t("topics.deleteTopic", "Delete topic")}>🗑</button>
+      )}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { createTopic, getTopics } from "../api.ts";
+import { createTopic, getTopics, deleteTopic } from "../api.ts";
 import { useAuth } from "../contexts/AuthContext.tsx";
 import type { Topic } from "../types.ts";
 import TopicItem from "../components/TopicItem/TopicItem.tsx";
+import ConfirmModal from "../components/ConfirmModal/ConfirmModal.tsx";
 import "./TopicsPage.css";
 
 export default function TopicsPage() {
@@ -17,6 +18,7 @@ export default function TopicsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<Topic | null>(null);
 
   const load = useCallback(async (q?: string) => {
     setLoading(true);
@@ -46,6 +48,18 @@ export default function TopicsPage() {
     setNewDesc("");
     setShowCreate(false);
   };
+
+  async function handleDeleteTopic() {
+    if (!deleteTarget) return;
+    try {
+      await deleteTopic(deleteTarget.id);
+      setTopics((prev) => prev.filter((t) => t.id !== deleteTarget.id));
+    } catch {
+      // ignore
+    } finally {
+      setDeleteTarget(null);
+    }
+  }
 
   return (
     <div className="topics-page">
@@ -102,9 +116,25 @@ export default function TopicsPage() {
             <p>{t("topics.empty", "No topics yet")}</p>
           </div>
         ) : (
-          topics?.map((topic) => <TopicItem key={topic.id} topic={topic} onClick={(t) => navigate(`/topics/${t.id}`)} />)
+          topics?.map((topic) => (
+            <TopicItem
+              key={topic.id}
+              topic={topic}
+              currentUserId={user?.id}
+              onClick={(t) => navigate(`/topics/${t.id}`)}
+              onDelete={(t) => setDeleteTarget(t)}
+            />
+          ))
         )}
       </div>
+      {deleteTarget && (
+        <ConfirmModal
+          title={t("topics.deleteTopic", "Delete topic")}
+          message={t("topics.confirmDeleteTopic", "Delete this topic and all its comments?")}
+          onConfirm={handleDeleteTopic}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.tsx";
 import { getTopic, sendTopicMessage, editTopicMessage, deleteTopicMessage, deleteTopic } from "../api.ts";
 import Avatar from "../components/Avatar/Avatar.tsx";
+import ConfirmModal from "../components/ConfirmModal/ConfirmModal.tsx";
 import type { Topic, TopicMessage } from "../types.ts";
 import "./TopicDetailPage.css";
 
@@ -48,13 +49,13 @@ interface CommentProps {
   onCancelReply: () => void;
   onSendReply: (parentId: string, content: string) => Promise<void>;
   onEdit: (messageId: string, content: string) => Promise<void>;
-  onDelete: (messageId: string) => Promise<void>;
+  onRequestDelete: (messageId: string) => void;
   user: { id: string; username: string; avatar?: string };
   sending: boolean;
   t: (key: string, fallback: string, opts?: Record<string, unknown>) => string;
 }
 
-function Comment({ node, activeReplyId, onReply, onCancelReply, onSendReply, onEdit, onDelete, user, sending, t }: CommentProps) {
+function Comment({ node, activeReplyId, onReply, onCancelReply, onSendReply, onEdit, onRequestDelete, user, sending, t }: CommentProps) {
   const m = node.message;
   const [replyText, setReplyText] = useState("");
   const [editing, setEditing] = useState(false);
@@ -93,9 +94,7 @@ function Comment({ node, activeReplyId, onReply, onCancelReply, onSendReply, onE
   }
 
   function handleDelete() {
-    if (window.confirm(t("topics.confirmDelete", "Delete this comment?"))) {
-      onDelete(m.id);
-    }
+    onRequestDelete(m.id);
   }
 
   return (
@@ -155,7 +154,7 @@ function Comment({ node, activeReplyId, onReply, onCancelReply, onSendReply, onE
         {node.children.length > 0 && (
           <div className="topic-comment-replies">
             {node.children.map((child) => (
-              <Comment key={child.message.id} node={child} activeReplyId={activeReplyId} onReply={onReply} onCancelReply={onCancelReply} onSendReply={onSendReply} onEdit={onEdit} onDelete={onDelete} user={user} sending={sending} t={t} />
+              <Comment key={child.message.id} node={child} activeReplyId={activeReplyId} onReply={onReply} onCancelReply={onCancelReply} onSendReply={onSendReply} onEdit={onEdit} onRequestDelete={onRequestDelete} user={user} sending={sending} t={t} />
             ))}
           </div>
         )}
@@ -173,6 +172,8 @@ export default function TopicDetailPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
+  const [deleteMsgId, setDeleteMsgId] = useState<string | null>(null);
+  const [showDeleteTopic, setShowDeleteTopic] = useState(false);
   const msgEndRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
@@ -262,7 +263,6 @@ export default function TopicDetailPage() {
   }
 
   async function handleDeleteTopic() {
-    if (!window.confirm(t("topics.confirmDeleteTopic", "Delete this topic and all its comments?"))) return;
     try {
       await deleteTopic(topic!.id);
       navigate("/topics", { replace: true });
@@ -284,7 +284,7 @@ export default function TopicDetailPage() {
           )}
         </div>
         {topic.creator.id === user.id && (
-          <button className="topic-delete-btn" onClick={handleDeleteTopic} title={t("topics.deleteTopic", "Delete topic")}>🗑</button>
+          <button className="topic-delete-btn" onClick={() => setShowDeleteTopic(true)} title={t("topics.deleteTopic", "Delete topic")}>🗑</button>
         )}
       </div>
       <div className="topic-comments">
@@ -297,10 +297,26 @@ export default function TopicDetailPage() {
           </div>
         )}
         {tree.map((node) => (
-          <Comment key={node.message.id} node={node} activeReplyId={activeReplyId} onReply={handleReply} onCancelReply={cancelReply} onSendReply={handleSendReply} onEdit={handleEdit} onDelete={handleDelete} user={user} sending={sending} t={t} />
+          <Comment key={node.message.id} node={node} activeReplyId={activeReplyId} onReply={handleReply} onCancelReply={cancelReply} onSendReply={handleSendReply} onEdit={handleEdit} onRequestDelete={setDeleteMsgId} user={user} sending={sending} t={t} />
         ))}
         <div ref={msgEndRef} />
       </div>
+      {deleteMsgId && (
+        <ConfirmModal
+          title={t("topics.deleteComment", "Delete comment")}
+          message={t("topics.confirmDelete", "Delete this comment?")}
+          onConfirm={() => { handleDelete(deleteMsgId); setDeleteMsgId(null); }}
+          onCancel={() => setDeleteMsgId(null)}
+        />
+      )}
+      {showDeleteTopic && (
+        <ConfirmModal
+          title={t("topics.deleteTopic", "Delete topic")}
+          message={t("topics.confirmDeleteTopic", "Delete this topic and all its comments?")}
+          onConfirm={handleDeleteTopic}
+          onCancel={() => setShowDeleteTopic(false)}
+        />
+      )}
     </>
   );
 }
