@@ -5,7 +5,7 @@ import "../components/AuthScreen/AuthScreen.css";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
-  const { user, handleRegister } = useAuth();
+  const { user, authError, handleRegister } = useAuth();
 
   if (user) return <Navigate to="/" replace />;
 
@@ -16,6 +16,7 @@ export default function RegisterPage() {
         <div className="auth-tabs">
           <form onSubmit={handleRegister}>
             <h2>{t("auth.register.title")}</h2>
+            {authError && <p className="auth-error">{authError}</p>}
             <input name="username" placeholder={t("auth.register.username")} required autoFocus />
             <input name="name" placeholder={t("auth.register.name")} />
             <input name="password" type="password" placeholder={t("auth.register.password")} required />

@@ -66,6 +66,16 @@
   font-size: 0.9rem;
 }
 
+.auth-error {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(207, 34, 46, 0.1);
+  color: var(--accent-red);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
 @media (max-width: 480px) {
   .auth-card {
     width: calc(100% - 2rem);
