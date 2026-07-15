@@ -21,6 +21,7 @@ model User {
   pushSubscriptions  PushSubscription[]
   createdTopics      Topic[]                    @relation("TopicCreator")
   topicMessages      TopicMessage[]
+  createdSocieties   Society[]                  @relation("SocietyCreator")
 }
 
 model Conversation {
@@ -107,4 +108,17 @@ model TopicMessage {
   replies  TopicMessage[] @relation("TopicReplies")
 
   @@index([topicId, createdAt])
+}
+
+model Society {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  creatorId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator User @relation("SocietyCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId])
 }

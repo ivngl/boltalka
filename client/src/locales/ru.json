@@ -109,5 +109,12 @@
   "nav.topics": "Темы",
   "nav.societies": "Сообщества",
   "societies.title": "Сообщества",
-  "societies.empty": "Пока нет сообществ"
+  "societies.empty": "Пока нет сообществ",
+  "societies.search": "Поиск сообществ...",
+  "societies.namePlaceholder": "Название сообщества",
+  "societies.descPlaceholder": "Описание (необязательно)",
+  "societies.create": "Создать",
+  "societies.loading": "Загрузка...",
+  "societies.deleteSociety": "Удалить сообщество",
+  "societies.confirmDeleteSociety": "Удалить это сообщество?"
 }

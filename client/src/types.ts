@@ -60,6 +60,15 @@ export interface Topic {
   updatedAt: string;
 }
 
+export interface Society {
+  id: string;
+  name: string;
+  description?: string;
+  creator: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TopicMessage {
   id: string;
   content: string;

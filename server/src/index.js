@@ -21,6 +21,7 @@ import { authRoutes } from "./routes/auth.js";
 import { conversationRoutes } from "./routes/conversations.js";
 import { pushRoutes } from "./routes/push.js";
 import { topicRoutes } from "./routes/topics.js";
+import { societyRoutes } from "./routes/societies.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -192,6 +193,7 @@ app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma, io));
 app.use("/api/push", pushRoutes(prisma));
 app.use("/topics", topicRoutes(prisma));
+app.use("/societies", societyRoutes(prisma));
 
 /**
  * @openapi

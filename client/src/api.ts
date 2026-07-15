@@ -130,3 +130,18 @@ export async function deleteTopicMessage(topicId: string, messageId: string): Pr
 export async function deleteTopic(id: string): Promise<void> {
   await api.delete(`/topics/${id}`);
 }
+
+export async function getSocieties(search?: string): Promise<Society[]> {
+  const params = search ? { search } : {};
+  const { data } = await api.get("/societies", { params });
+  return data;
+}
+
+export async function createSociety(name: string, description?: string): Promise<Society> {
+  const { data } = await api.post("/societies", { name, description });
+  return data;
+}
+
+export async function deleteSociety(id: string): Promise<void> {
+  await api.delete(`/societies/${id}`);
+}

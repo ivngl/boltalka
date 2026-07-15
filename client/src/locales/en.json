@@ -109,5 +109,12 @@
   "nav.topics": "Topics",
   "nav.societies": "Societies",
   "societies.title": "Societies",
-  "societies.empty": "No societies yet"
+  "societies.empty": "No societies yet",
+  "societies.search": "Search societies...",
+  "societies.namePlaceholder": "Society name",
+  "societies.descPlaceholder": "Description (optional)",
+  "societies.create": "Create",
+  "societies.loading": "Loading...",
+  "societies.deleteSociety": "Delete society",
+  "societies.confirmDeleteSociety": "Delete this society?"
 }
