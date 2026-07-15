@@ -189,6 +189,16 @@ if (pubClient && subClient) {
 const userSockets = new Map();
 initPush();
 
+const clientDist = path.resolve(__dirname, "../../client/dist");
+app.use(express.static(clientDist));
+
+app.get("/{*splat}", (req, res, next) => {
+  if (req.method === "GET" && req.headers.accept?.includes("text/html")) {
+    return res.sendFile(path.join(clientDist, "index.html"));
+  }
+  next();
+});
+
 app.use("/auth", authRoutes(prisma));
 app.use("/conversations", conversationRoutes(prisma, io));
 app.use("/api/push", pushRoutes(prisma));
@@ -218,12 +228,6 @@ app.get("/api/turn-config", auth, (req, res) => {
     username,
     credential,
   });
-});
-
-const clientDist = path.resolve(__dirname, "../../client/dist");
-app.use(express.static(clientDist));
-app.get("/{*path}", (req, res) => {
-  res.sendFile(path.join(clientDist, "index.html"));
 });
 
 io.use((socket, next) => {

@@ -18,8 +18,22 @@ export default defineConfig({
       "/conversations": {
         target: "http://localhost:4000",
         changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes("text/html")) {
+            return "/index.html";
+          }
+        },
       },
       "/topics": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+        bypass: (req) => {
+          if (req.headers.accept?.includes("text/html")) {
+            return "/index.html";
+          }
+        },
+      },
+      "/societies": {
         target: "http://localhost:4000",
         changeOrigin: true,
         bypass: (req) => {
