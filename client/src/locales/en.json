@@ -105,6 +105,7 @@
   "topics.deleteComment": "Delete comment",
   "topics.confirmDelete": "Delete this comment?",
   "topics.confirmDeleteTopic": "Delete this topic and all its comments?",
+  "topics.writeComment": "Write a comment...",
   "nav.chats": "Chats",
   "nav.topics": "Topics",
   "nav.societies": "Societies",

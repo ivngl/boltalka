@@ -308,3 +308,60 @@
   color: var(--text-secondary);
   padding: 2rem;
 }
+
+.topic-bottom-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.topic-bottom-bar-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.topic-bottom-bar-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 16px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.topic-bottom-bar-form input:focus {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+}
+
+.topic-bottom-bar-form button {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  color: var(--text-white);
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.topic-bottom-bar-form button:hover {
+  background: var(--accent-blue-hover);
+}
+
+.topic-bottom-bar-form button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

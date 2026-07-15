@@ -187,6 +187,7 @@ export default function TopicDetailPage() {
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [deleteMsgId, setDeleteMsgId] = useState<string | null>(null);
   const [showDeleteTopic, setShowDeleteTopic] = useState(false);
+  const [newCommentText, setNewCommentText] = useState("");
   const msgEndRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
@@ -284,6 +285,22 @@ export default function TopicDetailPage() {
     }
   }
 
+  async function handleNewComment(e: React.FormEvent) {
+    e.preventDefault();
+    const content = newCommentText.trim();
+    if (!content || sending) return;
+    setSending(true);
+    try {
+      const msg = await sendTopicMessage(topic!.id, content);
+      setTopic((prev) => prev ? { ...prev, messages: [...(prev.messages || []), msg] } : prev);
+      setNewCommentText("");
+    } catch {
+      // ignore
+    } finally {
+      setSending(false);
+    }
+  }
+
   return (
     <>
       <div className="topic-detail-header">
@@ -313,6 +330,18 @@ export default function TopicDetailPage() {
           <Comment key={node.message.id} node={node} activeReplyId={activeReplyId} onReply={handleReply} onCancelReply={cancelReply} onSendReply={handleSendReply} onEdit={handleEdit} onRequestDelete={setDeleteMsgId} user={user} sending={sending} t={t} />
         ))}
         <div ref={msgEndRef} />
+      </div>
+      <div className="topic-bottom-bar">
+        <Avatar username={user.username} avatar={user.avatar} size={36} />
+        <form className="topic-bottom-bar-form" onSubmit={handleNewComment}>
+          <input
+            type="text"
+            placeholder={t("topics.writeComment", "Write a comment...")}
+            value={newCommentText}
+            onChange={(e) => setNewCommentText(e.target.value)}
+          />
+          <button type="submit" disabled={sending || !newCommentText.trim()}>+</button>
+        </form>
       </div>
       {deleteMsgId && (
         <ConfirmModal
